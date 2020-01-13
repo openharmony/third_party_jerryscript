@@ -16,6 +16,49 @@
 #ifndef JERRYSCRIPT_CONFIG_H
 #define JERRYSCRIPT_CONFIG_H
 
+/*
+ * Here define the special config for IAR build.
+ */
+#ifdef JERRY_FOR_IAR_CONFIG
+
+#if defined (_WIN32) || defined (_WIN64)
+# error "Should not define this macro on IAR build!"
+#endif
+
+# define JERRY_BUILTIN_REGEXP 0
+# define JERRY_ES2015 0
+# define JERRY_NDEBUG
+# define JERRY_DISABLE_HEAVY_DEBUG
+
+//Maximum size of heap in kilobytes
+# define JERRY_GLOBAL_HEAP_SIZE (16)
+
+#endif /* JERRY_FOR_IAR_CONFIG */
+
+/*
+ * Here define the special config for Win simulator build.
+ */
+#if defined (_WIN32) || defined (_WIN64)
+#ifdef JERRY_FOR_IAR_CONFIG
+# error "Should not define this macro on WIN simulator!"
+#endif
+# define JERRY_BUILTIN_REGEXP 0
+# define JERRY_ES2015 0
+//Maximum size of heap in kilobytes
+# define JERRY_GLOBAL_HEAP_SIZE (16)
+# define JERRY_NDEBUG
+# define JERRY_DISABLE_HEAVY_DEBUG
+# define JERRY_ERROR_MESSAGES 1
+# define JERRY_LINE_INFO 1
+# define JERRY_MEM_STATS 1
+# define JERRY_SNAPSHOT_EXEC 1
+# define JERRY_SNAPSHOT_SAVE 1
+#endif /* defined (_WIN32) || defined (_WIN64) */
+
+/*
+ * Note: should not modify below by default!
+ */
+
 // @JERRY_BUILD_CFG@
 
 /**

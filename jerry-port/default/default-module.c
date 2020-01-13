@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#if !defined (WIN32)
+#if !defined (WIN32) && !defined(JERRY_FOR_IAR_CONFIG)
 #include <libgen.h>
 #endif /* !defined (WIN32) */
 #include <limits.h>
