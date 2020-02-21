@@ -679,7 +679,7 @@ jmem_heap_free_block (void *ptr, /**< pointer to beginning of data space of the 
   return;
 } /* jmem_heap_free_block */
 
-#ifndef JERRY_NDEBUG
+#ifdef JERRY_NDEBUG
 /**
  * Check whether the pointer points to the heap
  *
