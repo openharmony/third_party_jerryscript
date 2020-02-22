@@ -17,13 +17,9 @@
 #define JERRYSCRIPT_CONFIG_H
 
 /*
- * Here define the special config for IAR build.
+ * Here define the special config for IAR and gn build.
  */
-#ifdef JERRY_FOR_IAR_CONFIG
-
-#if defined (_WIN32) || defined (_WIN64)
-# error "Should not define this macro on IAR build!"
-#endif
+#if (!defined(_WIN32) && !defined(_WIN64))
 
 # define JERRY_BUILTIN_REGEXP 0
 # define JERRY_ES2015 0
@@ -31,7 +27,7 @@
 # define JERRY_DISABLE_HEAVY_DEBUG
 
 //Maximum size of heap in kilobytes
-# define JERRY_GLOBAL_HEAP_SIZE (16)
+# define JERRY_GLOBAL_HEAP_SIZE (32)
 
 #endif /* JERRY_FOR_IAR_CONFIG */
 
@@ -45,7 +41,7 @@
 # define JERRY_BUILTIN_REGEXP 0
 # define JERRY_ES2015 0
 //Maximum size of heap in kilobytes
-# define JERRY_GLOBAL_HEAP_SIZE (16)
+# define JERRY_GLOBAL_HEAP_SIZE (32)
 # define JERRY_NDEBUG
 # define JERRY_DISABLE_HEAVY_DEBUG
 # define JERRY_ERROR_MESSAGES 1
