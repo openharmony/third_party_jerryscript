@@ -25,9 +25,11 @@
 # define JERRY_ES2015 0
 # define JERRY_NDEBUG
 # define JERRY_DISABLE_HEAVY_DEBUG
+# define JERRY_SNAPSHOT_EXEC 1
+# define JERRY_PARSER 1
 
 //Maximum size of heap in kilobytes
-# define JERRY_GLOBAL_HEAP_SIZE (32)
+# define JERRY_GLOBAL_HEAP_SIZE (48)
 
 #endif /* JERRY_FOR_IAR_CONFIG */
 
@@ -41,7 +43,7 @@
 # define JERRY_BUILTIN_REGEXP 0
 # define JERRY_ES2015 0
 //Maximum size of heap in kilobytes
-# define JERRY_GLOBAL_HEAP_SIZE (32)
+# define JERRY_GLOBAL_HEAP_SIZE (48)
 # define JERRY_NDEBUG
 # define JERRY_DISABLE_HEAVY_DEBUG
 # define JERRY_ERROR_MESSAGES 1
