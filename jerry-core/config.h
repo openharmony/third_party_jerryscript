@@ -51,6 +51,11 @@
 # define JERRY_MEM_STATS 1
 # define JERRY_SNAPSHOT_EXEC 1
 # define JERRY_SNAPSHOT_SAVE 1
+# define JERRY_DEBUGGER 1
+
+// following config controls temp changes in jerry for debugger function with IDE
+# define ACE_DEBUGGER_CUSTOM
+
 #endif /* defined (_WIN32) || defined (_WIN64) */
 
 /*

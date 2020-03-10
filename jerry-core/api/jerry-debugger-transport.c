@@ -92,6 +92,9 @@ jerry_debugger_transport_add (jerry_debugger_transport_header_t *header_p, /**< 
 void
 jerry_debugger_transport_start (void)
 {
+#ifdef ACE_DEBUGGER_CUSTOM
+  JERRY_DEBUGGER_SET_FLAGS (JERRY_DEBUGGER_TRANSPORT_STARTED);
+#endif
   JERRY_ASSERT (JERRY_CONTEXT (debugger_flags) & JERRY_DEBUGGER_CONNECTED);
 
   if (jerry_debugger_send_configuration (JERRY_CONTEXT (debugger_max_receive_size)))

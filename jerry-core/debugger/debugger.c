@@ -96,6 +96,12 @@ jerry_debugger_free_unreferenced_byte_code (void)
 static bool
 jerry_debugger_send (size_t message_length) /**< message length in bytes */
 {
+#ifdef ACE_DEBUGGER_CUSTOM
+  if (!((JERRY_CONTEXT (debugger_flags) & JERRY_DEBUGGER_TRANSPORT_STARTED))) {
+    return false; // do not send any debugger data before the hand shake done
+  }
+#endif
+
   JERRY_ASSERT (message_length <= JERRY_CONTEXT (debugger_max_send_size));
 
   jerry_debugger_transport_header_t *header_p = JERRY_CONTEXT (debugger_transport_header_p);
@@ -647,6 +653,38 @@ jerry_debugger_send_eval (const lit_utf8_byte_t *eval_string_p, /**< evaluated s
     return false; \
   }
 
+#ifdef ACE_DEBUGGER_CUSTOM
+#define ENUM_TYPE_TO_STRING_CASE(x)   case x: return(#x);
+static inline const char *jerry_debugger_package_type_string(enum jerry_debugger_header_type_t type)
+{
+    switch (type)
+    {
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_FREE_BYTE_CODE_CP)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_UPDATE_BREAKPOINT)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_EXCEPTION_CONFIG)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_PARSER_CONFIG)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_MEMSTATS)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_STOP)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_PARSER_RESUME)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_CLIENT_SOURCE)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_CLIENT_SOURCE_PART)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_NO_MORE_SOURCES)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_CONTEXT_RESET)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_CONTINUE)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_STEP)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_NEXT)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_FINISH)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_GET_BACKTRACE)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_EVAL)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_EVAL_PART)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_GET_SCOPE_CHAIN)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_GET_SCOPE_VARIABLES)
+        ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_MESSAGES_IN_MAX_COUNT)
+    }
+    return "Unsupported jerry_debugger request from client";
+}
+#endif
+
 /**
  * Receive message from the client.
  *
@@ -669,6 +707,10 @@ jerry_debugger_process_message (const uint8_t *recv_buffer_p, /**< pointer to th
     jerry_debugger_transport_close ();
     return false;
   }
+
+#ifdef ACE_DEBUGGER_CUSTOM
+  printf("debugger server: received [%s] from client\n", jerry_debugger_package_type_string(recv_buffer_p[0]));
+#endif
 
   if (*expected_message_type_p != 0)
   {

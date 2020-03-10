@@ -95,6 +95,9 @@ typedef enum
   JERRY_DEBUGGER_CLIENT_SOURCE_MODE = 1u << 8, /**< debugger waiting for client code */
   JERRY_DEBUGGER_CLIENT_NO_SOURCE = 1u << 9, /**< debugger leaving the client source loop */
   JERRY_DEBUGGER_CONTEXT_RESET_MODE = 1u << 10, /**< debugger and engine reinitialization mode */
+#ifdef ACE_DEBUGGER_CUSTOM
+  JERRY_DEBUGGER_TRANSPORT_STARTED = 1u << 11, /**< only can send data to client after this flag set */
+#endif
 } jerry_debugger_flags_t;
 
 /**
