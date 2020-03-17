@@ -1,12 +1,12 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 # Description: Gn compile jerry-port-default
 # Create: 2020-01-16
-import("//build/config/zlite_component.gni")
-import("//third_party/jerryscript/engine.gni")
+import("//build/lite/config/zlite_component.gni")
+import("//foundations/ace/lite/third_party/jerryscript/engine.gni")
 
 static_library("jerry-port-default") {
     configs += [
-        "//build/config:compile_liteos_m",
+        "//build/lite/config:compile_liteos_m",
     ]
     sources = [
         "default-date.c",
