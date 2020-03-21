@@ -1,13 +1,11 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 # Description: Gn compile jerry-core
 # Create: 2020-01-16
-import("//build/lite/config/zlite_component.gni")
+import("//build/lite/config/component/zlite_component.gni")
 import("//foundations/ace/lite/third_party/jerryscript/engine.gni")
 
 static_library("jerry-core") {
-    configs += [
-        "//build/lite/config:compile_liteos_m",
-    ]
+
     sources = [
         "api/jerry.c",
         "api/jerry-debugger.c",

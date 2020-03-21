@@ -1,7 +1,7 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 # Description: Gn compile jerryscript
 # Create: 2020-01-16
-import("//build/lite/config/zlite_component.gni")
+import("//build/lite/config/component/zlite_component.gni")
 
 zlite_component("jerry_engine") {
     version = "2.1.0"
