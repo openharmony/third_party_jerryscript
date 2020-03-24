@@ -1,0 +1,35 @@
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+# Description: Gn compile jerry-ext
+# Create: 2020-01-16
+import("//build/lite/config/component/zlite_component.gni")
+import("//foundations/ace/lite/third_party/jerryscript/engine.gni")
+
+static_library("jerry-ext") {
+
+    sources = [
+        "debugger/debugger-serial.c",
+        "debugger/debugger-ws.c",
+        "debugger/debugger-sha1.c",
+        "debugger/debugger-rp.c",
+        "debugger/debugger-common.c",
+        "debugger/debugger-tcp.c",
+        "module/module.c",
+        "arg/arg.c",
+        "arg/arg-js-iterator-helper.c",
+        "arg/arg-transform-functions.c",
+        "handler/handler-print.c",
+        "handler/handler-register.c",
+        "handler/handler-gc.c",
+        "handler/handler-assert.c",
+        "handle-scope/handle-scope.c",
+        "handle-scope/handle-scope-allocator.c",
+    ]
+    include_dirs = [
+        "include",
+        "debugger",
+        "common",
+        "arg",
+        "handle-scope",
+        "${core_path}/include",
+    ]
+}

@@ -1,0 +1,32 @@
+# Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
+# Description: Gn compile jerry-libm
+# Create: 2020-01-16
+import("//build/lite/config/component/zlite_component.gni")
+import("//foundations/ace/lite/third_party/jerryscript/engine.gni")
+
+static_library("jerry-libm") {
+
+    sources = [
+        "acos.c",
+        "asin.c",
+        "atan2.c",
+        "atan.c",
+        "ceil.c",
+        "copysign.c",
+        "exp.c",
+        "fabs.c",
+        "finite.c",
+        "floor.c",
+        "fmod.c",
+        "isnan.c",
+        "log.c",
+        "nextafter.c",
+        "pow.c",
+        "scalbn.c",
+        "sqrt.c",
+        "trig.c",
+    ]
+    include_dirs = [
+        "include",
+    ]
+}
