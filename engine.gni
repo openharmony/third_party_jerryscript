@@ -1,6 +1,6 @@
 # Copyright (c) Huawei Technologies Co., Ltd. 2020-2020. All rights reserved.
 
-engine_path = "//foundations/ace/lite/third_party/jerryscript"
+engine_path = "//foundation/ace/lite/third_party/jerryscript"
 
 core_path = "${engine_path}/jerry-core"
 
