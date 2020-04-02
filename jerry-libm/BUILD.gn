@@ -2,7 +2,7 @@
 # Description: Gn compile jerry-libm
 # Create: 2020-01-16
 import("//build/lite/config/component/zlite_component.gni")
-import("//foundations/ace/lite/third_party/jerryscript/engine.gni")
+import("//foundation/ace/lite/third_party/jerryscript/engine.gni")
 
 static_library("jerry-libm") {
 
