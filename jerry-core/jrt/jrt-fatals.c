@@ -29,7 +29,7 @@
 void JERRY_ATTR_NORETURN
 jerry_fatal (jerry_fatal_code_t code) /**< status code */
 {
-#ifndef JERRY_NDEBUG
+#if defined (_WIN32) || defined (_WIN64) || !defined (JERRY_NDEBUG)
   switch (code)
   {
     case ERR_OUT_OF_MEMORY:
@@ -53,7 +53,7 @@ jerry_fatal (jerry_fatal_code_t code) /**< status code */
       break;
     }
   }
-#endif /* !JERRY_NDEBUG */
+#endif
 
   jerry_port_fatal (code);
 
