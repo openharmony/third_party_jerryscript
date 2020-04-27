@@ -1120,6 +1120,8 @@ ecma_free_unused_memory (jmem_pressure_t pressure) /**< current pressure */
 {
 #if ENABLED (JERRY_DEBUGGER)
   while ((JERRY_CONTEXT (debugger_flags) & JERRY_DEBUGGER_CONNECTED)
+         /* This shall prevent receiving messaging during evaluation */
+         && !(JERRY_CONTEXT (debugger_flags) & JERRY_DEBUGGER_VM_IGNORE)
          && JERRY_CONTEXT (debugger_byte_code_free_tail) != ECMA_NULL_POINTER)
   {
     /* Wait until all byte code is freed or the connection is aborted. */
