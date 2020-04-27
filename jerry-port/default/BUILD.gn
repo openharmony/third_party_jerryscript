@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/lite/config/component/zlite_component.gni")
-import("//foundation/ace/lite/third_party/jerryscript/engine.gni")
+import("//third_party/jerryscript/engine.gni")
 
 static_library("jerry-port-default") {
 
