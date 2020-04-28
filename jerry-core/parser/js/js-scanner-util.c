@@ -31,6 +31,9 @@
 /**
  * Raise a scanner error.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_raise_error
+  #pragma location = ".xip_code"
+#endif
 void
 scanner_raise_error (parser_context_t *context_p) /**< context */
 {
@@ -44,6 +47,9 @@ scanner_raise_error (parser_context_t *context_p) /**< context */
  *
  * @return allocated memory
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_malloc
+  #pragma location = ".xip_code"
+#endif
 void *
 scanner_malloc (parser_context_t *context_p, /**< context */
                 size_t size) /**< size of the memory block */
@@ -67,6 +73,9 @@ scanner_malloc (parser_context_t *context_p, /**< context */
 /**
  * Free memory allocated by scanner_malloc.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_free
+  #pragma location = ".xip_code"
+#endif
 inline void JERRY_ATTR_ALWAYS_INLINE
 scanner_free (void *ptr, /**< pointer to free */
               size_t size) /**< size of the memory block */
@@ -79,6 +88,9 @@ scanner_free (void *ptr, /**< pointer to free */
  *
  * @return newly allocated scanner info
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_insert_info
+  #pragma location = ".xip_code"
+#endif
 scanner_info_t *
 scanner_insert_info (parser_context_t *context_p, /**< context */
                      const uint8_t *source_p, /**< triggering position */
@@ -120,6 +132,9 @@ scanner_insert_info (parser_context_t *context_p, /**< context */
 /**
  * Release the next scanner info.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_release_next
+  #pragma location = ".xip_code"
+#endif
 inline void JERRY_ATTR_ALWAYS_INLINE
 scanner_release_next (parser_context_t *context_p, /**< context */
                       size_t size) /**< size of the memory block */
@@ -133,6 +148,9 @@ scanner_release_next (parser_context_t *context_p, /**< context */
 /**
  * Set the active scanner info to the next scanner info.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_set_active
+  #pragma location = ".xip_code"
+#endif
 inline void JERRY_ATTR_ALWAYS_INLINE
 scanner_set_active (parser_context_t *context_p) /**< context */
 {
@@ -146,6 +164,9 @@ scanner_set_active (parser_context_t *context_p) /**< context */
 /**
  * Release the active scanner info.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_release_active
+  #pragma location = ".xip_code"
+#endif
 inline void JERRY_ATTR_ALWAYS_INLINE
 scanner_release_active (parser_context_t *context_p, /**< context */
                         size_t size) /**< size of the memory block */
@@ -159,6 +180,9 @@ scanner_release_active (parser_context_t *context_p, /**< context */
 /**
  * Release switch cases.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_release_switch_cases
+  #pragma location = ".xip_code"
+#endif
 void
 scanner_release_switch_cases (scanner_case_info_t *case_p) /**< case list */
 {
@@ -174,6 +198,9 @@ scanner_release_switch_cases (scanner_case_info_t *case_p) /**< case list */
 /**
  * Seek to correct position in the scanner info list.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_seek
+  #pragma location = ".xip_code"
+#endif
 void
 scanner_seek (parser_context_t *context_p) /**< context */
 {
@@ -228,6 +255,9 @@ scanner_seek (parser_context_t *context_p) /**< context */
 /**
  * Reverse the scanner info chain after the scanning is completed.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_reverse_info_list
+  #pragma location = ".xip_code"
+#endif
 void
 scanner_reverse_info_list (parser_context_t *context_p) /**< context */
 {
@@ -257,6 +287,9 @@ scanner_reverse_info_list (parser_context_t *context_p) /**< context */
  * Release unused scanner info blocks.
  * This should happen only if an error is occured.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_cleanup
+  #pragma location = ".xip_code"
+#endif
 void
 scanner_cleanup (parser_context_t *context_p) /**< context */
 {
@@ -326,6 +359,9 @@ scanner_cleanup (parser_context_t *context_p) /**< context */
 /**
  * Get location from context.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_get_location
+  #pragma location = ".xip_code"
+#endif
 inline void JERRY_ATTR_ALWAYS_INLINE
 scanner_get_location (scanner_location_t *location_p, /**< location */
                       parser_context_t *context_p) /**< context */
@@ -338,6 +374,9 @@ scanner_get_location (scanner_location_t *location_p, /**< location */
 /**
  * Set context location.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_set_location
+  #pragma location = ".xip_code"
+#endif
 inline void JERRY_ATTR_ALWAYS_INLINE
 scanner_set_location (parser_context_t *context_p, /**< context */
                       scanner_location_t *location_p) /**< location */

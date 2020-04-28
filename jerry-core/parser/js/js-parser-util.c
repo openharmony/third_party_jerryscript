@@ -38,6 +38,9 @@
 /**
  * Append two bytes to the cbc stream.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_two_bytes
+  #pragma location = ".xip_code"
+#endif
 static void
 parser_emit_two_bytes (parser_context_t *context_p, /**< context */
                        uint8_t first_byte, /**< first byte */
@@ -88,6 +91,9 @@ parser_emit_two_bytes (parser_context_t *context_p, /**< context */
 /**
  * Append the current byte code to the stream
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_flush_cbc
+  #pragma location = ".xip_code"
+#endif
 void
 parser_flush_cbc (parser_context_t *context_p) /**< context */
 {
@@ -241,6 +247,9 @@ parser_flush_cbc (parser_context_t *context_p) /**< context */
 /**
  * Append a byte code
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_cbc
+  #pragma location = ".xip_code"
+#endif
 void
 parser_emit_cbc (parser_context_t *context_p, /**< context */
                  uint16_t opcode) /**< opcode */
@@ -258,6 +267,9 @@ parser_emit_cbc (parser_context_t *context_p, /**< context */
 /**
  * Append a byte code with a literal argument
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_cbc_literal
+  #pragma location = ".xip_code"
+#endif
 void
 parser_emit_cbc_literal (parser_context_t *context_p, /**< context */
                          uint16_t opcode, /**< opcode */
@@ -279,6 +291,9 @@ parser_emit_cbc_literal (parser_context_t *context_p, /**< context */
 /**
  * Append a byte code with the current literal argument
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_cbc_literal_from_token
+  #pragma location = ".xip_code"
+#endif
 void
 parser_emit_cbc_literal_from_token (parser_context_t *context_p, /**< context */
                                     uint16_t opcode) /**< opcode */
@@ -299,6 +314,9 @@ parser_emit_cbc_literal_from_token (parser_context_t *context_p, /**< context */
 /**
  * Append a byte code with a call argument
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_cbc_call
+  #pragma location = ".xip_code"
+#endif
 void
 parser_emit_cbc_call (parser_context_t *context_p, /**< context */
                       uint16_t opcode, /**< opcode */
@@ -319,6 +337,9 @@ parser_emit_cbc_call (parser_context_t *context_p, /**< context */
 /**
  * Append a push number 1/2 byte code
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_cbc_push_number
+  #pragma location = ".xip_code"
+#endif
 void
 parser_emit_cbc_push_number (parser_context_t *context_p, /**< context */
                              bool is_negative_number) /**< sign is negative */
@@ -448,6 +469,9 @@ parser_emit_line_info (parser_context_t *context_p, /**< context */
 /**
  * Append a byte code with a branch argument
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_cbc_forward_branch
+  #pragma location = ".xip_code"
+#endif
 void
 parser_emit_cbc_forward_branch (parser_context_t *context_p, /**< context */
                                 uint16_t opcode, /**< opcode */
@@ -532,6 +556,9 @@ parser_emit_cbc_forward_branch (parser_context_t *context_p, /**< context */
  *
  * @return newly created parser branch node
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_cbc_forward_branch_item
+  #pragma location = ".xip_code"
+#endif
 parser_branch_node_t *
 parser_emit_cbc_forward_branch_item (parser_context_t *context_p, /**< context */
                                      uint16_t opcode, /**< opcode */
@@ -553,6 +580,9 @@ parser_emit_cbc_forward_branch_item (parser_context_t *context_p, /**< context *
 /**
  * Append a byte code with a branch argument
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_cbc_backward_branch
+  #pragma location = ".xip_code"
+#endif
 void
 parser_emit_cbc_backward_branch (parser_context_t *context_p, /**< context */
                                  uint16_t opcode, /**< opcode */
@@ -654,6 +684,9 @@ parser_emit_cbc_backward_branch (parser_context_t *context_p, /**< context */
 /**
  * Set a branch to the current byte code position
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_set_branch_to_current_position
+  #pragma location = ".xip_code"
+#endif
 void
 parser_set_branch_to_current_position (parser_context_t *context_p, /**< context */
                                        parser_branch_t *branch_p) /**< branch result */
@@ -703,6 +736,9 @@ parser_set_branch_to_current_position (parser_context_t *context_p, /**< context
 /**
  * Set breaks to the current byte code position
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_set_breaks_to_current_position
+  #pragma location = ".xip_code"
+#endif
 void
 parser_set_breaks_to_current_position (parser_context_t *context_p, /**< context */
                                        parser_branch_node_t *current_p) /**< branch list */
@@ -723,6 +759,9 @@ parser_set_breaks_to_current_position (parser_context_t *context_p, /**< context
 /**
  * Set continues to the current byte code position
  */
+#if defined(__IAR_SYSTEMS_ICC__) // parser_set_continues_to_current_position
+  #pragma location = ".xip_code"
+#endif
 void
 parser_set_continues_to_current_position (parser_context_t *context_p, /**< context */
                                           parser_branch_node_t *current_p) /**< branch list */

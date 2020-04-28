@@ -31,6 +31,9 @@
 /**
  * Free literal.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // util_free_literal
+  #pragma location = ".xip_code"
+#endif
 void
 util_free_literal (lexer_literal_t *literal_p) /**< literal */
 {

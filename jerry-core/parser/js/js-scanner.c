@@ -204,6 +204,9 @@ scanner_process_simple_arrow (parser_context_t *context_p, /**< context */
  *
  * @return SCAN_NEXT_TOKEN to read the next token, or SCAN_KEEP_TOKEN to do nothing
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_scan_primary_expression
+  #pragma location = ".xip_code"
+#endif
 static scan_return_types_t
 scanner_scan_primary_expression (parser_context_t *context_p, /**< context */
                                  scanner_context_t *scanner_context_p, /* scanner context */
@@ -357,6 +360,9 @@ scanner_scan_primary_expression (parser_context_t *context_p, /**< context */
  *
  * @return true for break, false for fall through
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_scan_post_primary_expression
+  #pragma location = ".xip_code"
+#endif
 static bool
 scanner_scan_post_primary_expression (parser_context_t *context_p, /**< context */
                                       scanner_context_t *scanner_context_p, /**< scanner context */
@@ -405,6 +411,9 @@ scanner_scan_post_primary_expression (parser_context_t *context_p, /**< context 
  *
  * @return SCAN_NEXT_TOKEN to read the next token, or SCAN_KEEP_TOKEN to do nothing
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_scan_primary_expression_end
+  #pragma location = ".xip_code"
+#endif
 static scan_return_types_t
 scanner_scan_primary_expression_end (parser_context_t *context_p, /**< context */
                                      scanner_context_t *scanner_context_p, /**< scanner context */
@@ -857,6 +866,9 @@ scanner_scan_primary_expression_end (parser_context_t *context_p, /**< context *
  *
  * @return SCAN_NEXT_TOKEN to read the next token, or SCAN_KEEP_TOKEN to do nothing
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_scan_statement
+  #pragma location = ".xip_code"
+#endif
 static scan_return_types_t
 scanner_scan_statement (parser_context_t *context_p, /**< context */
                         scanner_context_t *scanner_context_p, /**< scanner context */
@@ -1354,6 +1366,9 @@ scanner_scan_statement (parser_context_t *context_p, /**< context */
  *
  * @return SCAN_NEXT_TOKEN to read the next token, or SCAN_KEEP_TOKEN to do nothing
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_scan_statement_end
+  #pragma location = ".xip_code"
+#endif
 static scan_return_types_t
 scanner_scan_statement_end (parser_context_t *context_p, /**< context */
                             scanner_context_t *scanner_context_p, /**< scanner context */
@@ -1590,6 +1605,9 @@ scanner_scan_statement_end (parser_context_t *context_p, /**< context */
 /**
  * Scan the whole source code.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // scanner_scan_all
+  #pragma location = ".xip_code"
+#endif
 void
 scanner_scan_all (parser_context_t *context_p, /**< context */
                   const uint8_t *arg_list_p, /**< function argument list */

@@ -43,6 +43,9 @@
  *
  * @return aligned position
  */
+#if defined(__IAR_SYSTEMS_ICC__) // align_column_to_tab
+  #pragma location = ".xip_code"
+#endif
 static parser_line_counter_t
 align_column_to_tab (parser_line_counter_t column) /**< current column */
 {
@@ -55,6 +58,9 @@ align_column_to_tab (parser_line_counter_t column) /**< current column */
  *
  * @return character value
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_hex_to_character
+  #pragma location = ".xip_code"
+#endif
 ecma_char_t
 lexer_hex_to_character (parser_context_t *context_p, /**< context */
                         const uint8_t *source_p, /**< current source position */
@@ -95,6 +101,9 @@ lexer_hex_to_character (parser_context_t *context_p, /**< context */
  *
  * @return character value
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_unchecked_hex_to_character
+  #pragma location = ".xip_code"
+#endif
 static ecma_char_t
 lexer_unchecked_hex_to_character (const uint8_t *source_p, /**< current source position */
                                   int length) /**< source length */
@@ -137,6 +146,9 @@ typedef enum
 /**
  * Skip spaces.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_skip_spaces
+  #pragma location = ".xip_code"
+#endif
 static void
 lexer_skip_spaces (parser_context_t *context_p) /**< context */
 {
@@ -497,6 +509,9 @@ static const uint8_t keyword_lengths_list[] =
 /**
  * Parse identifier.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_parse_identifier
+  #pragma location = ".xip_code"
+#endif
 static void
 lexer_parse_identifier (parser_context_t *context_p, /**< context */
                         bool check_keywords) /**< check keywords */
@@ -647,6 +662,9 @@ lexer_parse_identifier (parser_context_t *context_p, /**< context */
 /**
  * Parse string.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_parse_string
+  #pragma location = ".xip_code"
+#endif
 void
 lexer_parse_string (parser_context_t *context_p) /**< context */
 {
@@ -920,6 +938,9 @@ lexer_parse_string (parser_context_t *context_p) /**< context */
 /**
  * Parse number.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_parse_number
+  #pragma location = ".xip_code"
+#endif
 static void
 lexer_parse_number (parser_context_t *context_p) /**< context */
 {
@@ -1138,6 +1159,9 @@ lexer_parse_number (parser_context_t *context_p) /**< context */
 /**
  * Get next token.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_next_token
+  #pragma location = ".xip_code"
+#endif
 void
 lexer_next_token (parser_context_t *context_p) /**< context */
 {
@@ -1392,6 +1416,9 @@ lexer_next_token (parser_context_t *context_p) /**< context */
  * @return true - if the next is the specified character
  *         false - otherwise
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_check_next_character
+  #pragma location = ".xip_code"
+#endif
 bool
 lexer_check_next_character (parser_context_t *context_p, /**< context */
                             lit_utf8_byte_t character) /**< specified character */
@@ -1433,6 +1460,9 @@ lexer_check_arrow (parser_context_t *context_p) /**< context */
 /**
  * Search or append the string to the literal pool.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_process_char_literal
+  #pragma location = ".xip_code"
+#endif
 static void
 lexer_process_char_literal (parser_context_t *context_p, /**< context */
                             const uint8_t *char_p, /**< characters */
@@ -1507,6 +1537,9 @@ lexer_process_char_literal (parser_context_t *context_p, /**< context */
 /**
  * Construct a literal object from an identifier.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_construct_literal_object
+  #pragma location = ".xip_code"
+#endif
 void
 lexer_construct_literal_object (parser_context_t *context_p, /**< context */
                                 lexer_lit_location_t *literal_p, /**< literal location */
@@ -1816,6 +1849,9 @@ lexer_construct_literal_object (parser_context_t *context_p, /**< context */
  *
  * @return true if number is small number
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_construct_number_object
+  #pragma location = ".xip_code"
+#endif
 bool
 lexer_construct_number_object (parser_context_t *context_p, /**< context */
                                bool is_expr, /**< expression is parsed */
@@ -1905,6 +1941,9 @@ lexer_construct_number_object (parser_context_t *context_p, /**< context */
 /**
  * Convert a push number opcode to push literal opcode
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_convert_push_number_to_push_literal
+  #pragma location = ".xip_code"
+#endif
 void
 lexer_convert_push_number_to_push_literal (parser_context_t *context_p) /**< context */
 {
@@ -1987,6 +2026,9 @@ lexer_convert_push_number_to_push_literal (parser_context_t *context_p) /**< con
  *
  * @return function object literal index
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_construct_function_object
+  #pragma location = ".xip_code"
+#endif
 uint16_t
 lexer_construct_function_object (parser_context_t *context_p, /**< context */
                                  uint32_t extra_status_flags) /**< extra status flags */
@@ -2034,6 +2076,9 @@ lexer_construct_function_object (parser_context_t *context_p, /**< context */
 /**
  * Construct a regular expression object.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_construct_regexp_object
+  #pragma location = ".xip_code"
+#endif
 void
 lexer_construct_regexp_object (parser_context_t *context_p, /**< context */
                                bool parse_only) /**< parse only */
@@ -2246,6 +2291,9 @@ lexer_construct_regexp_object (parser_context_t *context_p, /**< context */
 /**
  * Next token must be an identifier.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_expect_identifier
+  #pragma location = ".xip_code"
+#endif
 void
 lexer_expect_identifier (parser_context_t *context_p, /**< context */
                          uint8_t literal_type) /**< literal type */
@@ -2314,6 +2362,9 @@ lexer_expect_identifier (parser_context_t *context_p, /**< context */
 /**
  * Next token must be an identifier.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_expect_object_literal_id
+  #pragma location = ".xip_code"
+#endif
 void
 lexer_expect_object_literal_id (parser_context_t *context_p, /**< context */
                                 uint32_t ident_opts) /**< lexer_obj_ident_opts_t option bits */
@@ -2444,6 +2495,9 @@ lexer_expect_object_literal_id (parser_context_t *context_p, /**< context */
 /**
  * Next token must be an identifier.
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_scan_identifier
+  #pragma location = ".xip_code"
+#endif
 void
 lexer_scan_identifier (parser_context_t *context_p, /**< context */
                        uint32_t ident_opts) /**< lexer_scan_ident_opts_t option bits */
@@ -2526,6 +2580,9 @@ lexer_scan_identifier (parser_context_t *context_p, /**< context */
  *
  * @return true if the input identifiers are the same
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_compare_identifier_to_current
+  #pragma location = ".xip_code"
+#endif
 bool
 lexer_compare_identifier_to_current (parser_context_t *context_p, /**< context */
                                      const lexer_lit_location_t *right_ident_p) /**< identifier */
@@ -2621,6 +2678,9 @@ lexer_compare_identifier_to_current (parser_context_t *context_p, /**< context *
  *
  * @return true if they are the same, false otherwise
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_compare_literal_to_identifier
+  #pragma location = ".xip_code"
+#endif
 inline bool JERRY_ATTR_ALWAYS_INLINE
 lexer_compare_literal_to_identifier (parser_context_t *context_p, /**< context */
                                      const char *identifier_p, /**< identifier */
@@ -2641,6 +2701,9 @@ lexer_compare_literal_to_identifier (parser_context_t *context_p, /**< context *
  *
  * @return true if they are the same, false otherwise
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_compare_literal_to_string
+  #pragma location = ".xip_code"
+#endif
 inline bool JERRY_ATTR_ALWAYS_INLINE
 lexer_compare_literal_to_string (parser_context_t *context_p, /**< context */
                                  const char *string_p, /**< string */
@@ -2662,6 +2725,9 @@ lexer_compare_literal_to_string (parser_context_t *context_p, /**< context */
  *
  * @return binary token
  */
+#if defined(__IAR_SYSTEMS_ICC__) // lexer_convert_binary_lvalue_token_to_binary
+  #pragma location = ".xip_code"
+#endif
 uint8_t
 lexer_convert_binary_lvalue_token_to_binary (uint8_t token) /**< binary lvalue token */
 {
