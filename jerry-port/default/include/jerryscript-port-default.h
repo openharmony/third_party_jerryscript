@@ -36,6 +36,10 @@ void jerry_port_default_set_log_level (jerry_log_level_t level);
 
 void jerry_port_default_set_current_context (jerry_context_t *context_p);
 
+typedef void (* fatal_handler_t)(int code);
+
+void jerry_port_default_set_fatal_handler (fatal_handler_t handler);
+
 /**
  * @}
  */
