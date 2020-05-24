@@ -44,9 +44,6 @@ JERRY_STATIC_ASSERT ((ECMA_PARSE_CLASS_CONSTRUCTOR << PARSER_CLASS_PARSE_OPTS_OF
 /**
  * Copy identifiers if needed.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_copy_identifiers
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_copy_identifiers (parser_context_t *context_p) /**< context */
 {
@@ -137,9 +134,6 @@ parser_copy_identifiers (parser_context_t *context_p) /**< context */
  *
  * @return length of the prefix opcodes
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_compute_indicies
-  #pragma location = ".xip_code"
-#endif
 static size_t
 parser_compute_indicies (parser_context_t *context_p, /**< context */
                          uint16_t *ident_end, /**< end of the identifier group */
@@ -503,9 +497,6 @@ parser_compute_indicies (parser_context_t *context_p, /**< context */
  *
  * @return position after the encoded values
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_encode_literal
-  #pragma location = ".xip_code"
-#endif
 static inline uint8_t *
 parser_encode_literal (uint8_t *dst_p, /**< destination buffer */
                        uint16_t literal_index, /**< literal index */
@@ -537,9 +528,6 @@ parser_encode_literal (uint8_t *dst_p, /**< destination buffer */
  *
  * @return the end of the initializer stream
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_generate_initializers
-  #pragma location = ".xip_code"
-#endif
 static uint8_t *
 parser_generate_initializers (parser_context_t *context_p, /**< context */
                               uint8_t *dst_p, /**< destination buffer */
@@ -785,9 +773,6 @@ parser_generate_initializers (parser_context_t *context_p, /**< context */
  *
  * @return the new distance
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_update_forward_branch
-  #pragma location = ".xip_code"
-#endif
 static size_t
 parser_update_forward_branch (parser_mem_page_t *page_p, /**< current page */
                               size_t full_distance, /**< full distance */
@@ -811,9 +796,6 @@ parser_update_forward_branch (parser_mem_page_t *page_p, /**< current page */
  *
  * @return the new distance
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_update_backward_branch
-  #pragma location = ".xip_code"
-#endif
 static size_t
 parser_update_backward_branch (parser_mem_page_t *page_p, /**< current page */
                                size_t full_distance, /**< full distance */
@@ -845,9 +827,6 @@ parser_update_backward_branch (parser_mem_page_t *page_p, /**< current page */
 /**
  * Update targets of all branches in one step.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parse_update_branches
-  #pragma location = ".xip_code"
-#endif
 static void
 parse_update_branches (parser_context_t *context_p, /**< context */
                        uint8_t *byte_code_p) /**< byte code */
@@ -1475,9 +1454,6 @@ parser_append_breakpoint_info (parser_context_t *context_p, /**< context */
  *
  * @return compiled code
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_post_processing
-  #pragma location = ".xip_code"
-#endif
 static ecma_compiled_code_t *
 parser_post_processing (parser_context_t *context_p) /**< context */
 {
@@ -2209,9 +2185,6 @@ parser_post_processing (parser_context_t *context_p) /**< context */
 /**
  * Free identifiers and literals.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_free_literals
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_free_literals (parser_list_t *literal_pool_p) /**< literals */
 {
@@ -2230,9 +2203,6 @@ parser_free_literals (parser_list_t *literal_pool_p) /**< literals */
 /**
  * Parse function arguments
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_function_arguments
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_function_arguments (parser_context_t *context_p, /**< context */
                                  lexer_token_type_t end_type) /**< expected end type */
@@ -2404,9 +2374,6 @@ parser_parse_function_arguments (parser_context_t *context_p, /**< context */
  *
  * @return compiled code
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_source
-  #pragma location = ".xip_code"
-#endif
 static ecma_compiled_code_t *
 parser_parse_source (const uint8_t *arg_list_p, /**< function argument list */
                      size_t arg_list_size, /**< size of function argument list */
@@ -2650,9 +2617,6 @@ parser_parse_source (const uint8_t *arg_list_p, /**< function argument list */
 /**
  * Save parser context before function parsing.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_save_context
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_save_context (parser_context_t *context_p, /**< context */
                      parser_saved_context_t *saved_context_p) /**< target for saving the context */
@@ -2712,9 +2676,6 @@ parser_save_context (parser_context_t *context_p, /**< context */
 /**
  * Restore parser context after function parsing.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_restore_context
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_restore_context (parser_context_t *context_p, /**< context */
                         parser_saved_context_t *saved_context_p) /**< target for saving the context */
@@ -2749,9 +2710,6 @@ parser_restore_context (parser_context_t *context_p, /**< context */
  *
  * @return compiled code
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_function
-  #pragma location = ".xip_code"
-#endif
 ecma_compiled_code_t *
 parser_parse_function (parser_context_t *context_p, /**< context */
                        uint32_t status_flags) /**< extra status flags */
@@ -2975,9 +2933,6 @@ parser_parse_arrow_function (parser_context_t *context_p, /**< context */
 /**
  * Raise a parse error.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_raise_error
-  #pragma location = ".xip_code"
-#endif
 void
 parser_raise_error (parser_context_t *context_p, /**< context */
                     parser_error_t error) /**< error code */
@@ -3024,9 +2979,6 @@ parser_raise_error (parser_context_t *context_p, /**< context */
  * @return true - if success
  *         syntax error - otherwise
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_script
-  #pragma location = ".xip_code"
-#endif
 ecma_value_t
 parser_parse_script (const uint8_t *arg_list_p, /**< function argument list */
                      size_t arg_list_size, /**< size of function argument list */

@@ -33,9 +33,6 @@
  *
  * @return allocated memory.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_malloc
-  #pragma location = ".xip_code"
-#endif
 void *
 parser_malloc (parser_context_t *context_p, /**< context */
                size_t size) /**< size of the memory block */
@@ -55,9 +52,6 @@ parser_malloc (parser_context_t *context_p, /**< context */
 /**
  * Free memory allocated by parser_malloc.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_free
-  #pragma location = ".xip_code"
-#endif
 inline void JERRY_ATTR_ALWAYS_INLINE
 parser_free (void *ptr, /**< pointer to free */
              size_t size) /**< size of the memory block */
@@ -70,9 +64,6 @@ parser_free (void *ptr, /**< pointer to free */
  *
  * @return allocated memory.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_malloc_local
-  #pragma location = ".xip_code"
-#endif
 void *
 parser_malloc_local (parser_context_t *context_p, /**< context */
                      size_t size) /**< size of the memory */
@@ -91,9 +82,6 @@ parser_malloc_local (parser_context_t *context_p, /**< context */
 /**
  * Free memory allocated by parser_malloc_local.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_free_local
-  #pragma location = ".xip_code"
-#endif
 void parser_free_local (void *ptr, /**< pointer to free */
                         size_t size) /**< size of the memory */
 {
@@ -107,9 +95,6 @@ void parser_free_local (void *ptr, /**< pointer to free */
 /**
  * Initialize parse data.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_data_init
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_data_init (parser_mem_data_t *data_p, /**< memory manager */
                   uint32_t page_size) /**< size of each page */
@@ -122,9 +107,6 @@ parser_data_init (parser_mem_data_t *data_p, /**< memory manager */
 /**
  * Free parse data.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_data_free
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_data_free (parser_mem_data_t *data_p, /**< memory manager */
                   uint32_t page_size) /**< size of each page */
@@ -147,9 +129,6 @@ parser_data_free (parser_mem_data_t *data_p, /**< memory manager */
 /**
  * Initialize byte stream.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_cbc_stream_init
-  #pragma location = ".xip_code"
-#endif
 void
 parser_cbc_stream_init (parser_mem_data_t *data_p) /**< memory manager */
 {
@@ -159,9 +138,6 @@ parser_cbc_stream_init (parser_mem_data_t *data_p) /**< memory manager */
 /**
  * Free byte stream.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_cbc_stream_free
-  #pragma location = ".xip_code"
-#endif
 void
 parser_cbc_stream_free (parser_mem_data_t *data_p) /**< memory manager */
 {
@@ -172,9 +148,6 @@ parser_cbc_stream_free (parser_mem_data_t *data_p) /**< memory manager */
 /**
  * Appends a byte at the end of the byte stream.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_cbc_stream_alloc_page
-  #pragma location = ".xip_code"
-#endif
 void
 parser_cbc_stream_alloc_page (parser_context_t *context_p, /**< context */
                               parser_mem_data_t *data_p) /**< memory manager */
@@ -203,9 +176,6 @@ parser_cbc_stream_alloc_page (parser_context_t *context_p, /**< context */
 /**
  * Initialize parser list.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_list_init
-  #pragma location = ".xip_code"
-#endif
 void
 parser_list_init (parser_list_t *list_p, /**< parser list */
                   uint32_t item_size, /**< size for each page */
@@ -222,9 +192,6 @@ parser_list_init (parser_list_t *list_p, /**< parser list */
 /**
  * Free parser list.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_list_free
-  #pragma location = ".xip_code"
-#endif
 void
 parser_list_free (parser_list_t *list_p) /**< parser list */
 {
@@ -235,9 +202,6 @@ parser_list_free (parser_list_t *list_p) /**< parser list */
 /**
  * Reset parser list.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_list_reset
-  #pragma location = ".xip_code"
-#endif
 void
 parser_list_reset (parser_list_t *list_p) /**< parser list */
 {
@@ -249,9 +213,6 @@ parser_list_reset (parser_list_t *list_p) /**< parser list */
  *
  * @return pointer to the appended item.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_list_append
-  #pragma location = ".xip_code"
-#endif
 void *
 parser_list_append (parser_context_t *context_p, /**< context */
                     parser_list_t *list_p) /**< parser list */
@@ -289,9 +250,6 @@ parser_list_append (parser_context_t *context_p, /**< context */
  *
  * @return pointer to the item.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_list_get
-  #pragma location = ".xip_code"
-#endif
 void *
 parser_list_get (parser_list_t *list_p, /**< parser list */
                  size_t index) /**< item index */
@@ -315,9 +273,6 @@ parser_list_get (parser_list_t *list_p, /**< parser list */
 /**
  * Initialize a parser list iterator.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_list_iterator_init
-  #pragma location = ".xip_code"
-#endif
 void
 parser_list_iterator_init (parser_list_t *list_p, /**< parser list */
                            parser_list_iterator_t *iterator_p) /**< iterator */
@@ -332,9 +287,6 @@ parser_list_iterator_init (parser_list_t *list_p, /**< parser list */
  *
  * @return the address of the current item, or NULL at the end.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_list_iterator_next
-  #pragma location = ".xip_code"
-#endif
 void *
 parser_list_iterator_next (parser_list_iterator_t *iterator_p) /**< iterator */
 {
@@ -373,9 +325,6 @@ parser_list_iterator_next (parser_list_iterator_t *iterator_p) /**< iterator */
 /**
  * Initialize parser stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_init
-  #pragma location = ".xip_code"
-#endif
 void
 parser_stack_init (parser_context_t *context_p) /**< context */
 {
@@ -386,9 +335,6 @@ parser_stack_init (parser_context_t *context_p) /**< context */
 /**
  * Free parser stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_free
-  #pragma location = ".xip_code"
-#endif
 void
 parser_stack_free (parser_context_t *context_p) /**< context */
 {
@@ -405,9 +351,6 @@ parser_stack_free (parser_context_t *context_p) /**< context */
 /**
  * Pushes an uint8_t value onto the stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_push_uint8
-  #pragma location = ".xip_code"
-#endif
 void
 parser_stack_push_uint8 (parser_context_t *context_p, /**< context */
                          uint8_t uint8_value) /**< value pushed onto the stack */
@@ -445,9 +388,6 @@ parser_stack_push_uint8 (parser_context_t *context_p, /**< context */
 /**
  * Pops the last uint8_t value from the stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_pop_uint8
-  #pragma location = ".xip_code"
-#endif
 void
 parser_stack_pop_uint8 (parser_context_t *context_p) /**< context */
 {
@@ -484,9 +424,6 @@ parser_stack_pop_uint8 (parser_context_t *context_p) /**< context */
 /**
  * Pushes an uint16_t value onto the stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_push_uint16
-  #pragma location = ".xip_code"
-#endif
 void
 parser_stack_push_uint16 (parser_context_t *context_p, /**< context */
                           uint16_t uint16_value) /**< value pushed onto the stack */
@@ -514,9 +451,6 @@ parser_stack_push_uint16 (parser_context_t *context_p, /**< context */
  *
  * @return the value popped from the stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_pop_uint16
-  #pragma location = ".xip_code"
-#endif
 uint16_t
 parser_stack_pop_uint16 (parser_context_t *context_p) /**< context */
 {
@@ -545,9 +479,6 @@ parser_stack_pop_uint16 (parser_context_t *context_p) /**< context */
 /**
  * Pushes a data onto the stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_push
-  #pragma location = ".xip_code"
-#endif
 void
 parser_stack_push (parser_context_t *context_p, /**< context */
                    const void *data_p, /**< data pushed onto the stack */
@@ -606,9 +537,6 @@ parser_stack_push (parser_context_t *context_p, /**< context */
 /**
  * Pop bytes from the top of the stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_pop
-  #pragma location = ".xip_code"
-#endif
 void
 parser_stack_pop (parser_context_t *context_p, /**< context */
                   void *data_p, /**< destination buffer, can be NULL */
@@ -665,9 +593,6 @@ parser_stack_pop (parser_context_t *context_p, /**< context */
 /**
  * Skip the next n bytes of the stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_iterator_skip
-  #pragma location = ".xip_code"
-#endif
 void
 parser_stack_iterator_skip (parser_stack_iterator_t *iterator, /**< iterator */
                             size_t length) /**< number of skipped bytes */
@@ -688,9 +613,6 @@ parser_stack_iterator_skip (parser_stack_iterator_t *iterator, /**< iterator */
 /**
  * Read bytes from the stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_iterator_read
-  #pragma location = ".xip_code"
-#endif
 void
 parser_stack_iterator_read (parser_stack_iterator_t *iterator, /**< iterator */
                             void *data_p, /**< destination buffer */
@@ -723,9 +645,6 @@ parser_stack_iterator_read (parser_stack_iterator_t *iterator, /**< iterator */
 /**
  * Write bytes onto the stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_iterator_write
-  #pragma location = ".xip_code"
-#endif
 void
 parser_stack_iterator_write (parser_stack_iterator_t *iterator, /**< iterator */
                              const void *data_p, /**< destination buffer */

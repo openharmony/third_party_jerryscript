@@ -190,9 +190,6 @@ typedef struct
  *
  * @return size consumed by a statement.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_statement_length
-  #pragma location = ".xip_code"
-#endif
 static inline size_t
 parser_statement_length (uint8_t type) /**< type of statement */
 {
@@ -236,9 +233,6 @@ parser_statement_length (uint8_t type) /**< type of statement */
 /**
  * Initialize stack iterator.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_iterator_init
-  #pragma location = ".xip_code"
-#endif
 static inline void
 parser_stack_iterator_init (parser_context_t *context_p, /**< context */
                             parser_stack_iterator_t *iterator) /**< iterator */
@@ -252,9 +246,6 @@ parser_stack_iterator_init (parser_context_t *context_p, /**< context */
  *
  * @return byte
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_iterator_read_uint8
-  #pragma location = ".xip_code"
-#endif
 static inline uint8_t
 parser_stack_iterator_read_uint8 (parser_stack_iterator_t *iterator) /**< iterator */
 {
@@ -265,9 +256,6 @@ parser_stack_iterator_read_uint8 (parser_stack_iterator_t *iterator) /**< iterat
 /**
  * Change last byte of the stack.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_stack_change_last_uint8
-  #pragma location = ".xip_code"
-#endif
 static inline void
 parser_stack_change_last_uint8 (parser_context_t *context_p, /**< context */
                                 uint8_t new_value) /**< new value */
@@ -284,9 +272,6 @@ parser_stack_change_last_uint8 (parser_context_t *context_p, /**< context */
 /**
  * Parse expression enclosed in parens.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_enclosed_expr
-  #pragma location = ".xip_code"
-#endif
 static inline void
 parser_parse_enclosed_expr (parser_context_t *context_p) /**< context */
 {
@@ -310,9 +295,6 @@ parser_parse_enclosed_expr (parser_context_t *context_p) /**< context */
 /**
  * Parse var statement.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_var_statement
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_var_statement (parser_context_t *context_p) /**< context */
 {
@@ -376,9 +358,6 @@ parser_parse_var_statement (parser_context_t *context_p) /**< context */
 /**
  * Parse function statement.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_function_statement
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_function_statement (parser_context_t *context_p) /**< context */
 {
@@ -490,9 +469,6 @@ parser_parse_function_statement (parser_context_t *context_p) /**< context */
 /**
  * Parse if statement (starting part).
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_if_statement_start
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_if_statement_start (parser_context_t *context_p) /**< context */
 {
@@ -515,9 +491,6 @@ parser_parse_if_statement_start (parser_context_t *context_p) /**< context */
  * @return true  - if parsing an 'else' statement
  *         false - otherwise
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_if_statement_end
-  #pragma location = ".xip_code"
-#endif
 static bool
 parser_parse_if_statement_end (parser_context_t *context_p) /**< context */
 {
@@ -558,9 +531,6 @@ parser_parse_if_statement_end (parser_context_t *context_p) /**< context */
 /**
  * Parse with statement (starting part).
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_with_statement_start
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_with_statement_start (parser_context_t *context_p) /**< context */
 {
@@ -590,9 +560,6 @@ parser_parse_with_statement_start (parser_context_t *context_p) /**< context */
 /**
  * Parse with statement (ending part).
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_with_statement_end
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_with_statement_end (parser_context_t *context_p) /**< context */
 {
@@ -709,9 +676,6 @@ parser_parse_super_class_context_end (parser_context_t *context_p, /**< context 
 /**
  * Parse do-while statement (ending part).
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_do_while_statement_end
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_do_while_statement_end (parser_context_t *context_p) /**< context */
 {
@@ -770,9 +734,6 @@ parser_parse_do_while_statement_end (parser_context_t *context_p) /**< context *
 /**
  * Parse while statement (starting part).
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_while_statement_start
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_while_statement_start (parser_context_t *context_p) /**< context */
 {
@@ -823,9 +784,6 @@ parser_parse_while_statement_start (parser_context_t *context_p) /**< context */
 /**
  * Parse while statement (ending part).
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_while_statement_end
-  #pragma location = ".xip_code"
-#endif
 static void JERRY_ATTR_NOINLINE
 parser_parse_while_statement_end (parser_context_t *context_p) /**< context */
 {
@@ -891,9 +849,6 @@ parser_parse_while_statement_end (parser_context_t *context_p) /**< context */
  *
  * @return the compatible assignment opcode
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_check_left_hand_side_expression
-  #pragma location = ".xip_code"
-#endif
 static uint16_t
 parser_check_left_hand_side_expression (parser_context_t *context_p, /**< context */
                                         uint16_t opcode) /**< opcode to check */
@@ -937,9 +892,6 @@ parser_check_left_hand_side_expression (parser_context_t *context_p, /**< contex
 /**
  * Parse for statement (starting part).
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_for_statement_start
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_for_statement_start (parser_context_t *context_p) /**< context */
 {
@@ -1160,9 +1112,6 @@ parser_parse_for_statement_start (parser_context_t *context_p) /**< context */
 /**
  * Parse for statement (ending part).
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_for_statement_end
-  #pragma location = ".xip_code"
-#endif
 static void JERRY_ATTR_NOINLINE
 parser_parse_for_statement_end (parser_context_t *context_p) /**< context */
 {
@@ -1248,9 +1197,6 @@ parser_parse_for_statement_end (parser_context_t *context_p) /**< context */
 /**
  * Parse switch statement (starting part).
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_switch_statement_start
-  #pragma location = ".xip_code"
-#endif
 static void JERRY_ATTR_NOINLINE
 parser_parse_switch_statement_start (parser_context_t *context_p) /**< context */
 {
@@ -1423,9 +1369,6 @@ parser_parse_switch_statement_start (parser_context_t *context_p) /**< context *
 /**
  * Parse try statement (ending part).
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_try_statement_end
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_try_statement_end (parser_context_t *context_p) /**< context */
 {
@@ -1551,9 +1494,6 @@ parser_parse_try_statement_end (parser_context_t *context_p) /**< context */
 /**
  * Parse default statement.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_default_statement
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_default_statement (parser_context_t *context_p) /**< context */
 {
@@ -1581,9 +1521,6 @@ parser_parse_default_statement (parser_context_t *context_p) /**< context */
 /**
  * Parse case statement.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_case_statement
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_case_statement (parser_context_t *context_p) /**< context */
 {
@@ -1632,9 +1569,6 @@ parser_parse_case_statement (parser_context_t *context_p) /**< context */
 /**
  * Parse break statement.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_break_statement
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_break_statement (parser_context_t *context_p) /**< context */
 {
@@ -1739,9 +1673,6 @@ parser_parse_break_statement (parser_context_t *context_p) /**< context */
 /**
  * Parse continue statement.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_continue_statement
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_continue_statement (parser_context_t *context_p) /**< context */
 {
@@ -2159,9 +2090,6 @@ parser_parse_export_statement (parser_context_t *context_p) /**< context */
 /**
  * Parse label statement.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_label
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_label (parser_context_t *context_p) /**< context */
 {
@@ -2205,9 +2133,6 @@ parser_parse_label (parser_context_t *context_p) /**< context */
 /**
  * Parse statements.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_statements
-  #pragma location = ".xip_code"
-#endif
 void
 parser_parse_statements (parser_context_t *context_p) /**< context */
 {
@@ -2868,9 +2793,6 @@ consume_last_statement:
 /**
  * Free jumps stored on the stack if a parse error is occured.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_free_jumps
-  #pragma location = ".xip_code"
-#endif
 void JERRY_ATTR_NOINLINE
 parser_free_jumps (parser_stack_iterator_t iterator) /**< iterator position */
 {

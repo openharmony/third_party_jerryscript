@@ -58,9 +58,6 @@ static const uint8_t parser_binary_precedence_table[36] =
 /**
  * Generate byte code for operators with lvalue.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_push_result
-  #pragma location = ".xip_code"
-#endif
 static inline void
 parser_push_result (parser_context_t *context_p) /**< context */
 {
@@ -92,9 +89,6 @@ parser_push_result (parser_context_t *context_p) /**< context */
 /**
  * Check for invalid assignment for "eval" and "arguments"
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_check_invalid_assign
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_check_invalid_assign (parser_context_t *context_p) /**< context */
 {
@@ -122,9 +116,6 @@ parser_check_invalid_assign (parser_context_t *context_p) /**< context */
 /**
  * Emit identifier reference
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_ident_reference
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_emit_ident_reference (parser_context_t *context_p, /**< context */
                              uint16_t opcode) /* opcode */
@@ -160,9 +151,6 @@ parser_emit_ident_reference (parser_context_t *context_p, /**< context */
 /**
  * Generate byte code for operators with lvalue.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_emit_unary_lvalue_opcode
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_emit_unary_lvalue_opcode (parser_context_t *context_p, /**< context */
                                  cbc_opcode_t opcode) /**< opcode */
@@ -218,9 +206,6 @@ parser_emit_unary_lvalue_opcode (parser_context_t *context_p, /**< context */
 /**
  * Parse array literal.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_array_literal
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_array_literal (parser_context_t *context_p) /**< context */
 {
@@ -287,9 +272,6 @@ typedef enum
 /**
  * Parse object literal.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_append_object_literal_item
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_append_object_literal_item (parser_context_t *context_p, /**< context */
                                    uint16_t item_index, /**< index of the item name */
@@ -724,9 +706,6 @@ parser_parse_object_method (parser_context_t *context_p) /**< context */
 /**
  * Parse object literal.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_object_literal
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_object_literal (parser_context_t *context_p) /**< context */
 {
@@ -945,9 +924,6 @@ parser_parse_object_literal (parser_context_t *context_p) /**< context */
 /**
  * Parse function literal.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_function_expression
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_function_expression (parser_context_t *context_p, /**< context */
                                   uint32_t status_flags) /**< function status flags */
@@ -1164,9 +1140,6 @@ parser_parse_template_literal (parser_context_t *context_p) /**< context */
 /**
  * Parse and record unary operators, and parse the primary literal.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_unary_expression
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_parse_unary_expression (parser_context_t *context_p, /**< context */
                                size_t *grouping_level_p) /**< grouping level */
@@ -1467,9 +1440,6 @@ parser_parse_unary_expression (parser_context_t *context_p, /**< context */
  * Parse the postfix part of unary operators, and
  * generate byte code for the whole expression.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_process_unary_expression
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_process_unary_expression (parser_context_t *context_p) /**< context */
 {
@@ -1778,9 +1748,6 @@ parser_process_unary_expression (parser_context_t *context_p) /**< context */
 /**
  * Append a binary token.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_append_binary_token
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_append_binary_token (parser_context_t *context_p) /**< context */
 {
@@ -1922,9 +1889,6 @@ parser_append_binary_token (parser_context_t *context_p) /**< context */
 /**
  * Emit opcode for binary computations.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_process_binary_opcodes
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_process_binary_opcodes (parser_context_t *context_p, /**< context */
                                uint8_t min_prec_treshold) /**< minimal precedence of tokens */
@@ -2029,9 +1993,6 @@ parser_process_binary_opcodes (parser_context_t *context_p, /**< context */
 /**
  * Process ternary expression.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_process_ternary_expression
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_process_ternary_expression (parser_context_t *context_p) /**< context */
 {
@@ -2080,9 +2041,6 @@ parser_process_ternary_expression (parser_context_t *context_p) /**< context */
 /**
  * Process expression sequence.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_process_expression_sequence
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_process_expression_sequence (parser_context_t *context_p) /**< context */
 {
@@ -2107,9 +2065,6 @@ parser_process_expression_sequence (parser_context_t *context_p) /**< context */
 /**
  * Process group expression.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_process_group_expression
-  #pragma location = ".xip_code"
-#endif
 static void
 parser_process_group_expression (parser_context_t *context_p, /**< context */
                                  size_t *grouping_level_p) /**< grouping level */
@@ -2130,9 +2085,6 @@ parser_process_group_expression (parser_context_t *context_p, /**< context */
 /**
  * Parse block expression.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_block_expression
-  #pragma location = ".xip_code"
-#endif
 void
 parser_parse_block_expression (parser_context_t *context_p, /**< context */
                                int options) /**< option flags */
@@ -2154,9 +2106,6 @@ parser_parse_block_expression (parser_context_t *context_p, /**< context */
 /**
  * Parse expression statement.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_expression_statement
-  #pragma location = ".xip_code"
-#endif
 void
 parser_parse_expression_statement (parser_context_t *context_p, /**< context */
                                    int options) /**< option flags */
@@ -2172,9 +2121,6 @@ parser_parse_expression_statement (parser_context_t *context_p, /**< context */
 /**
  * Parse expression.
  */
-#if defined(__IAR_SYSTEMS_ICC__) // parser_parse_expression
-  #pragma location = ".xip_code"
-#endif
 void
 parser_parse_expression (parser_context_t *context_p, /**< context */
                          int options) /**< option flags */
