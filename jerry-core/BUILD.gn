@@ -4,7 +4,18 @@
 import("//build/lite/config/component/zlite_component.gni")
 import("//third_party/jerryscript/engine.gni")
 
-static_library("jerry-core") {
+zlite_component("jerry-core") {
+    version = "1.0.0"
+    dependences = [
+    ]
+
+    features = [
+        ":jerry-core_shared",
+    ]
+}
+
+zlite_library("jerry-core_shared") {
+    target_type = "shared_library"
 
     sources = [
         "api/jerry.c",

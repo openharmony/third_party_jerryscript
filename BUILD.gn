@@ -24,3 +24,4 @@ zlite_component("jerry_engine") {
         "jerry-port/default:jerry-port-default"
     ]
 }
+

@@ -14,8 +14,18 @@
 import("//build/lite/config/component/zlite_component.gni")
 import("//third_party/jerryscript/engine.gni")
 
-static_library("jerry-libm") {
+zlite_component("jerry-libm") {
+    version = "1.0.0"
+    dependences = [
+    ]
 
+    features = [
+        ":jerry-libm_shared",
+    ]
+}
+
+zlite_library("jerry-libm_shared") {
+target_type = "shared_library"
     sources = [
         "acos.c",
         "asin.c",
