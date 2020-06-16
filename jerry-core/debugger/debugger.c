@@ -711,7 +711,7 @@ jerry_debugger_process_message (const uint8_t *recv_buffer_p, /**< pointer to th
   }
 
 #ifdef ACE_DEBUGGER_CUSTOM
-  printf("debugger server: received [%s] from client\n", jerry_debugger_package_type_string(recv_buffer_p[0]));
+  JERRY_DEBUG_MSG("debugger server: received [%s] from client\n", jerry_debugger_package_type_string(recv_buffer_p[0]));
 #endif
 
   if (*expected_message_type_p != 0)
