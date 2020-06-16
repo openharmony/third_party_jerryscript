@@ -89,12 +89,6 @@ static const char * const wrong_args_msg_p = "wrong type of argument";
 
 #endif /* ENABLED (JERRY_ERROR_MESSAGES) */
 
-/**
- * Place a placeholder to occupy the rom space
- */
-#define PLACEHOLDER_SIZE 19900
-const uint8_t JERRY_PLACEHOLDER[PLACEHOLDER_SIZE] = {0};
-
 /** \addtogroup jerry Jerry engine interface
  * @{
  */
@@ -174,11 +168,6 @@ jerry_throw (jerry_value_t value) /**< return value */
 void
 jerry_init (jerry_init_flag_t flags) /**< combination of Jerry flags */
 {
-  for (int i = 0; i < 1; ++i) {
-    if (JERRY_PLACEHOLDER[i] == 0) {
-      break;
-    }
-  }
   /* This function cannot be called twice unless jerry_cleanup is called. */
   JERRY_ASSERT (!(JERRY_CONTEXT (status_flags) & ECMA_STATUS_API_AVAILABLE));
 
