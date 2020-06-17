@@ -657,7 +657,7 @@ jerry_debugger_send_eval (const lit_utf8_byte_t *eval_string_p, /**< evaluated s
 
 #ifdef ACE_DEBUGGER_CUSTOM
 #define ENUM_TYPE_TO_STRING_CASE(x)   case x: return(#x);
-static inline const char *jerry_debugger_package_type_string(enum jerry_debugger_header_type_t type)
+static inline const char *jerry_debugger_package_type_string(jerry_debugger_header_type_t type)
 {
     switch (type)
     {
@@ -682,6 +682,8 @@ static inline const char *jerry_debugger_package_type_string(enum jerry_debugger
         ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_GET_SCOPE_CHAIN)
         ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_GET_SCOPE_VARIABLES)
         ENUM_TYPE_TO_STRING_CASE(JERRY_DEBUGGER_MESSAGES_IN_MAX_COUNT)
+        default:
+            return "Unsupported jerry_debugger request from client";
     }
     return "Unsupported jerry_debugger request from client";
 }
