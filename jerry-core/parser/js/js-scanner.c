@@ -1587,7 +1587,7 @@ scanner_scan_statement_end (parser_context_t *context_p, /**< context */
   }
 } /* scanner_scan_statement_end */
 
-#if defined(__IAR_SYSTEMS_ICC__)
+#if defined(JERRY_FOR_IAR_CONFIG)
 // IAR 8.20.2 generates incorrect code for this function.
 // When the function is compiled with 'High:Balanced' optimization level.
 // In the line context_p->source_end_p = source_end_p
