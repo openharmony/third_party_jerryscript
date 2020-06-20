@@ -85,15 +85,22 @@ jerry_port_log (jerry_log_level_t level, /**< message log level */
     va_list args;
     va_start (args, format);
 #if defined (JERRY_DEBUGGER) && (JERRY_DEBUGGER == 1)
-    int length = vsnprintf (NULL, 0, format, args);
-    va_end (args);
-    va_start (args, format);
+    if (jerry_debugger_is_connected())
+    {
+      int length = vsnprintf (NULL, 0, format, args);
+      va_end (args);
+      va_start (args, format);
 
-    JERRY_VLA (char, buffer, length + 1);
-    vsnprintf (buffer, (size_t) length + 1, format, args);
+      JERRY_VLA (char, buffer, length + 1);
+      vsnprintf (buffer, (size_t) length + 1, format, args);
 
-    fprintf (stderr, "%s", buffer);
-    jerry_debugger_send_log (level, (jerry_char_t *) buffer, (jerry_size_t) length);
+      fprintf (stderr, "%s", buffer);
+      jerry_debugger_send_log (level, (jerry_char_t *) buffer, (jerry_size_t) length);
+    }
+    else
+    {
+      vfprintf (stderr, format, args);
+    }
 #else /* If jerry-debugger isn't defined, libc is turned on */
     vfprintf (stderr, format, args);
 #endif /* defined (JERRY_DEBUGGER) && (JERRY_DEBUGGER == 1) */

@@ -17,8 +17,41 @@
  * Implementation of exit with specified status code.
  */
 
+#include "jmem.h"
 #include "jrt.h"
 #include "jrt-libc-includes.h"
+
+
+#if ENABLED (JERRY_MEM_STATS)
+static void
+jerry_dump_memstats_on_error (void)
+{
+  /* Dump memory stats */
+  jmem_heap_stats_t jmem_heap_stats;
+  jmem_heap_get_stats (&jmem_heap_stats);
+
+  JERRY_ERROR_MSG ("\tMemory info:\n");
+  JERRY_ERROR_MSG ("\theap total size: %zu\n", jmem_heap_stats.size);
+
+  JERRY_ERROR_MSG ("\tcurrently allocated bytes: %zu\n", jmem_heap_stats.allocated_bytes);
+  JERRY_ERROR_MSG ("\tpeak allocated bytes: %zu\n", jmem_heap_stats.peak_allocated_bytes);
+
+  JERRY_ERROR_MSG ("\tbytes waste due to blocks filled partially: %zu\n", jmem_heap_stats.waste_bytes);
+  JERRY_ERROR_MSG ("\tpeak wasted bytes: %zu\n", jmem_heap_stats.peak_waste_bytes);
+
+  JERRY_ERROR_MSG ("\tallocated memory for byte code: %zu\n", jmem_heap_stats.byte_code_bytes);
+  JERRY_ERROR_MSG ("\tpeak allocated memory for byte code: %zu\n", jmem_heap_stats.peak_byte_code_bytes);
+
+  JERRY_ERROR_MSG ("\tallocated memory for strings: %zu\n", jmem_heap_stats.string_bytes);
+  JERRY_ERROR_MSG ("\tpeak allocated memory for strings: %zu\n", jmem_heap_stats.peak_string_bytes);
+
+  JERRY_ERROR_MSG ("\tallocated memory for objects: %zu\n", jmem_heap_stats.object_bytes);
+  JERRY_ERROR_MSG ("\tpeak allocated memory for objects: %zu\n", jmem_heap_stats.peak_object_bytes);
+
+  JERRY_ERROR_MSG ("\tallocated memory for properties: %zu\n", jmem_heap_stats.property_bytes);
+  JERRY_ERROR_MSG ("\tpeak allocated memory for properties: %zu\n", jmem_heap_stats.peak_property_bytes);
+}
+#endif
 
 /*
  * Exit with specified status code.
@@ -29,7 +62,7 @@
 void JERRY_ATTR_NORETURN
 jerry_fatal (jerry_fatal_code_t code) /**< status code */
 {
-#ifndef JERRY_NDEBUG
+#if defined (_WIN32) || defined (_WIN64) || !defined (JERRY_NDEBUG)
   switch (code)
   {
     case ERR_OUT_OF_MEMORY:
@@ -52,8 +85,17 @@ jerry_fatal (jerry_fatal_code_t code) /**< status code */
       JERRY_ERROR_MSG ("Error: ERR_FAILED_INTERNAL_ASSERTION\n");
       break;
     }
+    default:
+    {
+      JERRY_ERROR_MSG ("Error: ERR_UNKNOWN_FATAL\n");
+      break;
+    }
   }
-#endif /* !JERRY_NDEBUG */
+
+#if ENABLED (JERRY_MEM_STATS)
+  jerry_dump_memstats_on_error ();
+#endif
+#endif
 
   jerry_port_fatal (code);
 

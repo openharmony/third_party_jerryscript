@@ -18,12 +18,23 @@
 #include "jerryscript-port.h"
 #include "jerryscript-port-default.h"
 
+static fatal_handler_t jerry_fatal_handler = NULL;
+
+void jerry_port_default_set_fatal_handler (fatal_handler_t handler)
+{
+  jerry_fatal_handler = handler;
+}
+
 /**
  * Default implementation of jerry_port_fatal. Calls 'abort' if exit code is
  * non-zero, 'exit' otherwise.
  */
 void jerry_port_fatal (jerry_fatal_code_t code) /**< cause of error */
 {
+  if (jerry_fatal_handler != NULL)
+  {
+    jerry_fatal_handler ((int) code);
+  }
   if (code != 0
       && code != ERR_OUT_OF_MEMORY)
   {

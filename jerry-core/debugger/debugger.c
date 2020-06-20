@@ -560,7 +560,6 @@ jerry_debugger_send_eval (const lit_utf8_byte_t *eval_string_p, /**< evaluated s
   uint32_t parse_opts = ECMA_PARSE_DIRECT_EVAL | (chain_index << ECMA_PARSE_CHAIN_INDEX_SHIFT);
 
   ecma_value_t result = ecma_op_eval_chars_buffer (eval_string_p + 5, eval_string_size - 5, parse_opts);
-  JERRY_DEBUGGER_CLEAR_FLAGS (JERRY_DEBUGGER_VM_IGNORE);
 
   if (!ECMA_IS_VALUE_ERROR (result))
   {
@@ -582,6 +581,7 @@ jerry_debugger_send_eval (const lit_utf8_byte_t *eval_string_p, /**< evaluated s
         JERRY_CONTEXT (status_flags) &= (uint32_t) ~ECMA_STATUS_EXCEPTION;
       }
 
+      JERRY_DEBUGGER_CLEAR_FLAGS (JERRY_DEBUGGER_VM_IGNORE);
       return true;
     }
 
@@ -618,6 +618,7 @@ jerry_debugger_send_eval (const lit_utf8_byte_t *eval_string_p, /**< evaluated s
                                     type,
                                     string_p,
                                     strlen ((const char *) string_p));
+        JERRY_DEBUGGER_CLEAR_FLAGS (JERRY_DEBUGGER_VM_IGNORE);
         return false;
       }
     }
@@ -639,6 +640,7 @@ jerry_debugger_send_eval (const lit_utf8_byte_t *eval_string_p, /**< evaluated s
 
   ecma_free_value (message);
 
+  JERRY_DEBUGGER_CLEAR_FLAGS (JERRY_DEBUGGER_VM_IGNORE);
   return false;
 } /* jerry_debugger_send_eval */
 
@@ -709,7 +711,7 @@ jerry_debugger_process_message (const uint8_t *recv_buffer_p, /**< pointer to th
   }
 
 #ifdef ACE_DEBUGGER_CUSTOM
-  printf("debugger server: received [%s] from client\n", jerry_debugger_package_type_string(recv_buffer_p[0]));
+  JERRY_DEBUG_MSG("debugger server: received [%s] from client\n", jerry_debugger_package_type_string(recv_buffer_p[0]));
 #endif
 
   if (*expected_message_type_p != 0)

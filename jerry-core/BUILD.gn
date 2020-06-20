@@ -2,9 +2,20 @@
 # Description: Gn compile jerry-core
 # Create: 2020-01-16
 import("//build/lite/config/component/zlite_component.gni")
-import("//foundation/ace/lite/third_party/jerryscript/engine.gni")
+import("//third_party/jerryscript/engine.gni")
 
-static_library("jerry-core") {
+zlite_component("jerry-core") {
+    version = "1.0.0"
+    dependences = [
+    ]
+
+    features = [
+        ":jerry-core_shared",
+    ]
+}
+
+zlite_library("jerry-core_shared") {
+    target_type = "shared_library"
 
     sources = [
         "api/jerry.c",

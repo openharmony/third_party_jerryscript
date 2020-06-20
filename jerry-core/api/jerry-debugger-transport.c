@@ -27,7 +27,7 @@
 /**
  * Sleep time in milliseconds between each jerry_debugger_receive call
  */
-#define JERRY_DEBUGGER_TRANSPORT_TIMEOUT 100
+#define JERRY_DEBUGGER_TRANSPORT_TIMEOUT 10
 
 /**
  * Add a new transport layer.

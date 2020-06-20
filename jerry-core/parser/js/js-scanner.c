@@ -1587,6 +1587,15 @@ scanner_scan_statement_end (parser_context_t *context_p, /**< context */
   }
 } /* scanner_scan_statement_end */
 
+#if defined(__IAR_SYSTEMS_ICC__)
+// IAR 8.20.2 generates incorrect code for this function.
+// When the function is compiled with 'High:Balanced' optimization level.
+// In the line context_p->source_end_p = source_end_p
+// IAR assumes that source_end_p is in R5 register, but
+// the compiled doesn't initialize it since the function start.
+// The workaround is to compile this function without optimizations.
+#pragma optimize=none
+#endif
 /**
  * Scan the whole source code.
  */

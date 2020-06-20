@@ -37,7 +37,12 @@ JERRY_STATIC_ASSERT (sizeof (jmem_heap_t) <= JMEM_HEAP_SIZE,
 /**
  * Global heap.
  */
+#ifdef JERRY_FOR_IAR_CONFIG // ACELite changes, align heap by 8bytes for IAR
+#pragma data_alignment = JMEM_ALIGNMENT
+jmem_heap_t jerry_global_heap JERRY_ATTR_GLOBAL_HEAP;
+#else
 jmem_heap_t jerry_global_heap JERRY_ATTR_ALIGNED (JMEM_ALIGNMENT) JERRY_ATTR_GLOBAL_HEAP;
+#endif
 
 #endif /* !ENABLED (JERRY_SYSTEM_ALLOCATOR) */
 
