@@ -28,6 +28,10 @@
 # define JERRY_SNAPSHOT_EXEC 1
 # define JERRY_PARSER 1
 # define JERRY_ES2015_BUILTIN_TYPEDARRAY 1
+#ifndef JERRY_FOR_IAR_CONFIG
+# define JERRY_MEM_STATS 1
+# define JERRY_LOGGING 1
+#endif
 
 //Maximum size of heap in kilobytes
 # define JERRY_GLOBAL_HEAP_SIZE (48)
