@@ -45,6 +45,10 @@
 #include "js-parser.h"
 #include "re-compiler.h"
 
+#ifdef JERRY_FOR_IAR_CONFIG
+#include "mc_memory.h"
+#endif
+
 JERRY_STATIC_ASSERT (sizeof (jerry_value_t) == sizeof (ecma_value_t),
                      size_of_jerry_value_t_must_be_equal_to_size_of_ecma_value_t);
 
@@ -161,6 +165,24 @@ jerry_throw (jerry_value_t value) /**< return value */
   JERRY_ASSERT (ECMA_IS_VALUE_ERROR (value));
   return ecma_create_error_reference_from_context ();
 } /* jerry_throw */
+
+#ifdef JERRY_FOR_IAR_CONFIG
+char* jerry_vla_malloc (uint32_t size)
+{
+  char* ret;
+  ret = MC_SVR_MEM_ALLOC (size);
+  if (!ret)
+  {
+    return NULL;
+  }
+  return ret;
+}
+
+void jerry_vla_free (char* p)
+{
+  MC_SVR_MEM_FREE (p);
+}
+#endif
 
 /**
  * Jerry engine initialization

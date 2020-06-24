@@ -35,6 +35,9 @@
 #include "opcodes.h"
 #include "vm.h"
 #include "vm-stack.h"
+#if defined(JERRY_FOR_IAR_CONFIG)
+#include "jerryscript-core.h"
+#endif
 
 /** \addtogroup vm Virtual machine
  * @{
@@ -3690,6 +3693,10 @@ vm_run (const ecma_compiled_code_t *bytecode_header_p, /**< byte-code data heade
   ecma_value_t *literal_p;
   vm_frame_ctx_t frame_ctx;
   uint32_t call_stack_size;
+#if defined(JERRY_FOR_IAR_CONFIG)
+  ecma_value_t* stack;
+  ecma_value_t ret;
+#endif
 
   if (bytecode_header_p->status_flags & CBC_CODE_FLAGS_UINT16_ARGUMENTS)
   {
@@ -3729,7 +3736,15 @@ vm_run (const ecma_compiled_code_t *bytecode_header_p, /**< byte-code data heade
   frame_ctx.is_eval_code = parse_opts & ECMA_PARSE_DIRECT_EVAL;
 
   /* Use JERRY_MAX() to avoid array declaration with size 0. */
+#if defined(JERRY_FOR_IAR_CONFIG)
+  stack = (ecma_value_t*)jerry_vla_malloc (sizeof(ecma_value_t) * JERRY_MAX (call_stack_size, 1));
+  if (!stack)
+  {
+    return ecma_raise_common_error (ECMA_ERR_MSG ("malloc stack failed"));
+  }
+#else
   JERRY_VLA (ecma_value_t, stack, JERRY_MAX (call_stack_size, 1));
+#endif
   frame_ctx.registers_p = stack;
 
 #if ENABLED (JERRY_ES2015_MODULE_SYSTEM)
@@ -3753,7 +3768,13 @@ vm_run (const ecma_compiled_code_t *bytecode_header_p, /**< byte-code data heade
   }
 #endif /* ENABLED (JERRY_ES2015_MODULE_SYSTEM) */
 
+#if defined(JERRY_FOR_IAR_CONFIG)
+  ret = vm_execute (&frame_ctx, arg_list_p, arg_list_len);
+  jerry_vla_free ((char*)stack);
+  return ret;
+#else
   return vm_execute (&frame_ctx, arg_list_p, arg_list_len);
+#endif
 } /* vm_run */
 
 /**

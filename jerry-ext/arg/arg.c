@@ -16,6 +16,9 @@
 #include "arg-internal.h"
 #include "jerryscript-ext/arg.h"
 #include "jerryscript.h"
+#if defined(JERRY_FOR_IAR_CONFIG)
+#include "jerryscript-core.h"
+#endif
 
 
 #define JERRYX_STATIC_ASSERT(x, msg) \
@@ -110,13 +113,24 @@ jerryx_arg_transform_object_properties (const jerry_value_t obj_val,/**< the JS 
                                         const jerryx_arg_t *c_arg_p, /**< points to the array of transformation steps */
                                         jerry_length_t c_arg_cnt) /**< the count of the `c_arg_p` array */
 {
+#if defined(JERRY_FOR_IAR_CONFIG)
+  jerry_value_t* prop;
+  jerry_value_t prop_i;
+#endif
   if (!jerry_value_is_object (obj_val))
   {
     return jerry_create_error (JERRY_ERROR_TYPE, (jerry_char_t *) "Not an object.");
   }
 
+#if defined(JERRY_FOR_IAR_CONFIG)
+  prop = (jerry_value_t*) jerry_vla_malloc (sizeof(jerry_value_t) * name_cnt);
+  if (!prop)
+  {
+    return jerry_create_error (JERRY_ERROR_TYPE, (jerry_char_t *) "malloc prop fail.");
+  }
+#else
   JERRY_VLA (jerry_value_t, prop, name_cnt);
-
+#endif
   for (jerry_length_t i = 0; i < name_cnt; i++, name_p++)
   {
     const jerry_value_t name_str = jerry_create_string (*name_p);
@@ -129,8 +143,13 @@ jerryx_arg_transform_object_properties (const jerry_value_t obj_val,/**< the JS 
       {
         jerry_release_value (prop[j]);
       }
-
+#if defined(JERRY_FOR_IAR_CONFIG)
+      prop_i = prop[i];
+      jerry_vla_free ((char*)prop);
+      return prop_i;
+#else
       return prop[i];
+#endif
     }
   }
 
@@ -140,7 +159,9 @@ jerryx_arg_transform_object_properties (const jerry_value_t obj_val,/**< the JS 
   {
     jerry_release_value (prop[i]);
   }
-
+#if defined(JERRY_FOR_IAR_CONFIG)
+  jerry_vla_free ((char*)prop);
+#endif
   return ret;
 } /* jerryx_arg_transform_object_properties */
 
@@ -155,13 +176,24 @@ jerryx_arg_transform_array (const jerry_value_t array_val, /**< points to the JS
                             const jerryx_arg_t *c_arg_p, /**< points to the array of validation/transformation steps */
                             jerry_length_t c_arg_cnt) /**< the count of the `c_arg_p` array */
 {
+#if defined(JERRY_FOR_IAR_CONFIG)
+  jerry_value_t* arr;
+  jerry_value_t arr_i;
+#endif
   if (!jerry_value_is_array (array_val))
   {
     return jerry_create_error (JERRY_ERROR_TYPE, (jerry_char_t *) "Not an array.");
   }
 
+#if defined(JERRY_FOR_IAR_CONFIG)
+  arr = (jerry_value_t*) jerry_vla_malloc (sizeof(jerry_value_t) * c_arg_cnt);
+  if (!arr)
+  {
+    return jerry_create_error (JERRY_ERROR_TYPE, (jerry_char_t *) "malloc arr fail.");
+  }
+#else
   JERRY_VLA (jerry_value_t, arr, c_arg_cnt);
-
+#endif
   for (jerry_length_t i = 0; i < c_arg_cnt; i++)
   {
     arr[i] = jerry_get_property_by_index (array_val, i);
@@ -172,8 +204,13 @@ jerryx_arg_transform_array (const jerry_value_t array_val, /**< points to the JS
       {
         jerry_release_value (arr[j]);
       }
-
+#if defined(JERRY_FOR_IAR_CONFIG)
+      arr_i = arr[i];
+      jerry_vla_free ((char*)arr);
+      return arr_i;
+#else
       return arr[i];
+#endif
     }
   }
 
@@ -183,6 +220,8 @@ jerryx_arg_transform_array (const jerry_value_t array_val, /**< points to the JS
   {
     jerry_release_value (arr[i]);
   }
-
+#if defined(JERRY_FOR_IAR_CONFIG)
+  jerry_vla_free ((char*)arr);
+#endif
   return ret;
 } /* jerryx_arg_transform_array */

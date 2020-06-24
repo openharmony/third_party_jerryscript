@@ -16,6 +16,10 @@
 #include <string.h>
 #include "jerryscript.h"
 #include "jerryscript-ext/module.h"
+#if defined(JERRY_FOR_IAR_CONFIG)
+#include "jerryscript-core.h"
+#include "jrt.h"
+#endif
 
 static const jerry_char_t *module_name_property_name = (jerry_char_t *) "moduleName";
 static const jerry_char_t *module_not_found = (jerry_char_t *) "Module not found";
@@ -178,9 +182,21 @@ jerryx_resolve_native_module (const jerry_value_t canonical_name, /**< canonical
                               jerry_value_t *result) /**< [out] where to put the resulting module instance */
 {
   const jerryx_native_module_t *module_p = NULL;
+#if defined(JERRY_FOR_IAR_CONFIG)
+  jerry_char_t* name_string;
+#endif
 
   jerry_size_t name_size = jerry_get_utf8_string_size (canonical_name);
+#if defined(JERRY_FOR_IAR_CONFIG)
+  name_string = (jerry_char_t*) jerry_vla_malloc (sizeof(jerry_char_t) * name_size);
+  if (!name_string)
+  {
+    JERRY_ERROR_MSG("malloc name_string fail\n");
+    return false;
+  }
+#else
   JERRY_VLA (jerry_char_t, name_string, name_size);
+#endif
   jerry_string_to_utf8_char_buffer (canonical_name, name_string, name_size);
 
   /* Look for the module by its name in the list of module definitions. */
@@ -195,9 +211,15 @@ jerryx_resolve_native_module (const jerry_value_t canonical_name, /**< canonical
                                             : jerryx_module_create_error (JERRY_ERROR_TYPE,
                                                                           on_resolve_absent,
                                                                           canonical_name));
+#if defined(JERRY_FOR_IAR_CONFIG)
+      jerry_vla_free ((char*)name_string);
+#endif
       return true;
     }
   }
+#if defined(JERRY_FOR_IAR_CONFIG)
+  jerry_vla_free ((char*)name_string);
+#endif
 
   return false;
 } /* jerryx_resolve_native_module */
@@ -218,7 +240,17 @@ jerryx_module_resolve_local (const jerry_value_t name, /**< name of the module t
   size_t index;
   size_t canonical_names_used = 0;
   jerry_value_t instances;
+#if defined(JERRY_FOR_IAR_CONFIG)
+  jerry_value_t* canonical_names;
+  canonical_names = (jerry_value_t*) jerry_vla_malloc (sizeof(jerry_value_t) * resolver_count);
+  if (!canonical_names)
+  {
+    JERRY_ERROR_MSG("malloc canonical_names fail\n");
+    return;
+  }
+#else
   JERRY_VLA (jerry_value_t, canonical_names, resolver_count);
+#endif
   jerry_value_t (*get_canonical_name_p) (const jerry_value_t name);
   bool (*resolve_p) (const jerry_value_t canonical_name,
                      jerry_value_t *result);
@@ -286,6 +318,9 @@ done:
   {
     jerry_release_value (canonical_names[index]);
   }
+#if defined(JERRY_FOR_IAR_CONFIG)
+  jerry_vla_free ((char*)canonical_names);
+#endif
 } /* jerryx_module_resolve_local */
 
 /**
