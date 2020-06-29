@@ -33,8 +33,10 @@
 # define JERRY_LOGGING 1
 #endif
 
+#ifndef JERRY_GLOBAL_HEAP_SIZE
 //Maximum size of heap in kilobytes
 # define JERRY_GLOBAL_HEAP_SIZE (48)
+#endif
 
 #endif /* JERRY_FOR_IAR_CONFIG */
 
