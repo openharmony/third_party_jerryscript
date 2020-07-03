@@ -51,7 +51,7 @@
 # define JERRY_ES2015 0
 # define JERRY_ES2015_BUILTIN_TYPEDARRAY 1
 //Maximum size of heap in kilobytes
-# define JERRY_GLOBAL_HEAP_SIZE (512)
+# define JERRY_GLOBAL_HEAP_SIZE (64)
 # define JERRY_NDEBUG
 # define JERRY_DISABLE_HEAVY_DEBUG
 # define JERRY_ERROR_MESSAGES 1
