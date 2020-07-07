@@ -26,6 +26,19 @@
 #define JMEM_ALLOCATOR_INTERNAL
 #include "jmem-allocator-internal.h"
 
+#ifdef _WIN32
+#  ifdef _WIN64
+#    define PRI_SIZET "lu"
+#    define MSG_SIZE_TYPE unsigned long
+#  else
+#    define PRI_SIZET "zu"
+#    define MSG_SIZE_TYPE size_t
+#  endif
+#else
+#  define PRI_SIZET "zu"
+#  define MSG_SIZE_TYPE size_t
+#endif
+
 /** \addtogroup mem Memory allocation
  * @{
  *
@@ -724,33 +737,33 @@ jmem_heap_stats_print (void)
 
   JERRY_DEBUG_MSG ("Heap stats:\n");
 #if !ENABLED (JERRY_SYSTEM_ALLOCATOR)
-  JERRY_DEBUG_MSG ("  Heap size = %zu bytes\n",
-                   heap_stats->size);
+  JERRY_DEBUG_MSG ("  Heap size = %"PRI_SIZET" bytes\n",
+                   (MSG_SIZE_TYPE)(heap_stats->size));
 #endif /* !ENABLED (JERRY_SYSTEM_ALLOCATOR) */
-  JERRY_DEBUG_MSG ("  Allocated = %zu bytes\n"
-                   "  Peak allocated = %zu bytes\n"
-                   "  Waste = %zu bytes\n"
-                   "  Peak waste = %zu bytes\n"
-                   "  Allocated byte code data = %zu bytes\n"
-                   "  Peak allocated byte code data = %zu bytes\n"
-                   "  Allocated string data = %zu bytes\n"
-                   "  Peak allocated string data = %zu bytes\n"
-                   "  Allocated object data = %zu bytes\n"
-                   "  Peak allocated object data = %zu bytes\n"
-                   "  Allocated property data = %zu bytes\n"
-                   "  Peak allocated property data = %zu bytes\n",
-                   heap_stats->allocated_bytes,
-                   heap_stats->peak_allocated_bytes,
-                   heap_stats->waste_bytes,
-                   heap_stats->peak_waste_bytes,
-                   heap_stats->byte_code_bytes,
-                   heap_stats->peak_byte_code_bytes,
-                   heap_stats->string_bytes,
-                   heap_stats->peak_string_bytes,
-                   heap_stats->object_bytes,
-                   heap_stats->peak_object_bytes,
-                   heap_stats->property_bytes,
-                   heap_stats->peak_property_bytes);
+  JERRY_DEBUG_MSG ("  Allocated = %"PRI_SIZET" bytes\n"
+                   "  Peak allocated = %"PRI_SIZET" bytes\n"
+                   "  Waste = %"PRI_SIZET" bytes\n"
+                   "  Peak waste = %"PRI_SIZET" bytes\n"
+                   "  Allocated byte code data = %"PRI_SIZET" bytes\n"
+                   "  Peak allocated byte code data = %"PRI_SIZET" bytes\n"
+                   "  Allocated string data = %"PRI_SIZET" bytes\n"
+                   "  Peak allocated string data = %"PRI_SIZET" bytes\n"
+                   "  Allocated object data = %"PRI_SIZET" bytes\n"
+                   "  Peak allocated object data = %"PRI_SIZET" bytes\n"
+                   "  Allocated property data = %"PRI_SIZET" bytes\n"
+                   "  Peak allocated property data = %"PRI_SIZET" bytes\n",
+                   (MSG_SIZE_TYPE)(heap_stats->allocated_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->peak_allocated_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->waste_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->peak_waste_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->byte_code_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->peak_byte_code_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->string_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->peak_string_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->object_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->peak_object_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->property_bytes),
+                   (MSG_SIZE_TYPE)(heap_stats->peak_property_bytes));
 } /* jmem_heap_stats_print */
 
 /**

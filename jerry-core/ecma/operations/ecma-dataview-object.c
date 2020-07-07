@@ -21,6 +21,9 @@
 #include "ecma-dataview-object.h"
 #include "ecma-typedarray-object.h"
 #include "ecma-objects.h"
+#if defined(JERRY_FOR_IAR_CONFIG)
+#include "jerryscript-core.h"
+#endif
 
 #if ENABLED (JERRY_ES2015_BUILTIN_DATAVIEW)
 
@@ -253,6 +256,10 @@ ecma_op_dataview_get_set_view_value (ecma_value_t view, /**< the operation's 'vi
 {
   /* 1 - 2. */
   ecma_dataview_object_t *view_p = ecma_op_dataview_get_object (view);
+#if defined(JERRY_FOR_IAR_CONFIG)
+  lit_utf8_byte_t* swap_block_p;
+  ecma_value_t ret;
+#endif
 
   if (JERRY_UNLIKELY (view_p == NULL))
   {
@@ -308,10 +315,24 @@ ecma_op_dataview_get_set_view_value (ecma_value_t view, /**< the operation's 'vi
 
   if (ecma_is_value_empty (value_to_set))
   {
+#if defined(JERRY_FOR_IAR_CONFIG)
+    swap_block_p = jerry_vla_malloc (sizeof(lit_utf8_byte_t) * element_size);
+    if (!swap_block_p)
+    {
+      return ecma_raise_common_error (ECMA_ERR_MSG ("malloc swap_block_p failed."));
+    }
+#else
     JERRY_VLA (lit_utf8_byte_t, swap_block_p, element_size);
+#endif
     memcpy (swap_block_p, block_p, element_size * sizeof (lit_utf8_byte_t));
     ecma_dataview_swap_order (system_is_little_endian, is_little_endian, element_size, swap_block_p);
+#if defined(JERRY_FOR_IAR_CONFIG)
+    ret = ecma_make_number_value (ecma_get_typedarray_element (swap_block_p, id));
+    jerry_vla_free (swap_block_p);
+    return ret;
+#else
     return ecma_make_number_value (ecma_get_typedarray_element (swap_block_p, id));
+#endif
   }
 
   if (ecma_is_value_number (value_to_set))

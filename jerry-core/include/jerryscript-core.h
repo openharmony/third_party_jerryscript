@@ -332,6 +332,12 @@ typedef enum
 /**
  * General engine functions.
  */
+
+#ifdef JERRY_FOR_IAR_CONFIG
+char* jerry_vla_malloc (uint32_t size);
+void jerry_vla_free (char* p);
+#endif
+
 void jerry_init (jerry_init_flag_t flags);
 void jerry_cleanup (void);
 void jerry_register_magic_strings (const jerry_char_t * const *ex_str_items_p,

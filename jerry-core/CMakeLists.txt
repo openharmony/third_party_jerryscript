@@ -199,7 +199,7 @@ endif()
 set(INCLUDE_THIRD_PARTY_VALGRIND "${CMAKE_SOURCE_DIR}/third-party/valgrind")
 
 # build mode specific compile/link flags
-set(DEFINES_JERRY ${DEFINES_JERRY} $<$<NOT:$<CONFIG:Debug>>:JERRY_NDEBUG>)
+#set(DEFINES_JERRY ${DEFINES_JERRY} $<$<NOT:$<CONFIG:Debug>>:JERRY_NDEBUG>)
 
 # Jerry heap-section
 if(DEFINED JERRY_ATTR_GLOBAL_HEAP)
@@ -225,7 +225,7 @@ endmacro(jerry_add_define01)
 jerry_add_define01(JERRY_CPOINTER_32_BIT)
 
 # Fill error messages for builtin error objects
-jerry_add_define01(JERRY_ERROR_MESSAGES)
+#jerry_add_define01(JERRY_ERROR_MESSAGES)
 
 # Use external context instead of static one
 jerry_add_define01(JERRY_EXTERNAL_CONTEXT)
@@ -234,16 +234,16 @@ jerry_add_define01(JERRY_EXTERNAL_CONTEXT)
 jerry_add_define01(JERRY_PARSER)
 
 # JS line info
-jerry_add_define01(JERRY_LINE_INFO)
+#jerry_add_define01(JERRY_LINE_INFO)
 
 # Logging
-jerry_add_define01(JERRY_LOGGING)
+#jerry_add_define01(JERRY_LOGGING)
 
 # Memory statistics
-jerry_add_define01(JERRY_MEM_STATS)
+#jerry_add_define01(JERRY_MEM_STATS)
 
 # Enable debugger
-jerry_add_define01(JERRY_DEBUGGER)
+#jerry_add_define01(JERRY_DEBUGGER)
 
 # Memory management stress-test mode
 jerry_add_define01(JERRY_MEM_GC_BEFORE_EACH_ALLOC)
@@ -282,10 +282,10 @@ jerry_add_define01(JERRY_REGEXP_STRICT_MODE)
 jerry_add_define01(JERRY_REGEXP_DUMP_BYTE_CODE)
 
 # Snapshot exec
-jerry_add_define01(JERRY_SNAPSHOT_EXEC)
+#jerry_add_define01(JERRY_SNAPSHOT_EXEC)
 
 # Snapshot save
-jerry_add_define01(JERRY_SNAPSHOT_SAVE)
+#jerry_add_define01(JERRY_SNAPSHOT_SAVE)
 
 # Enable system allocator
 jerry_add_define01(JERRY_SYSTEM_ALLOCATOR)
@@ -300,7 +300,7 @@ endif()
 jerry_add_define01(JERRY_VM_EXEC_STOP)
 
 # Size of heap
-set(DEFINES_JERRY ${DEFINES_JERRY} JERRY_GLOBAL_HEAP_SIZE=${JERRY_GLOBAL_HEAP_SIZE})
+#set(DEFINES_JERRY ${DEFINES_JERRY} JERRY_GLOBAL_HEAP_SIZE=${JERRY_GLOBAL_HEAP_SIZE})
 
 # Maximum size of stack memory usage
 set(DEFINES_JERRY ${DEFINES_JERRY} JERRY_STACK_LIMIT=${JERRY_STACK_LIMIT})
