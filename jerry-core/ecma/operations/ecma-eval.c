@@ -46,6 +46,11 @@ ecma_op_eval (ecma_string_t *code_p, /**< code string */
 {
   ecma_value_t ret_value;
 
+#if ENABLED (JERRY_BUILTIN_EVAL_DISABLED)
+  JERRY_UNUSED(code_p);
+  JERRY_UNUSED(parse_opts);
+  ret_value = ECMA_VALUE_UNDEFINED;
+#else /* ENABLED (JERRY_BUILTIN_EVAL_DISABLED) */
   lit_utf8_size_t chars_num = ecma_string_get_size (code_p);
   if (chars_num == 0)
   {
@@ -61,6 +66,7 @@ ecma_op_eval (ecma_string_t *code_p, /**< code string */
 
     ECMA_FINALIZE_UTF8_STRING (code_utf8_buffer_p, code_utf8_buffer_size);
   }
+#endif /* ENABLED (JERRY_BUILTIN_EVAL_DISABLED) */
 
   return ret_value;
 } /* ecma_op_eval */

@@ -38,6 +38,10 @@
 # define JERRY_GLOBAL_HEAP_SIZE (48)
 #endif
 
+#ifndef JERRY_BUILTIN_EVAL_DISABLED
+// disable builtin eval() function
+# define JERRY_BUILTIN_EVAL_DISABLED 1
+#endif
 #endif /* JERRY_FOR_IAR_CONFIG */
 
 /*
@@ -67,6 +71,10 @@
 // following config controls temp changes in jerry for debugger function with IDE
 # define ACE_DEBUGGER_CUSTOM
 
+#ifndef JERRY_BUILTIN_EVAL_DISABLED
+// disable builtin eval() function
+# define JERRY_BUILTIN_EVAL_DISABLED 1
+#endif
 #endif /* defined (_WIN32) || defined (_WIN64) */
 
 /*
