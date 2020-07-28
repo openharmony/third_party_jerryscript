@@ -114,7 +114,7 @@ jerry_port_normalize_path (const char *in_path_p,   /**< input file path */
   if (base_file_p != NULL)
   {
     _splitpath_s (base_file_p,
-                  &drive,
+                  drive,
                   _MAX_DRIVE,
                   dir_p,
                   _MAX_DIR,
@@ -122,7 +122,7 @@ jerry_port_normalize_path (const char *in_path_p,   /**< input file path */
                   0,
                   NULL,
                   0);
-    strncat (path_p, &drive, _MAX_DRIVE);
+    strncat (path_p, drive, _MAX_DRIVE);
     strncat (path_p, dir_p, _MAX_DIR);
   }
 

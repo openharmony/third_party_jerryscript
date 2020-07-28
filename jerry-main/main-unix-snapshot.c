@@ -39,6 +39,19 @@
 #define JERRY_STANDALONE_EXIT_CODE_OK   (0)
 #define JERRY_STANDALONE_EXIT_CODE_FAIL (1)
 
+#ifdef _WIN32
+#  ifdef _WIN64
+#    define PRI_SIZET "lu"
+#    define SIZE_T_TYPE unsigned long
+#  else
+#    define PRI_SIZET "zu"
+#    define SIZE_T_TYPE size_t
+#  endif
+#else
+#  define PRI_SIZET "zu"
+#  define SIZE_T_TYPE size_t
+#endif
+
 static uint8_t input_buffer[JERRY_BUFFER_SIZE];
 static uint32_t output_buffer[JERRY_BUFFER_SIZE / 4];
 static jerry_char_t literal_buffer[JERRY_BUFFER_SIZE];
@@ -150,7 +163,7 @@ read_file (uint8_t *input_pos_p, /**< next position in the input buffer */
     return 0;
   }
 
-  printf ("Input file '%s' (%lu bytes) loaded.\n", file_name, bytes_read);
+  printf ("Input file '%s' (%"PRI_SIZET" bytes) loaded.\n", file_name, (SIZE_T_TYPE)bytes_read);
   return bytes_read;
 } /* read_file */
 
@@ -584,7 +597,7 @@ process_literal_dump (cli_state_t *cli_state_p, /**< cli state */
       return JERRY_STANDALONE_EXIT_CODE_FAIL;
     }
 
-    printf ("Successfully merged the input snapshots (%lu bytes).\n", merged_snapshot_size);
+    printf ("Successfully merged the input snapshots (%"PRI_SIZET" bytes).\n", (SIZE_T_TYPE)merged_snapshot_size);
 
     lit_buf_sz = jerry_get_literals_from_snapshot (output_buffer,
                                                    merged_snapshot_size,
@@ -618,7 +631,7 @@ process_literal_dump (cli_state_t *cli_state_p, /**< cli state */
   fwrite (literal_buffer, sizeof (uint8_t), lit_buf_sz, file_p);
   fclose (file_p);
 
-  printf ("Literals are saved into '%s' (%lu bytes).\n", literals_file_name_p, lit_buf_sz);
+  printf ("Literals are saved into '%s' (%"PRI_SIZET" bytes).\n", literals_file_name_p, (SIZE_T_TYPE)lit_buf_sz);
 
   jerry_cleanup ();
   return JERRY_STANDALONE_EXIT_CODE_OK;
@@ -752,9 +765,9 @@ process_merge (cli_state_t *cli_state_p, /**< cli state */
   fwrite (output_buffer, 1u, merged_snapshot_size, file_p);
   fclose (file_p);
 
-  printf ("Merge is completed. Merged snapshot is saved into '%s' (%lu bytes).\n",
+  printf ("Merge is completed. Merged snapshot is saved into '%s' (%"PRI_SIZET" bytes).\n",
           output_file_name_p,
-          merged_snapshot_size);
+          (SIZE_T_TYPE)merged_snapshot_size);
 
   jerry_cleanup ();
   return JERRY_STANDALONE_EXIT_CODE_OK;
