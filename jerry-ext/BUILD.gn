@@ -11,17 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/zlite_component.gni")
+import("//build/lite/config/component/lite_component.gni")
 import("//third_party/jerryscript/engine.gni")
 
-zlite_component("jerry-ext") {
-  version = "1.0.0"
-  dependences = []
-
+lite_component("jerry-ext") {
   features = [ ":jerry-ext_shared" ]
 }
 
-zlite_library("jerry-ext_shared") {
+lite_library("jerry-ext_shared") {
   target_type = "shared_library"
 
   sources = [

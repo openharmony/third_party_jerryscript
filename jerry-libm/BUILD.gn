@@ -11,20 +11,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/lite/config/component/zlite_component.gni")
+import("//build/lite/config/component/lite_component.gni")
 import("//third_party/jerryscript/engine.gni")
 
-zlite_component("jerry-libm") {
-    version = "1.0.0"
-    dependences = [
-    ]
-
+lite_component("jerry-libm") {
     features = [
         ":jerry-libm_shared",
     ]
 }
 
-zlite_library("jerry-libm_shared") {
+lite_library("jerry-libm_shared") {
 target_type = "shared_library"
     sources = [
         "acos.c",

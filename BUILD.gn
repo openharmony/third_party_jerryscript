@@ -14,11 +14,11 @@
 isLite_script = "//third_party/jerryscript/LiteOrRichDevice.py"
 isLite_result = exec_script(isLite_script, [], "value")
 
-if (isLite_result == 1){ # when have zlite_component.gni file for ipcamera
+if (isLite_result == 1){ # when have lite_component.gni file for ipcamera
 
-  import("//build/lite/config/component/zlite_component.gni")
+  import("//build/lite/config/component/lite_component.gni")
 
-  zlite_component("jerry_engine") {
+  lite_component("jerry_engine") {
       version = "2.1.0"
       dependences = [
       ]
