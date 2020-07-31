@@ -11,10 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-isLite_script = "//third_party/jerryscript/LiteOrRichDevice.py"
-isLite_result = exec_script(isLite_script, [], "value")
-
-if (isLite_result == 1){ # when have lite_component.gni file for ipcamera
+if (defined(ohos_lite)){ # is on lite Os for ipcamera
 
   import("//build/lite/config/component/lite_component.gni")
 
@@ -27,7 +24,7 @@ if (isLite_result == 1){ # when have lite_component.gni file for ipcamera
       ]
   }
 
-} else if (isLite_result == 0){
+} else{
 
   import("//build/harmonyos.gni")
 
