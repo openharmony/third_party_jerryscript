@@ -19,9 +19,6 @@ if (isLite_result == 1){ # when have lite_component.gni file for ipcamera
   import("//build/lite/config/component/lite_component.gni")
 
   lite_component("jerry_engine") {
-      version = "2.1.0"
-      dependences = [
-      ]
       features = [
           "jerry-core",
           "jerry-libm",
