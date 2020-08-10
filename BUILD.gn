@@ -330,7 +330,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
           "jerry-core/lit",
           "jerry-core/include",
           "jerry-core/ecma/builtin-objects/",
-          "//kernel/liteos-a/lib/libsec/include",
+          "//kernel/liteos_a/lib/libsec/include",
       ]
   }
 
@@ -367,7 +367,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
           "jerry-core/lit",
           "jerry-core/include",
           "jerry-core/ecma/builtin-objects/",
-          "//kernel/liteos-a/lib/libsec/include",
+          "//kernel/liteos_a/lib/libsec/include",
       ]
   }
 
