@@ -21,10 +21,10 @@
 
 #include <errno.h>
 
-#ifdef WIN32
-#include <BaseTsd.h>
+#ifdef _WIN32
+#include <basetsd.h>
 typedef SSIZE_T ssize_t;
-#include <WS2tcpip.h>
+#include <ws2tcpip.h>
 #include <winsock2.h>
 
 /* On Windows the WSAEWOULDBLOCK value can be returned for non-blocking operations */
@@ -36,7 +36,7 @@ typedef SSIZE_T ssize_t;
 /* On Windows sockets have a SOCKET typedef */
 typedef SOCKET jerryx_socket;
 
-#else /* !WIN32 */
+#else /* !_WIN32 */
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -51,7 +51,7 @@ typedef SOCKET jerryx_socket;
 
 /* On *nix the sockets are integer identifiers */
 typedef int jerryx_socket;
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 /**
  * Implementation of transport over tcp/ip.
@@ -74,11 +74,11 @@ typedef struct
 static inline int
 jerryx_debugger_tcp_get_errno (void)
 {
-#ifdef WIN32
+#ifdef _WIN32
   return WSAGetLastError ();
-#else /* !WIN32 */
+#else /* !_WIN32 */
   return errno;
-#endif /* WIN32 */
+#endif /* _WIN32 */
 } /* jerryx_debugger_tcp_get_errno */
 
 /**
@@ -87,11 +87,11 @@ jerryx_debugger_tcp_get_errno (void)
 static inline void
 jerryx_debugger_tcp_close_socket (jerryx_socket socket_id) /**< socket to close */
 {
-#ifdef WIN32
+#ifdef _WIN32
   closesocket (socket_id);
-#else /* !WIN32 */
+#else /* !_WIN32 */
   close (socket_id);
-#endif /* WIN32 */
+#endif /* _WIN32 */
 } /* jerryx_debugger_tcp_close_socket */
 
 /**
@@ -105,20 +105,20 @@ jerryx_debugger_tcp_log_error (int errno_value) /**< error value to log */
     return;
   }
 
-#ifdef WIN32
+#ifdef _WIN32
   char *error_message = NULL;
   FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                  NULL,
-                 errno_value,
+                 (DWORD)errno_value,
                  MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
                  (LPTSTR) &error_message,
                  0,
                  NULL);
   jerry_port_log (JERRY_LOG_LEVEL_ERROR, "TCP Error: %s\n", error_message);
   LocalFree (error_message);
-#else /* !WIN32 */
+#else /* !_WIN32 */
   jerry_port_log (JERRY_LOG_LEVEL_ERROR, "TCP Error: %s\n", strerror (errno_value));
-#endif /* WIN32 */
+#endif /* _WIN32 */
 } /* jerryx_debugger_tcp_log_error */
 
 /**
@@ -166,8 +166,11 @@ jerryx_debugger_tcp_send (jerry_debugger_transport_header_t *header_p, /**< tcp 
       return false;
     }
 #endif /* __linux__ */
-
+#ifdef _WIN32
+    ssize_t sent_bytes = send (tcp_p->tcp_socket, (char *)message_p, (int)message_length, 0);
+#else
     ssize_t sent_bytes = send (tcp_p->tcp_socket, message_p, message_length, 0);
+#endif
 
     if (sent_bytes < 0)
     {
@@ -202,8 +205,11 @@ jerryx_debugger_tcp_receive (jerry_debugger_transport_header_t *header_p, /**< t
 
   uint8_t *buffer_p = receive_context_p->buffer_p + receive_context_p->received_length;
   size_t buffer_size = JERRY_DEBUGGER_TRANSPORT_MAX_BUFFER_SIZE - receive_context_p->received_length;
-
+#ifdef _WIN32
+  ssize_t length = recv (tcp_p->tcp_socket, (char *)buffer_p, (int)buffer_size, 0);
+#else
   ssize_t length = recv (tcp_p->tcp_socket, buffer_p, buffer_size, 0);
+#endif
 
   if (length <= 0)
   {
@@ -250,7 +256,11 @@ jerryx_debugger_tcp_configure_socket (jerryx_socket server_socket, /** < socket 
   addr.sin_port = htons (port);
   addr.sin_addr.s_addr = INADDR_ANY;
 
+#ifdef _WIN32
+  char opt_value = 1;
+#else
   int opt_value = 1;
+#endif
 
   if (setsockopt (server_socket, SOL_SOCKET, SO_REUSEADDR, &opt_value, sizeof (int)) != 0)
   {
@@ -279,7 +289,7 @@ jerryx_debugger_tcp_configure_socket (jerryx_socket server_socket, /** < socket 
 bool
 jerryx_debugger_tcp_create (uint16_t port) /**< listening port */
 {
-#ifdef WIN32
+#ifdef _WIN32
   WSADATA wsaData;
   int wsa_init_status = WSAStartup (MAKEWORD (2, 2), &wsaData);
   if (wsa_init_status != NO_ERROR)
@@ -287,7 +297,7 @@ jerryx_debugger_tcp_create (uint16_t port) /**< listening port */
     JERRYX_ERROR_MSG ("WSA Error: %d\n", wsa_init_status);
     return false;
   }
-#endif /* WIN32*/
+#endif /* _WIN32 */
 
   jerryx_socket server_socket = socket (AF_INET, SOCK_STREAM, 0);
   if (server_socket == JERRYX_SOCKET_INVALID)
@@ -320,14 +330,14 @@ jerryx_debugger_tcp_create (uint16_t port) /**< listening port */
   }
 
   /* Set non-blocking mode. */
-#ifdef WIN32
+#ifdef _WIN32
   u_long nonblocking_enabled = 1;
-  if (ioctlsocket (tcp_socket, FIONBIO, &nonblocking_enabled) != NO_ERROR)
+  if (ioctlsocket (tcp_socket, (long)FIONBIO, &nonblocking_enabled) != NO_ERROR)
   {
     jerryx_debugger_tcp_close_socket (tcp_socket);
     return false;
   }
-#else /* !WIN32 */
+#else /* !_WIN32 */
   int socket_flags = fcntl (tcp_socket, F_GETFL, 0);
 
   if (socket_flags < 0)
@@ -341,7 +351,7 @@ jerryx_debugger_tcp_create (uint16_t port) /**< listening port */
     close (tcp_socket);
     return false;
   }
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
   JERRYX_DEBUG_MSG ("Connected from: %s\n", inet_ntoa (addr.sin_addr));
 

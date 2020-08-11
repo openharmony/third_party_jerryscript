@@ -199,7 +199,7 @@ endif()
 set(INCLUDE_THIRD_PARTY_VALGRIND "${CMAKE_SOURCE_DIR}/third-party/valgrind")
 
 # build mode specific compile/link flags
-#set(DEFINES_JERRY ${DEFINES_JERRY} $<$<NOT:$<CONFIG:Debug>>:JERRY_NDEBUG>)
+set(DEFINES_JERRY ${DEFINES_JERRY} $<$<NOT:$<CONFIG:Debug>>:JERRY_NDEBUG>)
 
 # Jerry heap-section
 if(DEFINED JERRY_ATTR_GLOBAL_HEAP)
@@ -243,7 +243,7 @@ jerry_add_define01(JERRY_PARSER)
 #jerry_add_define01(JERRY_MEM_STATS)
 
 # Enable debugger
-#jerry_add_define01(JERRY_DEBUGGER)
+jerry_add_define01(JERRY_DEBUGGER)
 
 # Memory management stress-test mode
 jerry_add_define01(JERRY_MEM_GC_BEFORE_EACH_ALLOC)

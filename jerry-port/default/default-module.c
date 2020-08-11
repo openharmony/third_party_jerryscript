@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#if !defined (WIN32) && !defined(JERRY_FOR_IAR_CONFIG)
+#if !defined (_WIN32) && !defined(JERRY_FOR_IAR_CONFIG)
 #include <libgen.h>
-#endif /* !defined (WIN32) */
+#endif /* !defined (_WIN32) */
 #include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -104,7 +104,7 @@ jerry_port_normalize_path (const char *in_path_p,   /**< input file path */
 {
   size_t ret = 0;
 
-#if defined (WIN32)
+#if defined (_WIN32)
   char drive[_MAX_DRIVE];
   char *dir_p = (char *) malloc (_MAX_DIR);
 

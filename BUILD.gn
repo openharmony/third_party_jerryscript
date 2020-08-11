@@ -31,7 +31,8 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
   config("jerryscript_config") {
       defines = [
           "JERRY_SNAPSHOT_SAVE=1",
-          "JERRY_COMMIT_HASH=\"ignored\""
+          "JERRY_COMMIT_HASH=\"ignored\"",
+          "JERRY_NDEBUG",
       ]
       cflags = [
           "-Wno-unused-function",
