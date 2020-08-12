@@ -196,7 +196,7 @@ lite_library("jerry-core_shared") {
 
   defines = []
 
-  if (hos_kernel_type == "liteos_a" || hos_kernel_type == "linux") {
+  if (ohos_kernel_type == "liteos_a" || ohos_kernel_type == "linux") {
     defines += [
       "JERRY_GLOBAL_HEAP_SIZE = (128)",
       "JERRY_ERROR_MESSAGES = 1",
