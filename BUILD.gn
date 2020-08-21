@@ -26,7 +26,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
 
 } else{
 
-  import("//build/harmonyos.gni")
+  import("//build/ohos.gni")
 
   config("jerryscript_config") {
       defines = [
@@ -41,7 +41,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
       include_dirs = ["."]
   }
 
-  harmonyos_source_set("jerry_core_source_set"){
+  ohos_source_set("jerry_core_source_set"){
     sources = [
           "jerry-core/api/jerry.c",
           "jerry-core/api/jerry-debugger.c",
@@ -219,7 +219,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
     ]
   }
 
-  harmonyos_source_set("jerry_ext_source_set"){
+  ohos_source_set("jerry_ext_source_set"){
     sources = [
           "jerry-ext/debugger/debugger-serial.c",
           "jerry-ext/debugger/debugger-ws.c",
@@ -251,7 +251,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
     ]
   }
 
-  harmonyos_source_set("jerry_port_default_source_set"){
+  ohos_source_set("jerry_port_default_source_set"){
     sources = [
           "jerry-port/default/default-date.c",
           "jerry-port/default/default-module.c",
@@ -269,7 +269,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
     ]
   }
 
-  harmonyos_source_set("jerry_libm_source_set"){
+  ohos_source_set("jerry_libm_source_set"){
     sources = [
           "jerry-libm/acos.c",
           "jerry-libm/asin.c",
@@ -298,7 +298,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
     ]
   }
 
-  harmonyos_source_set("jerry_source_set") {
+  ohos_source_set("jerry_source_set") {
       sources = [
           "jerry-main/main-unix.c",
           "jerry-main/cli.c",
@@ -335,7 +335,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
       ]
   }
 
-  harmonyos_source_set("jerry_snapshot_source_set") {
+  ohos_source_set("jerry_snapshot_source_set") {
       sources = [
           "jerry-main/main-unix-snapshot.c",
           "jerry-main/cli.c",
@@ -372,7 +372,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
       ]
   }
 
-  harmonyos_executable("jerry"){
+  ohos_executable("jerry"){
     configs = [
       ":jerryscript_config",
     ]
@@ -385,7 +385,7 @@ if (defined(ohos_lite)){ # is on lite Os for ipcamera
     ]
   }
 
-  harmonyos_executable("jerry-snapshot"){
+  ohos_executable("jerry-snapshot"){
     configs = [
       ":jerryscript_config",
     ]
