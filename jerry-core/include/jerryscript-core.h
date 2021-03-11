@@ -661,6 +661,15 @@ jerry_value_t jerry_get_typedarray_buffer (jerry_value_t value,
 jerry_value_t jerry_json_parse (const jerry_char_t *string_p, jerry_size_t string_size);
 jerry_value_t jerry_json_stringify (const jerry_value_t object_to_stringify);
 
+#if defined(JERRY_HEAPDUMP)
+void JerryHeapdumpRun(const char* filepath);
+#endif
+
+#if defined(JERRY_REF_TRACKER)
+void JerryRefTrackerStart(const char* filepath);
+void JerryRefTrackerStop(void);
+#endif
+
 /**
  * @}
  */

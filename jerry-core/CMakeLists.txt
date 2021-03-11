@@ -25,7 +25,7 @@ set(JERRY_DEBUGGER                  OFF     CACHE BOOL   "Enable JerryScript deb
 set(JERRY_ERROR_MESSAGES            OFF     CACHE BOOL   "Enable error messages?")
 set(JERRY_EXTERNAL_CONTEXT          OFF     CACHE BOOL   "Enable external context?")
 set(JERRY_PARSER                    ON      CACHE BOOL   "Enable javascript-parser?")
-set(JERRY_LINE_INFO                 OFF     CACHE BOOL   "Enable line info?")
+set(JERRY_LINE_INFO                 ON      CACHE BOOL   "Enable line info?")
 set(JERRY_LOGGING                   OFF     CACHE BOOL   "Enable logging?")
 set(JERRY_MEM_STATS                 OFF     CACHE BOOL   "Enable memory statistics?")
 set(JERRY_MEM_GC_BEFORE_EACH_ALLOC  OFF     CACHE BOOL   "Enable mem-stress test?")
@@ -115,6 +115,7 @@ set(INCLUDE_CORE_PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/ecma/builtin-objects"
     "${CMAKE_CURRENT_SOURCE_DIR}/ecma/builtin-objects/typedarray"
     "${CMAKE_CURRENT_SOURCE_DIR}/ecma/operations"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ext"
     "${CMAKE_CURRENT_SOURCE_DIR}/jcontext"
     "${CMAKE_CURRENT_SOURCE_DIR}/jmem"
     "${CMAKE_CURRENT_SOURCE_DIR}/jrt"
@@ -135,6 +136,7 @@ file(GLOB SOURCE_CORE_FILES
      ecma/builtin-objects/*.c
      ecma/builtin-objects/typedarray/*.c
      ecma/operations/*.c
+     ext/*.c
      jcontext/*.c
      jmem/*.c
      jrt/*.c
@@ -142,6 +144,10 @@ file(GLOB SOURCE_CORE_FILES
      parser/js/*.c
      parser/regexp/*.c
      vm/*.c)
+
+list(FILTER SOURCE_CORE_FILES EXCLUDE REGEX  "api/generate-bytecode.c")
+list(FILTER SOURCE_CORE_FILES EXCLUDE REGEX  "api/external-context-helpers.c")
+list(FILTER SOURCE_CORE_FILES EXCLUDE REGEX  "api/jerryscript_adapter.c")
 
 # All-in-one build
 if(ENABLE_ALL_IN_ONE)
@@ -200,6 +206,10 @@ set(INCLUDE_THIRD_PARTY_VALGRIND "${CMAKE_SOURCE_DIR}/third-party/valgrind")
 
 # build mode specific compile/link flags
 set(DEFINES_JERRY ${DEFINES_JERRY} $<$<NOT:$<CONFIG:Debug>>:JERRY_NDEBUG>)
+set(DEFINES_JERRY ${DEFINES_JERRY} JERRY_FUNCTION_NAME)
+set(DEFINES_JERRY ${DEFINES_JERRY} JERRY_FUNCTION_BACKTRACE)
+set(DEFINES_JERRY ${DEFINES_JERRY} JERRY_HEAPDUMP)
+set(DEFINES_JERRY ${DEFINES_JERRY} JERRY_REF_TRACKER)
 
 # Jerry heap-section
 if(DEFINED JERRY_ATTR_GLOBAL_HEAP)
@@ -234,7 +244,7 @@ jerry_add_define01(JERRY_EXTERNAL_CONTEXT)
 jerry_add_define01(JERRY_PARSER)
 
 # JS line info
-#jerry_add_define01(JERRY_LINE_INFO)
+jerry_add_define01(JERRY_LINE_INFO)
 
 # Logging
 #jerry_add_define01(JERRY_LOGGING)

@@ -270,6 +270,20 @@ ecma_builtin_function_prototype_object_bind (ecma_object_t *this_arg_obj_p , /**
     ecma_value_t args_len_or_this = ecma_make_integer_value ((ecma_integer_value_t) arguments_number);
     ext_function_p->u.bound_function.args_len_or_this = args_len_or_this;
   }
+#if defined(JERRY_FUNCTION_NAME) && !defined(__APPLE__)
+  ecma_object_type_t obj_type = ecma_get_object_type(this_arg_obj_p);
+  if (obj_type == ECMA_OBJECT_TYPE_BOUND_FUNCTION || obj_type == ECMA_OBJECT_TYPE_FUNCTION) {
+    ecma_string_t* name_prop = ecma_get_magic_string (LIT_MAGIC_STRING_NAME);
+    ecma_value_t func_name_value = ecma_op_object_get (this_arg_obj_p, name_prop);
+    if (ecma_find_named_property (function_p, name_prop) == NULL) {
+      ecma_property_value_t* prop_val = ecma_create_named_data_property(function_p, name_prop,
+        ECMA_PROPERTY_CONFIGURABLE_ENUMERABLE_WRITABLE, NULL);
+      prop_val->value = ecma_copy_value(func_name_value);
+    } else {
+      ecma_deref_ecma_string (name_prop);
+    }
+  }
+#endif
 
   /*
    * [[Class]] property is not stored explicitly for objects of ECMA_OBJECT_TYPE_FUNCTION type.

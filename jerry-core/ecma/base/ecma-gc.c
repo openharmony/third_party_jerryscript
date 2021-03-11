@@ -31,6 +31,14 @@
 #include "vm-defines.h"
 #include "vm-stack.h"
 
+#if defined(JERRY_HEAPDUMP)
+#include "heapdump.h"
+#endif
+
+#if defined(JERRY_REF_TRACKER)
+#include "tracker.h"
+#endif
+
 #if ENABLED (JERRY_ES2015_BUILTIN_TYPEDARRAY)
 #include "ecma-typedarray-object.h"
 #endif /* ENABLED (JERRY_ES2015_BUILTIN_TYPEDARRAY) */
@@ -71,11 +79,18 @@ ecma_gc_is_object_visited (ecma_object_t *object_p) /**< object */
  * Set visited flag of the object.
  * Note: This macro can be inlined for performance critical code paths
  */
+#if defined(JERRY_REF_TRACKER)
+# define ECMA_REPORT_REF_MARK(x) ReportObjRefManip(x, kRefMark)
+#else
+# define ECMA_REPORT_REF_MARK(x) do { JERRY_UNUSED(x); } while (0)
+#endif
+
 #define ECMA_GC_SET_OBJECT_VISITED(object_p) \
   do \
   { \
     if ((object_p)->type_flags_refs < ECMA_OBJECT_REF_ONE) \
     { \
+      ECMA_REPORT_REF_MARK(object_p); \
       (object_p)->type_flags_refs |= ECMA_OBJECT_REF_ONE; \
     } \
   } while (0)
@@ -106,6 +121,9 @@ ecma_init_gc_info (ecma_object_t *object_p) /**< object */
 
   object_p->gc_next_cp = JERRY_CONTEXT (ecma_gc_objects_cp);
   ECMA_SET_NON_NULL_POINTER (JERRY_CONTEXT (ecma_gc_objects_cp), object_p);
+#if defined(JERRY_REF_TRACKER)
+  ReportObjRefManip(object_p, kRefInit);
+#endif
 } /* ecma_init_gc_info */
 
 /**
@@ -122,7 +140,23 @@ ecma_ref_object (ecma_object_t *object_p) /**< object */
   {
     jerry_fatal (ERR_REF_COUNT_LIMIT);
   }
+#if defined(JERRY_REF_TRACKER)
+  ReportObjRefManip(object_p, kRefRef);
+#endif
 } /* ecma_ref_object */
+
+/**
+ * Decrease reference counter as a routine of GC reset marks phase.
+ */
+inline void JERRY_ATTR_ALWAYS_INLINE
+ecma_unmark_deref_object (ecma_object_t *object_p) /**< object */
+{
+  JERRY_ASSERT (object_p->type_flags_refs >= ECMA_OBJECT_REF_ONE);
+  object_p->type_flags_refs = (uint16_t) (object_p->type_flags_refs - ECMA_OBJECT_REF_ONE);
+#if defined(JERRY_REF_TRACKER)
+  ReportObjRefManip(object_p, kRefUnmark);
+#endif
+} /* ecma_unmark_deref_object */
 
 /**
  * Decrease reference counter of an object
@@ -132,6 +166,9 @@ ecma_deref_object (ecma_object_t *object_p) /**< object */
 {
   JERRY_ASSERT (object_p->type_flags_refs >= ECMA_OBJECT_REF_ONE);
   object_p->type_flags_refs = (uint16_t) (object_p->type_flags_refs - ECMA_OBJECT_REF_ONE);
+#if defined(JERRY_REF_TRACKER)
+  ReportObjRefManip(object_p, kRefDeref);
+#endif
 } /* ecma_deref_object */
 
 /**
@@ -625,6 +662,10 @@ ecma_gc_free_object (ecma_object_t *object_p) /**< object to free */
                 && !ecma_gc_is_object_visited (object_p)
                 && object_p->type_flags_refs < ECMA_OBJECT_REF_ONE);
 
+#if defined(JERRY_REF_TRACKER)
+  ReportObjDelete(object_p);
+#endif
+
   bool obj_is_not_lex_env = !ecma_is_lexical_environment (object_p);
 
   if (obj_is_not_lex_env
@@ -1031,6 +1072,11 @@ ecma_gc_run (void)
   {
     obj_iter_p = JMEM_CP_GET_NON_NULL_POINTER (ecma_object_t, obj_iter_cp);
     ecma_gc_mark (obj_iter_p);
+#if defined(JERRY_HEAPDUMP)
+    if (GetHeapdumpTracing()) {
+      DumpInfoObject(obj_iter_p, HEAPDUMP_OBJECT_ROOT);
+    }
+#endif
     obj_iter_cp = obj_iter_p->gc_next_cp;
   }
 
@@ -1061,6 +1107,11 @@ ecma_gc_run (void)
         black_end_p = obj_iter_p;
 
         ecma_gc_mark (obj_iter_p);
+#if defined(JERRY_HEAPDUMP)
+        if (GetHeapdumpTracing()) {
+          DumpInfoObject(obj_iter_p, HEAPDUMP_OBJECT_SIMPLE);
+        }
+#endif
         marked_anything_during_current_iteration = true;
       }
       else
@@ -1096,7 +1147,7 @@ ecma_gc_run (void)
   {
     /* The reference counter must be 1. */
     obj_iter_p = JMEM_CP_GET_NON_NULL_POINTER (ecma_object_t, obj_iter_cp);
-    ecma_deref_object (obj_iter_p);
+    ecma_unmark_deref_object (obj_iter_p);
     JERRY_ASSERT (obj_iter_p->type_flags_refs < ECMA_OBJECT_REF_ONE);
 
     obj_iter_cp = obj_iter_p->gc_next_cp;

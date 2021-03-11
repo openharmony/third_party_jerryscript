@@ -39,6 +39,7 @@ typedef enum
   PARSER_ERR_LITERAL_LIMIT_REACHED,                   /**< maximum number of literals reached */
   PARSER_ERR_ARGUMENT_LIMIT_REACHED,                  /**< maximum number of function arguments reached */
   PARSER_ERR_STACK_LIMIT_REACHED,                     /**< maximum function stack size reached */
+  PARSER_ERR_JERRY_STACK_LIMIT_REACHED,               /**< maximum jerry context stack limit reached */
   PARSER_ERR_REGISTER_LIMIT_REACHED,                  /**< maximum register size reached */
 
   PARSER_ERR_INVALID_CHARACTER,                       /**< unexpected character */

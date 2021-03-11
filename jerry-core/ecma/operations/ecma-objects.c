@@ -999,6 +999,24 @@ ecma_op_object_put (ecma_object_t *object_p, /**< the object */
                 && !ecma_is_lexical_environment (object_p));
   JERRY_ASSERT (property_name_p != NULL);
 
+#if defined(JERRY_FUNCTION_NAME) && !defined(__APPLE__)
+  if (ecma_is_value_object(value)) {
+    ecma_object_t* obj = ecma_get_object_from_value(value);
+    if (ecma_get_object_type(obj) == ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION) {
+      ecma_string_t* property_name = ecma_get_magic_string (LIT_MAGIC_STRING_NAME);
+      if (ecma_find_named_property (obj, property_name) == NULL) {
+        ecma_property_value_t* prop_val = ecma_create_named_data_property(obj,
+                                            property_name,
+                                            ECMA_PROPERTY_CONFIGURABLE_ENUMERABLE_WRITABLE,
+                                            NULL);
+        prop_val->value = ecma_copy_value(ecma_make_string_value(property_name_p));
+      } else {
+        ecma_deref_ecma_string (property_name);
+      }
+    }
+  }
+#endif
+
   ecma_object_type_t type = ecma_get_object_type (object_p);
 
   switch (type)

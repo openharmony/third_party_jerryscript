@@ -20,4 +20,8 @@
 #include "jerryscript-debugger.h"
 #include "jerryscript-snapshot.h"
 
+#ifdef JERRY_IAR_JUPITER
+#include "ohos_mem_pool.h"
+#endif // JERRY_IAR_JUPITER
+
 #endif /* !JERRYSCRIPT_H */

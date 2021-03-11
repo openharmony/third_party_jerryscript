@@ -15,6 +15,7 @@
 
 #include "ecma-array-object.h"
 #include "ecma-helpers.h"
+#include "ecma-objects.h"
 #include "jcontext.h"
 #include "vm.h"
 
@@ -50,6 +51,44 @@ vm_is_direct_eval_form_call (void)
   return (JERRY_CONTEXT (status_flags) & ECMA_STATUS_DIRECT_EVAL) != 0;
 } /* vm_is_direct_eval_form_call */
 
+#if defined(JERRY_FUNCTION_BACKTRACE) && !defined(__APPLE__)
+static ecma_string_t*
+vm_get_function_name_string (vm_frame_ctx_t *context_p)
+{
+  ecma_string_t* func_name;
+  if (context_p->prev_context_p != NULL) {
+    vm_frame_ctx_t* prev_ctx_p = context_p->prev_context_p;
+    ecma_object_t* func_obj = ecma_get_object_from_value (prev_ctx_p->callee_value);
+    ecma_object_type_t func_obj_type = ecma_get_object_type (func_obj);
+    if (func_obj_type == ECMA_OBJECT_TYPE_FUNCTION
+	|| func_obj_type == ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION
+	|| func_obj_type == ECMA_OBJECT_TYPE_BOUND_FUNCTION) {
+      ecma_string_t* name_prop = ecma_get_magic_string (LIT_MAGIC_STRING_NAME);
+      ecma_value_t func_name_value = ecma_op_object_get (func_obj, name_prop);
+      if (func_name_value == ECMA_VALUE_UNDEFINED) {
+        func_name = ecma_new_ecma_string_from_utf8 ((const lit_utf8_byte_t *)"<unknown>", 9);
+      } else {
+        func_name = ecma_get_string_from_value (func_name_value);
+      }
+      ecma_deref_ecma_string (name_prop);
+    } else {
+      func_name = ecma_new_ecma_string_from_utf8 ((const lit_utf8_byte_t *)"<erroneous>", 11);
+    }
+  } else {
+    func_name = ecma_new_ecma_string_from_utf8 ((const lit_utf8_byte_t *)"<GLOBAL>", 8);
+  }
+  ecma_string_t* lbracket = ecma_new_ecma_string_from_utf8((const lit_utf8_byte_t *)"(", 1);
+  ecma_string_t* rbracket = ecma_new_ecma_string_from_utf8((const lit_utf8_byte_t *)")", 1);
+  func_name = ecma_concat_ecma_strings (func_name, lbracket);
+  func_name = ecma_concat_ecma_strings (func_name, rbracket);
+  func_name = ecma_append_magic_string_to_string (func_name, LIT_MAGIC_STRING_COMMA_CHAR);
+  func_name = ecma_append_magic_string_to_string (func_name, LIT_MAGIC_STRING_SPACE_CHAR);
+  ecma_deref_ecma_string(rbracket);
+  ecma_deref_ecma_string(lbracket);
+  return func_name;
+}
+#endif
+
 /**
  * Get backtrace. The backtrace is an array of strings where
  * each string contains the position of the corresponding frame.
@@ -75,33 +114,23 @@ vm_get_backtrace (uint32_t max_depth) /**< maximum backtrace depth, 0 = unlimite
 
   while (context_p != NULL)
   {
-    if (context_p->resource_name == ECMA_VALUE_UNDEFINED)
-    {
-      context_p = context_p->prev_context_p;
-      continue;
-    }
+    ecma_string_t *str_p = ecma_get_magic_string (LIT_MAGIC_STRING__EMPTY);
 
-    ecma_string_t *str_p = ecma_get_string_from_value (context_p->resource_name);
+#if defined(JERRY_FUNCTION_BACKTRACE) && !defined(__APPLE__)
+    ecma_string_t* func_name = vm_get_function_name_string (context_p);
+    func_name = ecma_concat_ecma_strings (func_name, str_p);
 
-    if (ecma_string_is_empty (str_p))
-    {
-      const lit_utf8_byte_t unknown_str[] = "<unknown>:";
-      str_p = ecma_new_ecma_string_from_utf8 (unknown_str, sizeof (unknown_str) - 1);
-    }
-    else
-    {
-      ecma_ref_ecma_string (str_p);
-      str_p = ecma_append_magic_string_to_string (str_p, LIT_MAGIC_STRING_COLON_CHAR);
-    }
-
-    ecma_string_t *line_str_p = ecma_new_ecma_string_from_uint32 (context_p->current_line);
-    str_p = ecma_concat_ecma_strings (str_p, line_str_p);
-    ecma_deref_ecma_string (line_str_p);
-
+    ecma_string_t *index_str_p = ecma_new_ecma_string_from_uint32 (index);
+    ecma_fast_array_set_property (array_p, index_str_p, ecma_make_string_value (func_name));
+    ecma_deref_ecma_string(str_p);
+    ecma_deref_ecma_string(index_str_p);
+    ecma_deref_ecma_string(func_name);
+#else
     ecma_string_t *index_str_p = ecma_new_ecma_string_from_uint32 (index);
     ecma_fast_array_set_property (array_p, index_str_p, ecma_make_string_value (str_p));
     ecma_deref_ecma_string (str_p);
     ecma_deref_ecma_string (index_str_p);
+#endif
 
     context_p = context_p->prev_context_p;
     index++;

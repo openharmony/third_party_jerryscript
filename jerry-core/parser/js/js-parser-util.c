@@ -762,6 +762,10 @@ parser_error_to_string (parser_error_t error) /**< error code */
     {
       return "Maximum function stack size reached.";
     }
+    case PARSER_ERR_JERRY_STACK_LIMIT_REACHED:
+    {
+      return "Maximum JERRY_STACK_LIMIT stack limit reached.";
+    }
     case PARSER_ERR_REGISTER_LIMIT_REACHED:
     {
       return "Maximum number of registers is reached.";

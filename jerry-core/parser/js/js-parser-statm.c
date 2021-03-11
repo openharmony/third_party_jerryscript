@@ -2240,6 +2240,8 @@ parser_parse_statements (parser_context_t *context_p) /**< context */
     }
   }
 
+  CHECK_JERRY_STACK_USAGE(context_p);
+
   if (context_p->status_flags & PARSER_IS_STRICT
       && context_p->status_flags & PARSER_HAS_NON_STRICT_ARG)
   {

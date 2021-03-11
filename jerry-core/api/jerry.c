@@ -46,7 +46,17 @@
 #include "re-compiler.h"
 
 #ifdef JERRY_FOR_IAR_CONFIG
-#include "mc_memory.h"
+
+#include "config-gt.h"
+
+#endif
+
+#if defined(JERRY_REF_TRACKER)
+#include "tracker.h"
+#endif
+
+#if defined(JERRY_HEAPDUMP)
+#include "heapdump.h"
 #endif
 
 JERRY_STATIC_ASSERT (sizeof (jerry_value_t) == sizeof (ecma_value_t),
@@ -170,7 +180,7 @@ jerry_throw (jerry_value_t value) /**< return value */
 char* jerry_vla_malloc (uint32_t size)
 {
   char* ret;
-  ret = MC_SVR_MEM_ALLOC (size);
+  ret = OhosMalloc (MEM_TYPE_JERRY, size);
   if (!ret)
   {
     return NULL;
@@ -180,7 +190,7 @@ char* jerry_vla_malloc (uint32_t size)
 
 void jerry_vla_free (char* p)
 {
-  MC_SVR_MEM_FREE (p);
+  OhosFree (p);
 }
 #endif
 
@@ -190,6 +200,9 @@ void jerry_vla_free (char* p)
 void
 jerry_init (jerry_init_flag_t flags) /**< combination of Jerry flags */
 {
+#if defined(JERRY_REF_TRACKER)
+  InitTracker();
+#endif
   /* This function cannot be called twice unless jerry_cleanup is called. */
   JERRY_ASSERT (!(JERRY_CONTEXT (status_flags) & ECMA_STATUS_API_AVAILABLE));
 
@@ -211,6 +224,8 @@ jerry_init (jerry_init_flag_t flags) /**< combination of Jerry flags */
 void
 jerry_cleanup (void)
 {
+  ecma_gc_run();
+
   jerry_assert_api_available ();
 
 #if ENABLED (JERRY_DEBUGGER)
@@ -2483,6 +2498,14 @@ jerry_call_function (const jerry_value_t func_obj_val, /**< function object to c
 {
   jerry_assert_api_available ();
 
+#if ENABLED (JERRY_DEBUGGER)
+  if (JERRY_CONTEXT (debugger_flags) & JERRY_DEBUGGER_CONNECTED) {
+    if (jerry_debugger_receive (NULL)) {
+      JERRY_DEBUG_MSG ("resume");
+    }
+  }
+#endif
+
   if (jerry_value_is_function (func_obj_val))
   {
     return jerry_invoke_function (false, func_obj_val, this_val, args_p, args_count);
@@ -3793,6 +3816,38 @@ jerry_json_stringify (const jerry_value_t object_to_stringify) /**< a jerry_obje
   return jerry_throw (ecma_raise_syntax_error (ECMA_ERR_MSG ("The JSON has been disabled.")));
 #endif /* ENABLED (JERRY_BUILTIN_JSON) */
 } /* jerry_json_stringify */
+
+
+#if defined(JERRY_HEAPDUMP)
+void JerryHeapdumpRun(const char* filepath)
+{
+  SetHeapdumpTraring(true);
+  LogHeapdumpInit(filepath);
+  LogHeapdump("[\n");
+  DumpInfoObject(ecma_builtin_get_global(), HEAPDUMP_OBJECT_GLOBAL);
+  DumpInfoObject(ecma_get_global_environment(), HEAPDUMP_OBJECT_GLOBAL);
+  ecma_gc_run();
+  LogHeapdump("{}]\n");
+  SetHeapdumpTraring(false);
+  LogHeapdumpClose();
+}
+#endif
+
+#if defined(JERRY_REF_TRACKER)
+void JerryRefTrackerStart(const char* filepath)
+{
+  SetRefTrackerEnabled(true);
+  LogTrackerInit(filepath);
+}
+#endif
+
+#if defined(JERRY_REF_TRACKER)
+void JerryRefTrackerStop(void)
+{
+  SetRefTrackerEnabled(false);
+  LogTrackerClose();
+}
+#endif
 
 /**
  * @}

@@ -1481,6 +1481,8 @@ parser_post_processing (parser_context_t *context_p) /**< context */
   ecma_value_t *literal_pool_p;
   uint8_t *dst_p;
 
+  CHECK_JERRY_STACK_USAGE(context_p);
+
   if ((size_t) context_p->stack_limit + (size_t) context_p->register_count > PARSER_MAXIMUM_STACK_LIMIT)
   {
     parser_raise_error (context_p, PARSER_ERR_STACK_LIMIT_REACHED);
@@ -2284,6 +2286,8 @@ parser_parse_function_arguments (parser_context_t *context_p, /**< context */
         parser_raise_error (context_p, PARSER_ERR_LITERAL_LIMIT_REACHED);
       }
 
+      CHECK_JERRY_STACK_USAGE(context_p);
+
       literal_p = (lexer_literal_t *) parser_list_append (context_p, &context_p->literal_pool);
       *literal_p = *context_p->lit_object.literal_p;
 
@@ -2743,6 +2747,8 @@ parser_parse_function (parser_context_t *context_p, /**< context */
     context_p->status_flags |= PARSER_LEXICAL_ENV_NEEDED | PARSER_NO_REG_STORE;
   }
 #endif /* ENABLED (JERRY_DEBUGGER) */
+
+  CHECK_JERRY_STACK_USAGE(context_p);
 
   lexer_next_token (context_p);
 

@@ -17,12 +17,12 @@
 #include <time.h>
 #endif /* HAVE_TM_GMTOFF */
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #include <winbase.h>
 #include <winnt.h>
 #include <time.h>
-#endif /* _WINDOWS */
+#endif /* _WIN32 */
 
 #ifdef __GNUC__
 #include <sys/time.h>
@@ -32,8 +32,11 @@
 #include "jerryscript-port-default.h"
 
 #ifdef JERRY_FOR_IAR_CONFIG
-#include "mc_type.h"
-#include "mc_hal_rtc.h"
+#define _BSD_SOURCE
+#include "time.h"
+#include "config-gt.h"
+#include "config-jupiter.h"
+
 #define GET_SIGN_BIT(x) ((x) >> sizeof (x) * 8 - 1)
 #define GET_TIMEZONE_HOUR(timeZone) (((timeZone) >> 8) & 0x7F)
 #define GET_TIMEZONE_MIN(timeZone) ((timeZone) & 0xFF)
@@ -41,15 +44,15 @@
 #define MIN_TO_SEC 60
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 /* https://support.microsoft.com/en-us/help/167296/how-to-convert-a-unix-time-t-to-a-win32-filetime-or-systemtime */
-void UnixTimeToFileTime (LONGLONG t, LPFILETIME pft)
+static void UnixTimeToFileTime (LONGLONG t, LPFILETIME pft)
 {
   LONGLONG ll = t * 10000000 + 116444736000000000;
   pft->dwLowDateTime = (DWORD) ll;
-  pft->dwHighDateTime = ll >> 32;
+  pft->dwHighDateTime = (DWORD) (ll >> 32);
 } /* UnixTimeToFileTime */
-#endif /* _WINDOWS */
+#endif /* _WIN32 */
 
 
 /**
@@ -74,26 +77,22 @@ double jerry_port_get_local_time_zone_adjustment (double unix_ms,  /**< ms since
   }
   return ((double) tm.tm_gmtoff) * 1000;
 #else /* !HAVE_TM_GMTOFF */
-  (void) unix_ms;
-  (void) is_utc;
 #ifdef JERRY_FOR_IAR_CONFIG
   // We don't use unix_ms and is_utc, since timezone cannot be computed
   // as a function of given time.
-  MC_S16 time_zone = HAL_RtcGetTimeZone ();
-  // Time offset in seconds against GMT, absolute value.
-  MC_S32 time_offset = (GET_TIMEZONE_HOUR (time_zone) * HOUR_TO_MIN
-      + GET_TIMEZONE_MIN (time_zone)) * MIN_TO_SEC;
-  if (GET_SIGN_BIT(time_zone))
+  struct tm tm;
+  time_t now = (time_t) (unix_ms / 1000);
+  localtime_r (&now, &tm);
+  if (!is_utc)
   {
-    return -((double) time_offset) * 1000;
+    now -= tm.tm_gmtoff;
+    localtime_r (&now, &tm);
   }
-  else
-  {
-    return ((double) time_offset) * 1000;
-  }
-
+  return ((double) tm.tm_gmtoff) * 1000;
 #else
-#ifdef _WINDOWS
+  (void) unix_ms;
+  (void) is_utc;
+#ifdef _WIN32
   FILETIME fileTime, localFileTime;
   SYSTEMTIME systemTime, localSystemTime;
   ULARGE_INTEGER time, localTime;
@@ -109,9 +108,9 @@ double jerry_port_get_local_time_zone_adjustment (double unix_ms,  /**< ms since
     time.HighPart = fileTime.dwHighDateTime;
     localTime.LowPart = localFileTime.dwLowDateTime;
     localTime.HighPart = localFileTime.dwHighDateTime;
-    return ((LONGLONG) localTime.QuadPart - (LONGLONG) time.QuadPart) / 10000;
+    return (double)(((LONGLONG) localTime.QuadPart - (LONGLONG) time.QuadPart) / 10000);
   }
-#endif /* _WINDOWS */
+#endif /* _WIN32 */
 #endif
   return 0.0;
 #endif /* HAVE_TM_GMTOFF */
@@ -137,19 +136,17 @@ double jerry_port_get_current_time (void)
 #endif /* __GNUC__ */
 
 #ifdef JERRY_FOR_IAR_CONFIG
-  MC_U64 millis = 0;
-  MC_S32 ret = HAL_RtcGetGmtTime (&millis, NULL);
-  if (ret == MC_SUCCESS)
-  {
-    return (double) millis;
+  time_t millis = 0;
+  if (time (&millis) != OHOS_FAILURE) {
+    return (double) millis * 1000.0;
   }
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
   time_t ltime;
   time (&ltime);
-  return ltime * 1000;
-#endif /* _WINDOWS */
+  return (double) (ltime * 1000);
+#endif /* _WIN32 */
 
   return 0.0;
 } /* jerry_port_get_current_time */

@@ -573,6 +573,10 @@ opfunc_call (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
   ecma_value_t func_value = stack_top_p[-1];
   ecma_value_t completion_value;
 
+#if defined(JERRY_FUNCTION_BACKTRACE) && !defined(__APPLE__)
+  frame_ctx_p->callee_value = func_value;
+#endif
+
   if (!ecma_op_is_callable (func_value))
   {
     completion_value = ecma_raise_type_error (ECMA_ERR_MSG ("Expected a function."));
@@ -665,6 +669,9 @@ opfunc_construct (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
   {
     ecma_object_t *constructor_obj_p = ecma_get_object_from_value (constructor_value);
 
+#if defined(JERRY_FUNCTION_BACKTRACE) && !defined(__APPLE__)
+    frame_ctx_p->callee_value = constructor_value;
+#endif
     completion_value = ecma_op_function_construct (constructor_obj_p,
                                                    ECMA_VALUE_UNDEFINED,
                                                    stack_top_p,
@@ -875,6 +882,19 @@ vm_init_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
             if (ECMA_IS_VALUE_ERROR (put_value_result))
             {
               ecma_free_value (JERRY_CONTEXT (error_value));
+            } else {
+#if defined(JERRY_FUNCTION_NAME) && !defined(__APPLE__)
+              if (ecma_is_value_object(lit_value)) {
+                ecma_object_t* obj = ecma_get_object_from_value(lit_value);
+                ecma_object_type_t obj_type = ecma_get_object_type(obj);
+                if (obj_type == ECMA_OBJECT_TYPE_BOUND_FUNCTION || obj_type == ECMA_OBJECT_TYPE_FUNCTION) {
+                  ecma_string_t* property_name = ecma_get_magic_string (LIT_MAGIC_STRING_NAME);
+                  ecma_property_value_t* prop_val = ecma_create_named_data_property(obj, property_name,
+                                                      ECMA_PROPERTY_CONFIGURABLE_ENUMERABLE_WRITABLE, NULL);
+                  prop_val->value = ecma_copy_value(literal_start_p[literal_index]);
+                }
+              }
+#endif
             }
 
             if (value_index >= register_end)
@@ -1288,6 +1308,22 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
           {
             prop_value_p = ECMA_PROPERTY_VALUE_PTR (property_p);
           }
+#if defined(JERRY_FUNCTION_NAME) && !defined(__APPLE__)
+          if (ecma_is_value_object(left_value) && ecma_op_is_callable(left_value)) {
+            ecma_object_t* obj = ecma_get_object_from_value(left_value);
+            ecma_object_type_t obj_type = ecma_get_object_type(obj);
+            if (obj_type == ECMA_OBJECT_TYPE_BOUND_FUNCTION || obj_type == ECMA_OBJECT_TYPE_FUNCTION) {
+              ecma_string_t* property_name = ecma_get_magic_string (LIT_MAGIC_STRING_NAME);
+              if (ecma_find_named_property (obj, property_name) == NULL) {
+                ecma_property_value_t* prop_val = ecma_create_named_data_property(obj, property_name,
+                                                    ECMA_PROPERTY_CONFIGURABLE_ENUMERABLE_WRITABLE, NULL);
+                prop_val->value = ecma_copy_value(right_value);
+              } else {
+                ecma_deref_ecma_string (property_name);
+              }
+            }
+          }
+#endif
 
           ecma_named_data_property_assign_value (object_p, prop_value_p, left_value);
 
@@ -1982,6 +2018,23 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
         }
         case VM_OC_ASSIGN:
         {
+#if defined(JERRY_FUNCTION_NAME) && !defined(__APPLE__)
+          if (ecma_is_value_object(left_value) && ecma_op_is_callable(left_value)) {
+            ecma_object_t* obj = ecma_get_object_from_value(left_value);
+            ecma_object_type_t obj_type = ecma_get_object_type(obj);
+            if (obj_type == ECMA_OBJECT_TYPE_BOUND_FUNCTION || obj_type == ECMA_OBJECT_TYPE_FUNCTION) {
+              ecma_string_t* property_name = ecma_get_magic_string (LIT_MAGIC_STRING_NAME);
+              if (ecma_find_named_property (obj, property_name) == NULL) {
+                ecma_property_value_t* prop_val = ecma_create_named_data_property(obj, property_name,
+                                                    ECMA_PROPERTY_CONFIGURABLE_ENUMERABLE_WRITABLE, NULL);
+                prop_val->value = ecma_copy_value(right_value);
+              } else {
+                ecma_deref_ecma_string (property_name);
+              }
+            }
+          }
+#endif
+
           result = left_value;
           left_value = ECMA_VALUE_UNDEFINED;
           break;
@@ -2001,6 +2054,23 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
         }
         case VM_OC_ASSIGN_PROP:
         {
+#if defined(JERRY_FUNCTION_NAME) && !defined(__APPLE__)
+          if (ecma_is_value_object(left_value) && ecma_op_is_callable(left_value)) {
+            ecma_object_t* obj = ecma_get_object_from_value(left_value);
+            ecma_object_type_t obj_type = ecma_get_object_type(obj);
+            if (obj_type == ECMA_OBJECT_TYPE_BOUND_FUNCTION || obj_type == ECMA_OBJECT_TYPE_FUNCTION) {
+              ecma_string_t* property_name = ecma_get_magic_string (LIT_MAGIC_STRING_NAME);
+              if (ecma_find_named_property (obj, property_name) == NULL) {
+                ecma_property_value_t* prop_val = ecma_create_named_data_property(obj, property_name,
+                                                    ECMA_PROPERTY_CONFIGURABLE_ENUMERABLE_WRITABLE, NULL);
+                prop_val->value = ecma_copy_value(right_value);
+              } else {
+                ecma_deref_ecma_string (property_name);
+              }
+            }
+          }
+#endif
+
           result = stack_top_p[-1];
           stack_top_p[-1] = left_value;
           left_value = ECMA_VALUE_UNDEFINED;
@@ -2008,6 +2078,23 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
         }
         case VM_OC_ASSIGN_PROP_THIS:
         {
+#if defined(JERRY_FUNCTION_NAME) && !defined(__APPLE__)
+          if (ecma_is_value_object(left_value) && ecma_op_is_callable(left_value)) {
+            ecma_object_t* obj = ecma_get_object_from_value(left_value);
+            ecma_object_type_t obj_type = ecma_get_object_type(obj);
+            if (obj_type == ECMA_OBJECT_TYPE_BOUND_FUNCTION || obj_type == ECMA_OBJECT_TYPE_FUNCTION) {
+              ecma_string_t* property_name = ecma_get_magic_string (LIT_MAGIC_STRING_NAME);
+              if (ecma_find_named_property (obj, property_name) == NULL) {
+                ecma_property_value_t* prop_val = ecma_create_named_data_property(obj, property_name,
+                                                    ECMA_PROPERTY_CONFIGURABLE_ENUMERABLE_WRITABLE, NULL);
+                prop_val->value = ecma_copy_value(right_value);
+              } else {
+                ecma_deref_ecma_string (property_name);
+              }
+            }
+          }
+#endif
+
           result = stack_top_p[-1];
           stack_top_p[-1] = ecma_copy_value (frame_ctx_p->this_binding);
           *stack_top_p++ = left_value;
@@ -3338,6 +3425,24 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
             goto error;
           }
 
+#if defined(JERRY_FUNCTION_NAME) && !defined(__APPLE__)
+          if (ecma_is_value_object(result) && ecma_op_is_callable(result)) {
+            // It was a function assignment. Is the function was anonymous - assign a name to it.
+            ecma_object_t* obj = ecma_get_object_from_value(result);
+            ecma_object_type_t obj_type = ecma_get_object_type(obj);
+            if (obj_type == ECMA_OBJECT_TYPE_BOUND_FUNCTION || obj_type == ECMA_OBJECT_TYPE_FUNCTION) {
+              ecma_string_t* property_name = ecma_get_magic_string (LIT_MAGIC_STRING_NAME);
+              if (ecma_find_named_property (obj, property_name) == NULL) {
+                ecma_property_value_t* prop_val = ecma_create_named_data_property(obj, property_name,
+                                                    ECMA_PROPERTY_CONFIGURABLE_ENUMERABLE_WRITABLE, NULL);
+                prop_val->value = ecma_copy_value(literal_start_p[literal_index]);
+              } else {
+                ecma_deref_ecma_string (property_name);
+              }
+            }
+          }
+#endif
+
           if (!(opcode_data & (VM_OC_PUT_STACK | VM_OC_PUT_BLOCK)))
           {
             ecma_fast_free_value (result);
@@ -3746,6 +3851,14 @@ vm_run (const ecma_compiled_code_t *bytecode_header_p, /**< byte-code data heade
   JERRY_VLA (ecma_value_t, stack, JERRY_MAX (call_stack_size, 1));
 #endif
   frame_ctx.registers_p = stack;
+
+#if defined(JERRY_FUNCTION_BACKTRACE) && !defined(__APPLE__)
+  if (JERRY_LIKELY(frame_ctx.prev_context_p != NULL)) {
+    frame_ctx.callee_value = frame_ctx.prev_context_p->callee_value;
+  } else {
+    frame_ctx.callee_value = ECMA_VALUE_UNDEFINED;
+  }
+#endif
 
 #if ENABLED (JERRY_ES2015_MODULE_SYSTEM)
   if (JERRY_CONTEXT (module_top_context_p) != NULL)

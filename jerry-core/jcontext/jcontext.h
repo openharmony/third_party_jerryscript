@@ -29,6 +29,9 @@
 #include "jerryscript.h"
 #include "jerryscript-debugger-transport.h"
 #include "js-parser-internal.h"
+#ifdef JERRY_FOR_IAR_CONFIG
+#include "jerryscript-port-default.h"
+#endif
 
 /** \addtogroup context Context
  * @{
@@ -216,6 +219,12 @@ struct jerry_context_t
   /** hash table for caching the last access of properties */
   ecma_lcache_hash_entry_t lcache[ECMA_LCACHE_HASH_ROWS_COUNT][ECMA_LCACHE_HASH_ROW_LENGTH];
 #endif /* ENABLED (JERRY_LCACHE) */
+
+#ifdef JERRY_FOR_IAR_CONFIG
+#if ENABLED (JERRY_EXTERNAL_CONTEXT)
+  fatal_handler_t jerry_fatal_handler; /* js task fatal handler */
+#endif  /* ENABLED (JERRY_EXTERNAL_CONTEXT) */
+#endif // not defined JERRY_FOR_IAR_CONFIG
 };
 
 

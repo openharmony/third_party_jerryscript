@@ -52,6 +52,9 @@ typedef struct vm_frame_ctx_t
 #endif /* defined (JERRY_DEBUGGER) || ENABLED (JERRY_LINE_INFO) */
   ecma_value_t this_binding;                          /**< this binding */
   ecma_value_t block_result;                          /**< block result */
+#if defined(JERRY_FUNCTION_BACKTRACE) && !defined(__APPLE__)
+  ecma_value_t callee_value;
+#endif
 #if ENABLED (JERRY_LINE_INFO)
   ecma_value_t resource_name;                         /**< current resource name (usually a file name) */
   uint32_t current_line;                              /**< currently executed line */

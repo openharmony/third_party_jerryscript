@@ -145,6 +145,9 @@ lite_library("jerry-core_shared") {
     "ecma/operations/ecma-string-object.c",
     "ecma/operations/ecma-symbol-object.c",
     "ecma/operations/ecma-typedarray-object.c",
+    "ext/ext-utils.c",
+    "ext/heapdump.c",
+    "ext/tracker.c",
     "jcontext/jcontext.c",
     "jmem/jmem-allocator.c",
     "jmem/jmem-heap.c",
@@ -183,6 +186,7 @@ lite_library("jerry-core_shared") {
     "ecma/builtin-objects",
     "ecma/builtin-objects/typedarray",
     "ecma/operations",
+    "ext",
     "jcontext",
     "jmem",
     "jrt",
@@ -201,6 +205,9 @@ lite_library("jerry-core_shared") {
       "JERRY_GLOBAL_HEAP_SIZE = (128)",
       "JERRY_ERROR_MESSAGES = 1",
       "JERRY_LINE_INFO = 1",
+      "JERRY_FUNCTION_NAME",
+      "JERRY_FUNCTION_BACKTRACE",
+      "JERRY_STACK_LIMIT = 0",
     ]
   }
 }

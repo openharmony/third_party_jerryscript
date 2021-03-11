@@ -1736,6 +1736,23 @@ typedef struct
 
 #if (JERRY_STACK_LIMIT != 0)
 /**
+ * Set the jerry context stack limit for IAR.
+ */
+#define JERRY_IAR_MEM_STACK_LIMIT (4480) // > 4136b, 3500; < 4.5 * 1024 = 4608
+
+/**
+ * Check the current jerry context stack usage.
+ */
+#define CHECK_JERRY_STACK_USAGE(context_p) \
+do \
+{ \
+  if (ecma_get_current_stack_usage () > JERRY_IAR_MEM_STACK_LIMIT) \
+  { \
+    parser_raise_error (context_p, PARSER_ERR_JERRY_STACK_LIMIT_REACHED); \
+  } \
+} while (0)
+
+/**
  * Check the current stack usage. If the limit is reached a RangeError is raised.
  */
 #define ECMA_CHECK_STACK_USAGE() \
@@ -1751,6 +1768,7 @@ do \
  * If the stack limit is unlimited, this check is an empty macro.
  */
 #define ECMA_CHECK_STACK_USAGE()
+#define CHECK_JERRY_STACK_USAGE(context_p)
 #endif /* (JERRY_STACK_LIMIT != 0) */
 
 /**

@@ -18,6 +18,46 @@
 #include "jerryscript-port.h"
 #include "jerryscript-port-default.h"
 
+#ifdef JERRY_FOR_IAR_CONFIG
+#include "jcontext.h"
+
+#if !ENABLED (JERRY_EXTERNAL_CONTEXT)
+static fatal_handler_t jerry_fatal_handler = NULL;
+#endif
+
+void jerry_port_default_set_fatal_handler (fatal_handler_t handler)
+{
+#if ENABLED (JERRY_EXTERNAL_CONTEXT)
+  JERRY_CONTEXT (jerry_fatal_handler) = handler;
+#else
+  jerry_fatal_handler = handler;
+#endif
+}
+
+/**
+ * Default implementation of jerry_port_fatal. Calls 'abort' if exit code is
+ * non-zero, 'exit' otherwise.
+ */
+void jerry_port_fatal (jerry_fatal_code_t code) /**< cause of error */
+{
+#if ENABLED (JERRY_EXTERNAL_CONTEXT)
+  fatal_handler_t jerry_fatal_handler = JERRY_CONTEXT (jerry_fatal_handler);
+#endif
+  if (jerry_fatal_handler != NULL)
+  {
+    jerry_fatal_handler ((int) code);
+  }
+  if (code != 0
+      && code != ERR_OUT_OF_MEMORY)
+  {
+    abort ();
+  }
+
+  exit ((int) code);
+} /* jerry_port_fatal */
+
+#else // not defined JERRY_FOR_IAR_CONFIG
+
 static fatal_handler_t jerry_fatal_handler = NULL;
 
 void jerry_port_default_set_fatal_handler (fatal_handler_t handler)
@@ -43,3 +83,5 @@ void jerry_port_fatal (jerry_fatal_code_t code) /**< cause of error */
 
   exit ((int) code);
 } /* jerry_port_fatal */
+
+#endif

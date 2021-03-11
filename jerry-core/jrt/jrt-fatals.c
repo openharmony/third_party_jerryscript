@@ -74,7 +74,7 @@ jerry_dump_memstats_on_error (void)
 void JERRY_ATTR_NORETURN
 jerry_fatal (jerry_fatal_code_t code) /**< status code */
 {
-#if defined (_WIN32) || defined (_WIN64) || !defined (JERRY_NDEBUG)
+#if defined (_WIN32) || defined (_WIN64) || !defined (JERRY_NDEBUG) || defined (__APPLE__)
   switch (code)
   {
     case ERR_OUT_OF_MEMORY:
