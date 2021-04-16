@@ -34,6 +34,7 @@
 #ifdef JERRY_FOR_IAR_CONFIG
 #define _BSD_SOURCE
 #include "time.h"
+#include "sys/time.h"
 #include "config-gt.h"
 #include "config-jupiter.h"
 
@@ -126,21 +127,14 @@ double jerry_port_get_local_time_zone_adjustment (double unix_ms,  /**< ms since
  */
 double jerry_port_get_current_time (void)
 {
-#ifdef __GNUC__
+#if defined (__GNUC__) || defined (JERRY_FOR_IAR_CONFIG)
   struct timeval tv;
 
   if (gettimeofday (&tv, NULL) == 0)
   {
     return ((double) tv.tv_sec) * 1000.0 + ((double) tv.tv_usec) / 1000.0;
   }
-#endif /* __GNUC__ */
-
-#ifdef JERRY_FOR_IAR_CONFIG
-  time_t millis = 0;
-  if (time (&millis) != OHOS_FAILURE) {
-    return (double) millis * 1000.0;
-  }
-#endif
+#endif /* __GNUC__ || JERRY_FOR_IAR_CONFIG */
 
 #ifdef _WIN32
   time_t ltime;
