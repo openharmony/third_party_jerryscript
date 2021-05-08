@@ -33,17 +33,12 @@
 
 #ifdef JERRY_FOR_IAR_CONFIG
 #define _BSD_SOURCE
-#include "time.h"
+/* the "sys/time.h" should be put ahead of "time.h" so that the right implementation for gettimeofday can be found. */
 #include "sys/time.h"
+#include "time.h"
 #include "config-gt.h"
 #include "config-jupiter.h"
-
-#define GET_SIGN_BIT(x) ((x) >> sizeof (x) * 8 - 1)
-#define GET_TIMEZONE_HOUR(timeZone) (((timeZone) >> 8) & 0x7F)
-#define GET_TIMEZONE_MIN(timeZone) ((timeZone) & 0xFF)
-#define HOUR_TO_MIN 60
-#define MIN_TO_SEC 60
-#endif
+#endif /* JERRY_FOR_IAR_CONFIG */
 
 #ifdef _WIN32
 /* https://support.microsoft.com/en-us/help/167296/how-to-convert-a-unix-time-t-to-a-win32-filetime-or-systemtime */
@@ -78,9 +73,7 @@ double jerry_port_get_local_time_zone_adjustment (double unix_ms,  /**< ms since
   }
   return ((double) tm.tm_gmtoff) * 1000;
 #else /* !HAVE_TM_GMTOFF */
-#ifdef JERRY_FOR_IAR_CONFIG
-  // We don't use unix_ms and is_utc, since timezone cannot be computed
-  // as a function of given time.
+#ifdef JERRY_IAR_JUPITER
   struct tm tm;
   time_t now = (time_t) (unix_ms / 1000);
   localtime_r (&now, &tm);
@@ -90,7 +83,7 @@ double jerry_port_get_local_time_zone_adjustment (double unix_ms,  /**< ms since
     localtime_r (&now, &tm);
   }
   return ((double) tm.tm_gmtoff) * 1000;
-#else
+#else /* !JERRY_IAR_JUPITER */
   (void) unix_ms;
   (void) is_utc;
 #ifdef _WIN32
@@ -127,14 +120,14 @@ double jerry_port_get_local_time_zone_adjustment (double unix_ms,  /**< ms since
  */
 double jerry_port_get_current_time (void)
 {
-#if defined (__GNUC__) || defined (JERRY_FOR_IAR_CONFIG)
-  struct timeval tv;
+#if defined (__GNUC__) || defined (JERRY_IAR_JUPITER)
+  struct timeval tv = {0};
 
   if (gettimeofday (&tv, NULL) == 0)
   {
     return ((double) tv.tv_sec) * 1000.0 + ((double) tv.tv_usec) / 1000.0;
   }
-#endif /* __GNUC__ || JERRY_FOR_IAR_CONFIG */
+#endif /* __GNUC__ || JERRY_IAR_JUPITER */
 
 #ifdef _WIN32
   time_t ltime;
