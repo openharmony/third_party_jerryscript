@@ -94,7 +94,7 @@ jerry_port_log (jerry_log_level_t level, /**< message log level */
       JERRY_VLA (char, buffer, length + 1);
       vsnprintf (buffer, (size_t) length + 1, format, args);
 
-      fprintf (stderr, "%s", buffer);
+      fprintf (stderr, "[JERRYSCRIPT]%s", buffer);
       jerry_debugger_send_log (level, (jerry_char_t *) buffer, (jerry_size_t) length);
     }
     else
