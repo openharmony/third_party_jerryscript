@@ -1170,7 +1170,7 @@ jerry_debugger_receive (jerry_debugger_uint8_data_t **message_data_p) /**< [out]
   {
 #if defined (__APPLE__)
     // wait at here for 0.5ms
-    usleep(500)
+    usleep(500);
 #endif /* __APPLE__ */
 
     jerry_debugger_transport_receive_context_t context;
