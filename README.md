@@ -1,4 +1,4 @@
-![](https://github.com/jerryscript-project/jerryscript/blob/master/LOGO.png)
+![](./LOGO.png)
 # JerryScript: JavaScript engine for the Internet of Things
 [![License](https://img.shields.io/badge/licence-Apache%202.0-brightgreen.svg?style=flat)](LICENSE)
 [![Travis CI Build Status](https://travis-ci.org/jerryscript-project/jerryscript.svg?branch=master)](https://travis-ci.org/jerryscript-project/jerryscript)
