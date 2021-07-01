@@ -26,11 +26,16 @@ uint8_t* js_context_and_heap;
 
 void JerryPsRamMemInit()
 {
-  // memory for input_js file and snapshot file
+  // memory for js task
+  js_context_and_heap = OhosMalloc(MEM_TYPE_JERRY_LSRAM, JS_TASK_CONTEXT_AND_HEAP_SIZE_BYTE);
+}
+
+void JerryBmsPsRamMemInit()
+{
+  // memory for input_js file, snapshot file and bms task
   input_buffer = OhosMalloc(MEM_TYPE_JERRY_LSRAM, INPUTJS_BUFFER_SIZE);
   snapshot_buffer = OhosMalloc(MEM_TYPE_JERRY_LSRAM, SNAPSHOT_BUFFER_SIZE);
   bms_context_and_heap = OhosMalloc(MEM_TYPE_JERRY_LSRAM, BMS_TASK_CONTEXT_AND_HEAP_SIZE * CONVERTION_RATIO);
-  js_context_and_heap = OhosMalloc(MEM_TYPE_JERRY_LSRAM, JS_TASK_CONTEXT_AND_HEAP_SIZE_BYTE);
 }
 
 #endif // JERRY_IAR_JUPITER
