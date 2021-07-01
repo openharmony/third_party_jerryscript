@@ -34,7 +34,7 @@ static void * bms_task_context_alloc (size_t total_size, void *cb_data_p)
  */
 void bms_task_context_init (void)
 {
-  jerry_context_t * bms_task_context = jerry_create_context (GT_TASK_HEAP_SIZE * CONVERTION_RATIO,
+  jerry_context_t * bms_task_context = jerry_create_context (BMS_TASK_HEAP_SIZE * CONVERTION_RATIO,
                                         bms_task_context_alloc, NULL);
 
   jerry_port_default_set_current_context (bms_task_context);
@@ -60,7 +60,7 @@ static void * js_task_context_alloc (size_t total_size, void *cb_data_p)
  */
 void js_task_context_init (void)
 {
-  jerry_context_t * js_task_context = jerry_create_context (GT_TASK_HEAP_SIZE * CONVERTION_RATIO,
+  jerry_context_t * js_task_context = jerry_create_context (JS_TASK_HEAP_SIZE * CONVERTION_RATIO,
                                         js_task_context_alloc, NULL);
 
   jerry_port_default_set_current_context (js_task_context);
