@@ -13,6 +13,7 @@ extern "C"
 #endif /* __cplusplus */
 
 void JerryPsRamMemInit();
+void JerryBmsPsRamMemInit();
 
 #ifdef __cplusplus
 }
