@@ -16,27 +16,20 @@
 #include "jerryscript-port.h"
 #include "jerryscript-port-default.h"
 
-#ifdef JERRY_FOR_IAR_CONFIG
+#if defined (JERRY_FOR_IAR_CONFIG) && (JERRY_EXTERNAL_CONTEXT == 1)
 
 #include "generate-bytecode.h"
 #include "los_task.h"
+#include "target_config.h"
 
 /**
- * use static Array to record the correspondence between task id and jerry-heap/context
+ * use array to record the correspondence between task id and jerry-heap/context
  */
-#define MAX_CONTEXT_NUM 8
-#define CONTEXT_NO_EXIST -1
+#define MAX_CONTEXT_NUM (LOSCFG_BASE_CORE_TSK_LIMIT+1)
+ContextRecord g_contextRecords[MAX_CONTEXT_NUM] = {0};
 
-static uint8_t g_contextRecordCount = 0;
-static ContextRecord g_contextRecords[MAX_CONTEXT_NUM] = {0};
-
-uint8_t getContextRecordCount() {
-  return g_contextRecordCount;
-}
-
-ContextRecord* getContextRecord() {
-  return g_contextRecords;
-}
+void jerry_switch_context();
+extern jerry_context_t *jerry_dynamic_global_context_p;
 
 /**
  * set context function: store task id and context
@@ -44,63 +37,37 @@ ContextRecord* getContextRecord() {
 void
 jerry_port_default_set_current_context (jerry_context_t *context_p) /**< store created context */
 {
-  LOS_TaskLock();
   uint32_t curTaskId = LOS_CurTaskIDGet();
-  g_contextRecordCount++;
-  g_contextRecords[g_contextRecordCount-1].task_id = curTaskId;
-  g_contextRecords[g_contextRecordCount-1].context_p = context_p;
-  LOS_TaskUnlock();
+  g_contextRecords[curTaskId].context_p = context_p;
+  jerry_dynamic_global_context_p = context_p;
 }
 
-int get_context_record_index(void)
+void jerry_switch_context()
 {
-  uint32_t curTaskId = LOS_CurTaskIDGet();
-
-  for (int i = 0; i < g_contextRecordCount; i++) {
-    if (g_contextRecords[i].task_id == curTaskId) {
-      return i;
-    }
-  }
-  return CONTEXT_NO_EXIST;
+  jerry_dynamic_global_context_p = g_contextRecords[LOS_NextTaskIDGet()].context_p;
 }
 
 /**
- * when task over, delete its record in array
+ * when task ends, the context_pointer point to NULL
  */
 void
 jerry_port_default_remove_current_context_record () /**< remove current task's context record in Array */
 {
-  LOS_TaskLock();
-
-  int index = get_context_record_index();
-
-  for (int i = index; i < g_contextRecordCount-1; i++) {
-    g_contextRecords[i].task_id = g_contextRecords[i+1].task_id;
-    g_contextRecords[i].context_p = g_contextRecords[i+1].context_p;
-  }
-  memset_s(&g_contextRecords[g_contextRecordCount-1], 0, sizeof(g_contextRecords[g_contextRecordCount-1]));
-  g_contextRecordCount--;
-  LOS_TaskUnlock();
+  uint32_t curTaskId = LOS_CurTaskIDGet();
+  g_contextRecords[curTaskId].context_p = NULL;
+  jerry_dynamic_global_context_p = NULL;
 }
 
 /**
- * key: rewrite get_current_context function; get the context pointer according to task id
+ * key: global dynamic context_p for current context
  */
 jerry_context_t *
 jerry_port_get_current_context (void) /**< points to current task's context */
 {
-  jerry_context_t * context = NULL;
-  LOS_TaskLock();
-
-  int index = get_context_record_index();
-
-  context = g_contextRecords[index].context_p;
-
-  LOS_TaskUnlock();
-  return context;
+  return jerry_dynamic_global_context_p;
 }
 
-#else // not defined JERRY_FOR_IAR_CONFIG
+#else // not defined JERRY_FOR_IAR_CONFIG || not enabled JERRY_EXTERNAL_CONTEXT
 
 /**
  * Pointer to the current context.
@@ -128,4 +95,4 @@ jerry_port_get_current_context (void)
   return current_context_p;
 } /* jerry_port_get_current_context */
 
-#endif
+#endif // defined (JERRY_FOR_IAR_CONFIG) && (JERRY_EXTERNAL_CONTEXT == 1)

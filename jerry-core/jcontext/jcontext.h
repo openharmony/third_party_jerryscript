@@ -233,8 +233,9 @@ struct jerry_context_t
 /*
  * This part is for JerryScript which uses external context.
  */
+extern jerry_context_t *jerry_dynamic_global_context_p;
 
-#define JERRY_CONTEXT(field) (jerry_port_get_current_context ()->field)
+#define JERRY_CONTEXT(field) (jerry_dynamic_global_context_p->field)
 
 #if !ENABLED (JERRY_SYSTEM_ALLOCATOR)
 

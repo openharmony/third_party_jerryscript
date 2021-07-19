@@ -46,6 +46,8 @@ jmem_heap_t jerry_global_heap JERRY_ATTR_ALIGNED (JMEM_ALIGNMENT) JERRY_ATTR_GLO
 
 #endif /* !ENABLED (JERRY_SYSTEM_ALLOCATOR) */
 
+#else /* ENABLED (JERRY_EXTERNAL_CONTEXT) */
+jerry_context_t *jerry_dynamic_global_context_p = NULL;
 #endif /* !ENABLED (JERRY_EXTERNAL_CONTEXT) */
 
 /**

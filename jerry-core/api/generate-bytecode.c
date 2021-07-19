@@ -287,7 +287,7 @@ EXECRES walk_directory(char* filefolder) {
     return EXCE_ACE_JERRY_INPUT_PATH_ERROR;
   }
   if ((start_folder = (char*)OhosMalloc(MEM_TYPE_JERRY, filefolder_len)) == NULL) {
-    return EXEC_ACE_JERRY_MALLOC_ERROR;
+    return EXCE_ACE_JERRY_MALLOC_ERROR;
   }
   if (strcpy_s(start_folder, filefolder_len, filefolder) != 0) {
     OhosFree(start_folder);
@@ -427,7 +427,7 @@ EXECRES walk_del_bytecode(char* filefolder) {
     return EXCE_ACE_JERRY_INPUT_PATH_ERROR;
   }
   if ((start_folder = (char*)OhosMalloc(MEM_TYPE_JERRY, filefolder_len)) == NULL) {
-    return EXEC_ACE_JERRY_MALLOC_ERROR;
+    return EXCE_ACE_JERRY_MALLOC_ERROR;
   }
   if (strcpy_s(start_folder, filefolder_len, filefolder) != 0) {
     OhosFree(start_folder);
@@ -506,7 +506,7 @@ EXECRES walk_del_bytecode(char* filefolder) {
         free_link(head);
         curr = NULL;
         end = NULL;
-        return EXEC_ACE_JERRY_UNLINKFILE_ERROR;
+        return EXCE_ACE_JERRY_UNLINKFILE_ERROR;
       } else {
         OhosFree(input_file_path);
         input_file_path = NULL;
