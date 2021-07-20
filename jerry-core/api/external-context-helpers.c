@@ -4,7 +4,7 @@
  * Create: 2020/11/17
  */
 
-#ifdef JERRY_IAR_JUPITER
+#if defined (JERRY_IAR_JUPITER) && (JERRY_EXTERNAL_CONTEXT == 1)
 
 #include "jcontext.h"
 #include "config-jupiter.h"
@@ -78,4 +78,4 @@ jerry_external_context_init (uint32_t heap_size, /**< the size of heap */
   jerry_port_default_set_current_context (external_context);
 }
 
-#endif // JERRY_IAR_JUPITER
+#endif // defined (JERRY_IAR_JUPITER) && (JERRY_EXTERNAL_CONTEXT == 1)

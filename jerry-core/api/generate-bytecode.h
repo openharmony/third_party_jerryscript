@@ -14,7 +14,7 @@
 typedef enum {
   EXCE_ACE_JERRY_EXEC_OK = 0, // program function OK
   EXCE_ACE_JERRY_NULL_PATH, // null path for generateing snapshot
-  EXEC_ACE_JERRY_MALLOC_ERROR, // error when malloc
+  EXCE_ACE_JERRY_MALLOC_ERROR, // error when malloc
   EXCE_ACE_JERRY_INPUT_PATH_ERROR, // passed input path is NULL OR open failed
   EXCE_ACE_JERRY_INPUT_PATH_NOT_DIR, // passed input path is not a directory
   EXCE_ACE_JERRY_OPEN_DIR_FAILED, // open directory failed
@@ -28,12 +28,11 @@ typedef enum {
   EXCE_ACE_JERRY_SPRINTFS_VERSION_ERROR, // error when sprintf_s for jerry_version
   EXCE_ACE_JERRY_GET_FILE_STAT_ERROR, // error when getting file stat
   EXCE_ACE_JERRY_LINKLIST_ERROR, // error when malloc for list node
-  EXEC_ACE_JERRY_UNLINKFILE_ERROR, // error when unlink bytecode file
+  EXCE_ACE_JERRY_UNLINKFILE_ERROR, // error when unlink bytecode file
 } EXECRES;
 
 typedef struct
 {
-  uint32_t task_id;
   jerry_context_t *context_p;
 } ContextRecord;
 
