@@ -16,7 +16,11 @@
 #include "jerryscript-port.h"
 #include "jerryscript-port-default.h"
 
-#if defined (JERRY_FOR_IAR_CONFIG) && (JERRY_EXTERNAL_CONTEXT == 1)
+#if (JERRY_EXTERNAL_CONTEXT == 1)
+
+extern jerry_context_t *jerry_dynamic_global_context_p;
+
+#if defined (JERRY_FOR_IAR_CONFIG)
 
 #include "generate-bytecode.h"
 #include "los_task.h"
@@ -29,7 +33,6 @@
 ContextRecord g_contextRecords[MAX_CONTEXT_NUM] = {0};
 
 void jerry_switch_context();
-extern jerry_context_t *jerry_dynamic_global_context_p;
 
 /**
  * set context function: store task id and context
@@ -67,13 +70,7 @@ jerry_port_get_current_context (void) /**< points to current task's context */
   return jerry_dynamic_global_context_p;
 }
 
-#else // not defined JERRY_FOR_IAR_CONFIG || not enabled JERRY_EXTERNAL_CONTEXT
-
-/**
- * Pointer to the current context.
- * Note that it is a global variable, and is not a thread safe implementation.
- */
-static jerry_context_t *current_context_p = NULL;
+#else // not defined JERRY_FOR_IAR_CONFIG, but enabled JERRY_EXTERNAL_CONTEXT
 
 /**
  * Set the current_context_p as the passed pointer.
@@ -81,7 +78,7 @@ static jerry_context_t *current_context_p = NULL;
 void
 jerry_port_default_set_current_context (jerry_context_t *context_p) /**< points to the created context */
 {
-  current_context_p = context_p;
+  jerry_dynamic_global_context_p = context_p;
 } /* jerry_port_default_set_current_context */
 
 /**
@@ -92,7 +89,9 @@ jerry_port_default_set_current_context (jerry_context_t *context_p) /**< points 
 jerry_context_t *
 jerry_port_get_current_context (void)
 {
-  return current_context_p;
+  return jerry_dynamic_global_context_p;
 } /* jerry_port_get_current_context */
 
-#endif // defined (JERRY_FOR_IAR_CONFIG) && (JERRY_EXTERNAL_CONTEXT == 1)
+#endif // defined (JERRY_FOR_IAR_CONFIG)
+
+#endif // (JERRY_EXTERNAL_CONTEXT == 1)
