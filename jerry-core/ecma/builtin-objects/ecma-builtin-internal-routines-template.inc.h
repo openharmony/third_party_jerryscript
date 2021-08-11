@@ -45,6 +45,8 @@
   static ecma_value_t c_function_name (ROUTINE_ARG_LIST_ ## args_number);
 #define ROUTINE_CONFIGURABLE_ONLY(name, c_function_name, args_number, length_prop_value) \
   static ecma_value_t c_function_name (ROUTINE_ARG_LIST_ ## args_number);
+#define ROUTINE_WITH_FLAGS(name, c_function_name, args_number, length_prop_value, flags) \
+  static ecma_value_t c_function_name (ROUTINE_ARG_LIST_ ## args_number);
 #define ACCESSOR_READ_WRITE(name, c_getter_func_name, c_setter_func_name, prop_attributes) \
   static ecma_value_t c_getter_func_name (ROUTINE_ARG_LIST_0); \
   static ecma_value_t c_setter_func_name (ROUTINE_ARG_LIST_1);
@@ -67,6 +69,8 @@ enum
 #define ROUTINE(name, c_function_name, args_number, length_prop_value) \
   ECMA_ROUTINE_ ## name ## c_function_name,
 #define ROUTINE_CONFIGURABLE_ONLY(name, c_function_name, args_number, length_prop_value) \
+  ECMA_ROUTINE_ ## name ## c_function_name,
+#define ROUTINE_WITH_FLAGS(name, c_function_name, args_number, length_prop_value, flags) \
   ECMA_ROUTINE_ ## name ## c_function_name,
 #define ACCESSOR_READ_WRITE(name, c_getter_func_name, c_setter_func_name, prop_attributes) \
   ECMA_ACCESSOR_ ## name ## c_getter_func_name, \
@@ -98,12 +102,27 @@ const ecma_builtin_property_descriptor_t PROPERTY_DESCRIPTOR_LIST_NAME[] =
     ECMA_PROPERTY_FLAG_CONFIGURABLE, \
     ECMA_ROUTINE_VALUE (ECMA_ROUTINE_ ## name ## c_function_name, length_prop_value) \
   },
+#define ROUTINE_WITH_FLAGS(name, c_function_name, args_number, length_prop_value, flags) \
+  { \
+    name, \
+    ECMA_BUILTIN_PROPERTY_ROUTINE, \
+    flags, \
+    ECMA_ROUTINE_VALUE (ECMA_ROUTINE_ ## name ## c_function_name, length_prop_value) \
+  },
 #define ACCESSOR_READ_ONLY(name, c_getter_func_name, prop_attributes) \
   { \
     name, \
     ECMA_BUILTIN_PROPERTY_ACCESSOR_READ_ONLY, \
     prop_attributes, \
     ECMA_ACCESSOR_ ## name ## c_getter_func_name \
+  },
+#define ACCESSOR_READ_WRITE(name, c_getter_func_name, c_setter_func_name, prop_attributes) \
+  { \
+    name, \
+    ECMA_BUILTIN_PROPERTY_ACCESSOR_READ_WRITE, \
+    prop_attributes, \
+    ECMA_ACCESSOR_READ_WRITE (ECMA_ACCESSOR_ ## name ## c_getter_func_name, \
+                              ECMA_ACCESSOR_ ## name ## c_setter_func_name) \
   },
 #else /* BUILTIN_CUSTOM_DISPATCH */
 #define ROUTINE(name, c_function_name, args_number, length_prop_value) \
@@ -120,12 +139,26 @@ const ecma_builtin_property_descriptor_t PROPERTY_DESCRIPTOR_LIST_NAME[] =
     ECMA_PROPERTY_FLAG_CONFIGURABLE, \
     ECMA_ROUTINE_VALUE (c_function_name, length_prop_value) \
   },
+#define ROUTINE_WITH_FLAGS(name, c_function_name, args_number, length_prop_value, flags) \
+  { \
+    name, \
+    ECMA_BUILTIN_PROPERTY_ROUTINE, \
+    flags, \
+    ECMA_ROUTINE_VALUE (c_function_name, length_prop_value) \
+  },
 #define ACCESSOR_READ_ONLY(name, c_getter_func_name, prop_attributes) \
   { \
     name, \
     ECMA_BUILTIN_PROPERTY_ACCESSOR_READ_ONLY, \
     prop_attributes, \
     c_getter_func_name \
+  },
+#define ACCESSOR_READ_WRITE(name, c_getter_func_name, c_setter_func_name, prop_attributes) \
+  { \
+    name, \
+    ECMA_BUILTIN_PROPERTY_ACCESSOR_READ_WRITE, \
+    prop_attributes, \
+    ECMA_ACCESSOR_READ_WRITE (c_getter_func_name, c_setter_func_name) \
   },
 #endif /* !BUILTIN_CUSTOM_DISPATCH */
 #define OBJECT_VALUE(name, obj_builtin_id, prop_attributes) \
@@ -156,22 +189,29 @@ const ecma_builtin_property_descriptor_t PROPERTY_DESCRIPTOR_LIST_NAME[] =
     prop_attributes, \
     magic_string_id \
   },
-#if ENABLED (JERRY_ES2015_BUILTIN_SYMBOL)
-#define SYMBOL_VALUE(name, desc_string_id) \
+#if ENABLED (JERRY_ES2015)
+#define SYMBOL_VALUE(symbol, desc_magic_string_id) \
   { \
-    name, \
+    symbol, \
     ECMA_BUILTIN_PROPERTY_SYMBOL, \
     ECMA_PROPERTY_FIXED, \
-    desc_string_id \
+    desc_magic_string_id \
   },
-#endif /* ENABLED (JERRY_ES2015_BUILTIN_SYMBOL) */
-#define ACCESSOR_READ_WRITE(name, c_getter_name, c_setter_name, prop_attributes) \
+#define INTRINSIC_PROPERTY(name, magic_string_id, prop_attributes) \
   { \
     name, \
-    ECMA_BUILTIN_PROPERTY_ACCESSOR_READ_WRITE, \
+    ECMA_BUILTIN_PROPERTY_INTRINSIC_PROPERTY, \
     prop_attributes, \
-    ECMA_ACCESSOR_READ_WRITE (ECMA_ACCESSOR_ ## name ## c_getter_name, ECMA_ACCESSOR_ ## name ## c_setter_name) \
+    magic_string_id \
   },
+#define ACCESSOR_BUILTIN_FUNCTION(name, getter_builtin_id, setter_builtin_id, prop_attributes) \
+  { \
+    name, \
+    ECMA_BUILTIN_PROPERTY_ACCESSOR_BUILTIN_FUNCTION, \
+    prop_attributes, \
+    ECMA_ACCESSOR_READ_WRITE (getter_builtin_id, setter_builtin_id) \
+  },
+#endif /* ENABLED (JERRY_ES2015) */
 #include BUILTIN_INC_HEADER_NAME
   {
     LIT_MAGIC_STRING__COUNT,
@@ -218,6 +258,11 @@ DISPATCH_ROUTINE_ROUTINE_NAME (uint16_t builtin_routine_id, /**< built-in wide r
          return c_function_name (this_arg_value ROUTINE_ARG_LIST_ ## args_number); \
        }
 #define ROUTINE_CONFIGURABLE_ONLY(name, c_function_name, args_number, length_prop_value) \
+       case ECMA_ROUTINE_ ## name ## c_function_name: \
+       { \
+         return c_function_name (this_arg_value ROUTINE_ARG_LIST_ ## args_number); \
+       }
+#define ROUTINE_WITH_FLAGS(name, c_function_name, args_number, length_prop_value, flags) \
        case ECMA_ROUTINE_ ## name ## c_function_name: \
        { \
          return c_function_name (this_arg_value ROUTINE_ARG_LIST_ ## args_number); \

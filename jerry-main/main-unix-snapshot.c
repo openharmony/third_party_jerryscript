@@ -439,7 +439,7 @@ process_generate (cli_state_t *cli_state_p, /**< cli state */
   fwrite (output_buffer, sizeof (uint8_t), snapshot_size, snapshot_file_p);
   fclose (snapshot_file_p);
 
-  printf ("Created snapshot file: '%s' (%lu bytes)\n", output_file_name_p, (unsigned long) snapshot_size);
+  printf ("Created snapshot file: '%s' (%zu bytes)\n", output_file_name_p, snapshot_size);
 
   jerry_cleanup ();
   return JERRY_STANDALONE_EXIT_CODE_OK;

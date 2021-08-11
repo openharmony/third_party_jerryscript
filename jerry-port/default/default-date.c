@@ -50,7 +50,6 @@ static void UnixTimeToFileTime (LONGLONG t, LPFILETIME pft)
 } /* UnixTimeToFileTime */
 #endif /* _WIN32 */
 
-
 /**
  * Default implementation of jerry_port_get_local_time_zone_adjustment. Uses the 'tm_gmtoff' field
  * of 'struct tm' (a GNU extension) filled by 'localtime_r' if available on the

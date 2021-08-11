@@ -19,7 +19,7 @@
 
 #include "ecma-builtin-helpers-macro-defines.inc.h"
 
-#if ENABLED (JERRY_ES2015_BUILTIN_SYMBOL)
+#if ENABLED (JERRY_ES2015)
 
 /* Object properties:
  *  (property name, object pointer getter) */
@@ -27,10 +27,6 @@
 OBJECT_VALUE (LIT_MAGIC_STRING_CONSTRUCTOR,
               ECMA_BUILTIN_ID_SYMBOL,
               ECMA_PROPERTY_CONFIGURABLE_WRITABLE)
-
-NUMBER_VALUE (LIT_MAGIC_STRING_LENGTH,
-              0,
-              ECMA_PROPERTY_FLAG_WRITABLE)
 
 ROUTINE (LIT_MAGIC_STRING_TO_STRING_UL, ecma_builtin_symbol_prototype_object_to_string, 0, 0)
 ROUTINE (LIT_MAGIC_STRING_VALUE_OF_UL, ecma_builtin_symbol_prototype_object_value_of, 0, 0)
@@ -44,6 +40,6 @@ STRING_VALUE (LIT_GLOBAL_SYMBOL_TO_STRING_TAG,
               LIT_MAGIC_STRING_SYMBOL_UL,
               ECMA_PROPERTY_FLAG_CONFIGURABLE)
 
-#endif /* ENABLED (JERRY_ES2015_BUILTIN_SYMBOL) */
+#endif /* ENABLED (JERRY_ES2015) */
 
 #include "ecma-builtin-helpers-macro-undefs.inc.h"

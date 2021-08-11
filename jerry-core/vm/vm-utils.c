@@ -17,6 +17,7 @@
 #include "ecma-helpers.h"
 #include "ecma-objects.h"
 #include "jcontext.h"
+#include "lit-char-helpers.h"
 #include "vm.h"
 
 /**
@@ -55,7 +56,7 @@ vm_is_direct_eval_form_call (void)
 static ecma_string_t*
 vm_get_function_name_string (vm_frame_ctx_t *context_p)
 {
-  ecma_string_t* func_name;
+  ecma_stringbuilder_t func_name_builder;
   if (context_p->prev_context_p != NULL) {
     vm_frame_ctx_t* prev_ctx_p = context_p->prev_context_p;
     ecma_object_t* func_obj = ecma_get_object_from_value (prev_ctx_p->callee_value);
@@ -66,26 +67,26 @@ vm_get_function_name_string (vm_frame_ctx_t *context_p)
       ecma_string_t* name_prop = ecma_get_magic_string (LIT_MAGIC_STRING_NAME);
       ecma_value_t func_name_value = ecma_op_object_get (func_obj, name_prop);
       if (func_name_value == ECMA_VALUE_UNDEFINED) {
-        func_name = ecma_new_ecma_string_from_utf8 ((const lit_utf8_byte_t *)"<unknown>", 9);
+        func_name_builder = ecma_stringbuilder_create_raw ((lit_utf8_byte_t *) ("<unknown>"), 9);
       } else {
-        func_name = ecma_get_string_from_value (func_name_value);
+        func_name_builder = ecma_stringbuilder_create_from(ecma_get_string_from_value (func_name_value));
       }
       ecma_deref_ecma_string (name_prop);
     } else {
-      func_name = ecma_new_ecma_string_from_utf8 ((const lit_utf8_byte_t *)"<erroneous>", 11);
+      func_name_builder = ecma_stringbuilder_create_raw ((lit_utf8_byte_t *) ("<erroneous>"), 11);
     }
   } else {
-    func_name = ecma_new_ecma_string_from_utf8 ((const lit_utf8_byte_t *)"<GLOBAL>", 8);
+    func_name_builder = ecma_stringbuilder_create_raw ((lit_utf8_byte_t *) ("<GLOBAL>"), 8);
   }
-  ecma_string_t* lbracket = ecma_new_ecma_string_from_utf8((const lit_utf8_byte_t *)"(", 1);
-  ecma_string_t* rbracket = ecma_new_ecma_string_from_utf8((const lit_utf8_byte_t *)")", 1);
-  func_name = ecma_concat_ecma_strings (func_name, lbracket);
-  func_name = ecma_concat_ecma_strings (func_name, rbracket);
-  func_name = ecma_append_magic_string_to_string (func_name, LIT_MAGIC_STRING_COMMA_CHAR);
-  func_name = ecma_append_magic_string_to_string (func_name, LIT_MAGIC_STRING_SPACE_CHAR);
+  ecma_string_t* lbracket = ecma_new_ecma_string_from_utf8((const lit_utf8_byte_t *) ("("), 1);
+  ecma_string_t* rbracket = ecma_new_ecma_string_from_utf8((const lit_utf8_byte_t *) (")"), 1);
+  ecma_stringbuilder_append (&func_name_builder, lbracket);
+  ecma_stringbuilder_append (&func_name_builder, rbracket);
+  ecma_stringbuilder_append_byte (&func_name_builder, LIT_CHAR_COMMA);
+  ecma_stringbuilder_append_byte (&func_name_builder, LIT_CHAR_SP);
   ecma_deref_ecma_string(rbracket);
   ecma_deref_ecma_string(lbracket);
-  return func_name;
+  return ecma_stringbuilder_finalize (&func_name_builder);
 }
 #endif
 
@@ -109,7 +110,7 @@ vm_get_backtrace (uint32_t max_depth) /**< maximum backtrace depth, 0 = unlimite
 
   vm_frame_ctx_t *context_p = JERRY_CONTEXT (vm_top_context_p);
   ecma_object_t *array_p = ecma_get_object_from_value (result_array);
-  JERRY_ASSERT (((ecma_extended_object_t *) array_p)->u.array.is_fast_mode);
+  JERRY_ASSERT (ecma_op_object_is_fast_array (array_p));
   uint32_t index = 0;
 
   while (context_p != NULL)
@@ -120,16 +121,12 @@ vm_get_backtrace (uint32_t max_depth) /**< maximum backtrace depth, 0 = unlimite
     ecma_string_t* func_name = vm_get_function_name_string (context_p);
     func_name = ecma_concat_ecma_strings (func_name, str_p);
 
-    ecma_string_t *index_str_p = ecma_new_ecma_string_from_uint32 (index);
-    ecma_fast_array_set_property (array_p, index_str_p, ecma_make_string_value (func_name));
+    ecma_fast_array_set_property (array_p, index, ecma_make_string_value (func_name));
     ecma_deref_ecma_string(str_p);
-    ecma_deref_ecma_string(index_str_p);
     ecma_deref_ecma_string(func_name);
 #else
-    ecma_string_t *index_str_p = ecma_new_ecma_string_from_uint32 (index);
-    ecma_fast_array_set_property (array_p, index_str_p, ecma_make_string_value (str_p));
+    ecma_fast_array_set_property (array_p, index, ecma_make_string_value (str_p));
     ecma_deref_ecma_string (str_p);
-    ecma_deref_ecma_string (index_str_p);
 #endif
 
     context_p = context_p->prev_context_p;
