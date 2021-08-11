@@ -46,7 +46,7 @@ ecma_op_eval (ecma_string_t *code_p, /**< code string */
 {
   ecma_value_t ret_value;
 
-#if ENABLED (JERRY_BUILTIN_EVAL_DISABLED)
+#if defined (JERRY_BUILTIN_EVAL_DISABLED) && ENABLED (JERRY_BUILTIN_EVAL_DISABLED)
   JERRY_UNUSED(code_p);
   JERRY_UNUSED(parse_opts);
   ret_value = ECMA_VALUE_UNDEFINED;
@@ -103,9 +103,9 @@ ecma_op_eval_chars_buffer (const lit_utf8_byte_t *code_p, /**< code characters b
   JERRY_CONTEXT (resource_name) = ecma_make_magic_string_value (LIT_MAGIC_STRING_RESOURCE_EVAL);
 #endif /* ENABLED (JERRY_LINE_INFO) || ENABLED (JERRY_ERROR_MESSAGES) */
 
-#if ENABLED (JERRY_ES2015_CLASS)
-  ECMA_CLEAR_SUPER_EVAL_PARSER_OPTS ();
-#endif /* ENABLED (JERRY_ES2015_CLASS) */
+#if ENABLED (JERRY_ES2015)
+  ECMA_CLEAR_LOCAL_PARSE_OPTS ();
+#endif /* ENABLED (JERRY_ES2015) */
 
   ecma_value_t parse_status = parser_parse_script (NULL,
                                                    0,

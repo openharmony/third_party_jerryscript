@@ -24,10 +24,9 @@
 /* Number properties:
  *  (property name, number value, writable, enumerable, configurable) */
 
-/* ECMA-262 v5, 15.5.3 */
 NUMBER_VALUE (LIT_MAGIC_STRING_LENGTH,
               1,
-              ECMA_PROPERTY_FIXED)
+              ECMA_PROPERTY_FLAG_DEFAULT_LENGTH)
 
 /* Object properties:
  *  (property name, object pointer getter) */
@@ -40,6 +39,11 @@ OBJECT_VALUE (LIT_MAGIC_STRING_PROTOTYPE,
 /* Routine properties:
  *  (property name, C routine name, arguments number or NON_FIXED, value of the routine's length property) */
 ROUTINE (LIT_MAGIC_STRING_FROM_CHAR_CODE_UL, ecma_builtin_string_object_from_char_code, NON_FIXED, 1)
+
+#if ENABLED (JERRY_ES2015)
+ROUTINE (LIT_MAGIC_STRING_FROM_CODE_POINT_UL, ecma_builtin_string_object_from_code_point, NON_FIXED, 1)
+ROUTINE (LIT_MAGIC_STRING_RAW, ecma_builtin_string_object_raw, NON_FIXED, 1)
+#endif /* ENABLED (JERRY_ES2015) */
 
 #endif /* ENABLED (JERRY_BUILTIN_STRING) */
 

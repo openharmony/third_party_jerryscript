@@ -54,7 +54,7 @@ do_number_arithmetic (number_arithmetic_op op, /**< number arithmetic operation 
 
   switch (op)
   {
-    case NUMBER_ARITHMETIC_SUBSTRACTION:
+    case NUMBER_ARITHMETIC_SUBTRACTION:
     {
       result = num_left - num_right;
       break;
@@ -74,6 +74,13 @@ do_number_arithmetic (number_arithmetic_op op, /**< number arithmetic operation 
       result = ecma_op_number_remainder (num_left, num_right);
       break;
     }
+#if ENABLED (JERRY_ES2015)
+    case NUMBER_ARITHMETIC_EXPONENTIATION:
+    {
+      result = ecma_number_pow (num_left, num_right);
+      break;
+    }
+#endif /* ENABLED (JERRY_ES2015) */
   }
 
   ret_value = ecma_make_number_value (result);
@@ -132,9 +139,9 @@ opfunc_addition (ecma_value_t left_value, /**< left value */
   if (ecma_is_value_string (left_value)
       || ecma_is_value_string (right_value))
   {
-    ecma_value_t str_left_value = ecma_op_to_string (left_value);
+    ecma_string_t *string1_p = ecma_op_to_string (left_value);
 
-    if (ECMA_IS_VALUE_ERROR (str_left_value))
+    if (JERRY_UNLIKELY (string1_p == NULL))
     {
       if (free_left_value)
       {
@@ -144,14 +151,12 @@ opfunc_addition (ecma_value_t left_value, /**< left value */
       {
         ecma_free_value (right_value);
       }
-      return str_left_value;
+      return ECMA_VALUE_ERROR;
     }
 
-    ecma_string_t *string1_p = ecma_get_string_from_value (str_left_value);
+    ecma_string_t *string2_p = ecma_op_to_string (right_value);
 
-    ecma_value_t str_right_value = ecma_op_to_string (right_value);
-
-    if (ECMA_IS_VALUE_ERROR (str_right_value))
+    if (JERRY_UNLIKELY (string2_p == NULL))
     {
       if (free_right_value)
       {
@@ -162,10 +167,8 @@ opfunc_addition (ecma_value_t left_value, /**< left value */
         ecma_free_value (left_value);
       }
       ecma_deref_ecma_string (string1_p);
-      return str_right_value;
+      return ECMA_VALUE_ERROR;
     }
-
-    ecma_string_t *string2_p = ecma_get_string_from_value (str_right_value);
 
     string1_p = ecma_concat_ecma_strings (string1_p, string2_p);
     ret_value = ecma_make_string_value (string1_p);

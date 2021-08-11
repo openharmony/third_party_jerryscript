@@ -91,3 +91,48 @@ assert(set.size === 0);
 set.add(3);
 assert(set.delete(3));
 assert(!set.delete(3));
+
+function createIterable(arr, methods = {}) {
+  let iterable = function *() {
+    let idx = 0;
+    while (idx < arr.length) {
+      yield arr[idx];
+      idx++;
+    }
+  }();
+  iterable['return'] = methods['return'];
+  iterable['throw'] = methods['throw'];
+
+  return iterable;
+};
+
+var closed = false;
+var iter = createIterable([1, 2, 3], {
+  'return': function(){ closed = true; return {}; }
+});
+var add = Set.prototype.add;
+Set.prototype.add = function(){ throw 0 };
+try {
+  new Set(iter);
+} catch(e){}
+Set.prototype.add = add;
+
+assert(closed === true);
+
+/* Test third argument of callback */
+var s = new Set([1, 2, 3]);
+
+s.forEach(function(value, key, thisArg) {
+  assert (typeof thisArg === "object");
+  assert(thisArg === s);
+});
+
+var set = new Set();
+set.add(-0);
+var k;
+set.forEach(function (value) {
+  k = 1 / value;
+});
+
+assert(k === Infinity);
+assert(set.has(+0) === true);

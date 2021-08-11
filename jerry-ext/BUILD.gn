@@ -37,6 +37,7 @@ lite_library("jerry-ext_shared") {
     "handler/handler-gc.c",
     "handler/handler-print.c",
     "handler/handler-register.c",
+    "handler/handler-resource-name.c",
     "module/module.c",
   ]
   include_dirs = [

@@ -15,34 +15,41 @@ import("//build/lite/config/component/lite_component.gni")
 import("//third_party/jerryscript/engine.gni")
 
 lite_component("jerry-libm") {
-    features = [
-        ":jerry-libm_shared",
-    ]
+  features = [ ":jerry-libm_shared" ]
 }
 
 lite_library("jerry-libm_shared") {
-target_type = "shared_library"
-    sources = [
-        "acos.c",
-        "asin.c",
-        "atan2.c",
-        "atan.c",
-        "ceil.c",
-        "copysign.c",
-        "exp.c",
-        "fabs.c",
-        "finite.c",
-        "floor.c",
-        "fmod.c",
-        "isnan.c",
-        "log.c",
-        "nextafter.c",
-        "pow.c",
-        "scalbn.c",
-        "sqrt.c",
-        "trig.c",
-    ]
-    include_dirs = [
-        "include",
-    ]
+  target_type = "shared_library"
+  sources = [
+    "acos.c",
+    "acosh.c",
+    "asin.c",
+    "asinh.c",
+    "atan.c",
+    "atan2.c",
+    "atanh.c",
+    "cbrt.c",
+    "ceil.c",
+    "copysign.c",
+    "cosh.c",
+    "exp.c",
+    "expm1.c",
+    "fabs.c",
+    "finite.c",
+    "floor.c",
+    "fmod.c",
+    "isnan.c",
+    "log.c",
+    "log10.c",
+    "log1p.c",
+    "log2.c",
+    "nextafter.c",
+    "pow.c",
+    "scalbn.c",
+    "sinh.c",
+    "sqrt.c",
+    "tanh.c",
+    "trig.c",
+  ]
+  include_dirs = [ "include" ]
 }

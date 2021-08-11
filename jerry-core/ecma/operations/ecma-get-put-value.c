@@ -26,6 +26,7 @@
 #include "ecma-function-object.h"
 #include "ecma-objects-general.h"
 #include "ecma-try-catch-macro.h"
+#include "ecma-reference.h"
 
 /** \addtogroup ecma ECMA
  * @{
@@ -61,26 +62,35 @@ ecma_op_get_value_lex_env_base (ecma_object_t *lex_env_p, /**< lexical environme
         if (property_p != NULL)
         {
           *ref_base_lex_env_p = lex_env_p;
-          return ecma_copy_value (ECMA_PROPERTY_VALUE_PTR (property_p)->value);
+          ecma_property_value_t *property_value_p = ECMA_PROPERTY_VALUE_PTR (property_p);
+
+#if ENABLED (JERRY_ES2015)
+          if (JERRY_UNLIKELY (property_value_p->value == ECMA_VALUE_UNINITIALIZED))
+          {
+            return ecma_raise_reference_error (ECMA_ERR_MSG ("Variables declared by let/const must be"
+                                                             " initialized before reading their value."));
+          }
+#endif /* ENABLED (JERRY_ES2015) */
+
+          return ecma_fast_copy_value (property_value_p->value);
         }
         break;
       }
-#if ENABLED (JERRY_ES2015_CLASS)
-      case ECMA_LEXICAL_ENVIRONMENT_SUPER_OBJECT_BOUND:
+#if ENABLED (JERRY_ES2015)
+      case ECMA_LEXICAL_ENVIRONMENT_HOME_OBJECT_BOUND:
       {
         break;
       }
-#endif /* ENABLED (JERRY_ES2015_CLASS) */
+#endif /* ENABLED (JERRY_ES2015) */
       default:
       {
         JERRY_ASSERT (ecma_get_lex_env_type (lex_env_p) == ECMA_LEXICAL_ENVIRONMENT_THIS_OBJECT_BOUND);
 
-        ecma_object_t *binding_obj_p = ecma_get_lex_env_binding_object (lex_env_p);
-
-        ecma_value_t result = ecma_op_object_find (binding_obj_p, name_p);
+        ecma_value_t result = ecma_op_object_bound_environment_resolve_reference_value (lex_env_p, name_p);
 
         if (ecma_is_value_found (result))
         {
+          /* Note: the result may contains ECMA_VALUE_ERROR */
           *ref_base_lex_env_p = lex_env_p;
           return result;
         }
@@ -120,59 +130,62 @@ ecma_value_t
 ecma_op_get_value_object_base (ecma_value_t base_value, /**< base value */
                                ecma_string_t *property_name_p) /**< property name */
 {
-  if (ecma_is_value_object (base_value))
-  {
-    ecma_object_t *obj_p = ecma_get_object_from_value (base_value);
-    JERRY_ASSERT (obj_p != NULL
-                  && !ecma_is_lexical_environment (obj_p));
+  ecma_object_t *obj_p;
 
-    return ecma_op_object_get (obj_p, property_name_p);
+  if (JERRY_UNLIKELY (ecma_is_value_object (base_value)))
+  {
+    obj_p = ecma_get_object_from_value (base_value);
   }
-
-  JERRY_ASSERT (ecma_is_value_boolean (base_value)
-                || ecma_is_value_number (base_value)
-                || ECMA_ASSERT_VALUE_IS_SYMBOL (base_value)
-                || ecma_is_value_string (base_value));
-
-  /* Fast path for the strings length property. The length of the string
-     can be obtained directly from the ecma-string. */
-  if (ecma_is_value_string (base_value) && ecma_string_is_length (property_name_p))
+  else
   {
-    ecma_string_t *string_p = ecma_get_string_from_value (base_value);
+    ecma_builtin_id_t id = ECMA_BUILTIN_ID_OBJECT_PROTOTYPE;
 
-    return ecma_make_uint32_value (ecma_string_get_length (string_p));
-  }
-
-  ecma_value_t object_base = ecma_op_to_object (base_value);
-  JERRY_ASSERT (!ECMA_IS_VALUE_ERROR (object_base));
-
-  ecma_object_t *object_p = ecma_get_object_from_value (object_base);
-  JERRY_ASSERT (object_p != NULL
-                && !ecma_is_lexical_environment (object_p));
-
-  ecma_value_t ret_value = ECMA_VALUE_UNDEFINED;
-
-  while (true)
-  {
-    ecma_value_t value = ecma_op_object_find_own (base_value, object_p, property_name_p);
-
-    if (ecma_is_value_found (value))
+    if (JERRY_LIKELY (ecma_is_value_string (base_value)))
     {
-      ret_value = value;
-      break;
+      ecma_string_t *string_p = ecma_get_string_from_value (base_value);
+
+      if (ecma_string_is_length (property_name_p))
+      {
+        return ecma_make_uint32_value (ecma_string_get_length (string_p));
+      }
+
+      uint32_t index = ecma_string_get_array_index (property_name_p);
+
+      if (index != ECMA_STRING_NOT_ARRAY_INDEX
+          && index < ecma_string_get_length (string_p))
+      {
+        ecma_char_t char_at_idx = ecma_string_get_char_at_pos (string_p, index);
+        return ecma_make_string_value (ecma_new_ecma_string_from_code_unit (char_at_idx));
+      }
+
+#if ENABLED (JERRY_BUILTIN_STRING)
+      id = ECMA_BUILTIN_ID_STRING_PROTOTYPE;
+#endif /* ENABLED (JERRY_BUILTIN_STRING) */
+    }
+    else if (ecma_is_value_number (base_value))
+    {
+#if ENABLED (JERRY_BUILTIN_NUMBER)
+      id = ECMA_BUILTIN_ID_NUMBER_PROTOTYPE;
+#endif /* ENABLED (JERRY_BUILTIN_NUMBER) */
+    }
+#if ENABLED (JERRY_ES2015)
+    else if (ecma_is_value_symbol (base_value))
+    {
+      id = ECMA_BUILTIN_ID_SYMBOL_PROTOTYPE;
+    }
+#endif /* ENABLED (JERRY_ES2015) */
+    else
+    {
+      JERRY_ASSERT (ecma_is_value_boolean (base_value));
+#if ENABLED (JERRY_BUILTIN_BOOLEAN)
+      id = ECMA_BUILTIN_ID_BOOLEAN_PROTOTYPE;
+#endif /* ENABLED (JERRY_BUILTIN_BOOLEAN) */
     }
 
-    if (object_p->u2.prototype_cp == JMEM_CP_NULL)
-    {
-      break;
-    }
-
-    object_p = ECMA_GET_NON_NULL_POINTER (ecma_object_t, object_p->u2.prototype_cp);
+    obj_p = ecma_builtin_get (id);
   }
 
-  ecma_free_value (object_base);
-
-  return ret_value;
+  return ecma_op_object_get_with_receiver (obj_p, property_name_p, base_value);
 } /* ecma_op_get_value_object_base */
 
 /**
@@ -204,8 +217,24 @@ ecma_op_put_value_lex_env_base (ecma_object_t *lex_env_p, /**< lexical environme
         {
           if (ecma_is_property_writable (*property_p))
           {
-            ecma_named_data_property_assign_value (lex_env_p, ECMA_PROPERTY_VALUE_PTR (property_p), value);
+            ecma_property_value_t *property_value_p = ECMA_PROPERTY_VALUE_PTR (property_p);
+
+#if ENABLED (JERRY_ES2015)
+            if (JERRY_UNLIKELY (property_value_p->value == ECMA_VALUE_UNINITIALIZED))
+            {
+              return ecma_raise_reference_error (ECMA_ERR_MSG ("Variables declared by let/const must be"
+                                                               " initialized before writing their value."));
+            }
+#endif /* ENABLED (JERRY_ES2015) */
+
+            ecma_named_data_property_assign_value (lex_env_p, property_value_p, value);
           }
+#if ENABLED (JERRY_ES2015)
+          else if (ecma_is_property_enumerable (*property_p))
+          {
+            return ecma_raise_type_error (ECMA_ERR_MSG ("Constant bindings cannot be reassigned."));
+          }
+#endif /* ENABLED (JERRY_ES2015) */
           else if (is_strict)
           {
             return ecma_raise_type_error (ECMA_ERR_MSG ("Binding cannot be set."));
@@ -214,19 +243,28 @@ ecma_op_put_value_lex_env_base (ecma_object_t *lex_env_p, /**< lexical environme
         }
         break;
       }
-#if ENABLED (JERRY_ES2015_CLASS)
-      case ECMA_LEXICAL_ENVIRONMENT_SUPER_OBJECT_BOUND:
+#if ENABLED (JERRY_ES2015)
+      case ECMA_LEXICAL_ENVIRONMENT_HOME_OBJECT_BOUND:
       {
         break;
       }
-#endif /* ENABLED (JERRY_ES2015_CLASS) */
+#endif /* ENABLED (JERRY_ES2015) */
       default:
       {
         JERRY_ASSERT (ecma_get_lex_env_type (lex_env_p) == ECMA_LEXICAL_ENVIRONMENT_THIS_OBJECT_BOUND);
 
         ecma_object_t *binding_obj_p = ecma_get_lex_env_binding_object (lex_env_p);
 
-        if (ecma_op_object_has_property (binding_obj_p, name_p))
+        ecma_value_t has_property = ecma_op_object_has_property (binding_obj_p, name_p);
+
+#if ENABLED (JERRY_ES2015_BUILTIN_PROXY)
+        if (ECMA_IS_VALUE_ERROR (has_property))
+        {
+          return has_property;
+        }
+#endif /* ENABLED (JERRY_ES2015_BUILTIN_PROXY) */
+
+        if (ecma_is_value_true (has_property))
         {
           ecma_value_t completion = ecma_op_object_put (binding_obj_p,
                                                         name_p,

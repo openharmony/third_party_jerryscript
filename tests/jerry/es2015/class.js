@@ -56,6 +56,7 @@ must_throw("class X {}; var o = {}; Object.defineProperty(o, 'p', { get: X, set:
 must_throw("var a = new A; class A {};");
 must_throw("class A { g\\u0065t e() {} }");
 must_throw('class A { "static" e() {} }');
+must_throw('class A { *constructor() {} }');
 
 assert(eval("class A {}") === undefined);
 assert(eval("var a = class A {}") === undefined);
@@ -63,6 +64,22 @@ assert(eval("var a = class {}") === undefined);
 assert(eval("class A { ; ; ; ;;;;;;;;;;;; ; ; ;;;;;;;;;;;;;;;;;;;;;;;;; }") === undefined);
 assert(eval('class A {"constructor"() {} }') === undefined);
 assert(isNaN (eval('switch(1) { default: (class A{} % 1) }')));
+
+class A1 {
+  ["constructor"]() {
+    return 5;
+  }
+}
+
+assert ((new A1).constructor() === 5);
+
+class A2 {
+  *["constructor"]() {
+    yield 5;
+  }
+}
+
+assert ((new A2).constructor().next().value === 5);
 
 class B {
 }
@@ -90,6 +107,10 @@ class C {
   return() {
     return 43;
   }
+
+  static *constructor() {
+    return 44;
+  }
 }
 
 var c = new C;
@@ -99,6 +120,7 @@ assert (c["3"]() === 3);
 assert (c.super() === 42);
 assert (c.return() === 43);
 assert (c.constructor === C);
+assert (C.constructor().next().value === 44);
 
 class D {
   constructor(d) {
@@ -236,3 +258,77 @@ assert (G.get() == 11);
 assert (G.set() == 12);
 G.constructor = 30;
 assert (G.constructor === 30);
+
+class H {
+  method() { assert (typeof H === 'function'); return H; }
+}
+
+let H_original = H;
+var H_method = H.prototype.method;
+C = undefined;
+assert(C === undefined);
+C = H_method();
+assert(C === H_original);
+
+var I = class C {
+  method() { assert(typeof C === 'function'); return C; }
+}
+
+let I_original = I;
+var I_method = I.prototype.method;
+I = undefined;
+assert(I === undefined);
+I = I_method();
+assert(I == I_original);
+
+var J_method;
+class J {
+  static [(J_method = eval('(function() { return J; })'), "X")]() {}
+}
+var J_original = J;
+J = 6;
+assert (J_method() == J_original);
+
+var K_method;
+class K {
+  constructor () {
+    K_method = function() { return K; }
+  }
+}
+var K_original = K;
+new K;
+K = 6;
+assert (K_method() == K_original);
+
+var L_method;
+class L extends (L_method = function() { return L; }) {
+}
+var L_original = L;
+L = 6;
+assert (L_method() == L_original);
+
+/* Test cleanup class environment */
+try {
+  class A {
+    [d]() {}
+  }
+  let d;
+  assert(false);
+} catch (e) {
+  assert(e instanceof ReferenceError);
+}
+
+try {
+  class A extends d {}
+  let d;
+  assert(false);
+} catch (e) {
+  assert(e instanceof ReferenceError);
+}
+try {
+  var a = 1 + 2 * 3 >> class A extends d {};
+  let d;
+  assert(false);
+} catch (e) {
+  assert(e instanceof ReferenceError);
+}

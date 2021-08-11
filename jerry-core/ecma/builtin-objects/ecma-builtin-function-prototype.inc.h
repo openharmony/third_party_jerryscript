@@ -30,10 +30,9 @@ OBJECT_VALUE (LIT_MAGIC_STRING_CONSTRUCTOR,
 /* Number properties:
  *  (property name, object pointer getter) */
 
-/* ECMA-262 v5, 15.3.4 */
 NUMBER_VALUE (LIT_MAGIC_STRING_LENGTH,
               0,
-              ECMA_PROPERTY_FIXED)
+              ECMA_PROPERTY_FLAG_DEFAULT_LENGTH)
 
 /* Routine properties:
  *  (property name, C routine name, arguments number or NON_FIXED, value of the routine's length property) */
@@ -41,5 +40,21 @@ ROUTINE (LIT_MAGIC_STRING_TO_STRING_UL, ECMA_FUNCTION_PROTOTYPE_TO_STRING, 0, 0)
 ROUTINE (LIT_MAGIC_STRING_APPLY, ECMA_FUNCTION_PROTOTYPE_APPLY, 2, 2)
 ROUTINE (LIT_MAGIC_STRING_CALL, ECMA_FUNCTION_PROTOTYPE_CALL, NON_FIXED, 1)
 ROUTINE (LIT_MAGIC_STRING_BIND, ECMA_FUNCTION_PROTOTYPE_BIND, NON_FIXED, 1)
+
+#if ENABLED (JERRY_ES2015)
+/**
+ * ECMA-262 v6.0 19.2.3.6 @@hasInstance
+ *  the property attributes are: { [[Writable]]: false, [[Enumerable]]: false, [[Configurable]]: false }.
+ */
+ROUTINE_WITH_FLAGS (LIT_GLOBAL_SYMBOL_HAS_INSTANCE, ECMA_FUNCTION_PROTOTYPE_SYMBOL_HAS_INSTANCE, 1, 1, 0 /* flags */)
+ACCESSOR_BUILTIN_FUNCTION (LIT_MAGIC_STRING_ARGUMENTS,
+                           ECMA_BUILTIN_ID_TYPE_ERROR_THROWER,
+                           ECMA_BUILTIN_ID_TYPE_ERROR_THROWER,
+                           ECMA_PROPERTY_FLAG_CONFIGURABLE)
+ACCESSOR_BUILTIN_FUNCTION (LIT_MAGIC_STRING_CALLER,
+                           ECMA_BUILTIN_ID_TYPE_ERROR_THROWER,
+                           ECMA_BUILTIN_ID_TYPE_ERROR_THROWER,
+                           ECMA_PROPERTY_FLAG_CONFIGURABLE)
+#endif /* ENABLED (JERRY_ES2015) */
 
 #include "ecma-builtin-helpers-macro-undefs.inc.h"

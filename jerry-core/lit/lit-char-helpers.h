@@ -18,8 +18,6 @@
 
 #include "lit-globals.h"
 
-#define LIT_CHAR_UNDEF ((ecma_char_t) 0xFFFF) /* undefined character */
-
 /*
  * Format control characters (ECMA-262 v5, Table 1)
  */
@@ -37,7 +35,7 @@
 #define LIT_CHAR_NBSP ((ecma_char_t) 0x00A0) /* no-break space */
 /* LIT_CHAR_BOM is defined above */
 
-bool lit_char_is_white_space (ecma_char_t c);
+bool lit_char_is_white_space (lit_code_point_t c);
 
 /*
  * Line terminator characters (ECMA-262 v5, Table 3)
@@ -75,10 +73,8 @@ bool lit_char_is_line_terminator (ecma_char_t c);
 #define LIT_CHAR_UNDERSCORE  ((ecma_char_t) '_')  /* low line (underscore) */
 /* LIT_CHAR_BACKSLASH defined above */
 
-bool lit_char_is_identifier_start (const uint8_t *src_p);
-bool lit_char_is_identifier_part (const uint8_t *src_p);
-bool lit_char_is_identifier_start_character (ecma_char_t chr);
-bool lit_char_is_identifier_part_character (ecma_char_t chr);
+bool lit_code_point_is_identifier_start (lit_code_point_t code_point);
+bool lit_code_point_is_identifier_part (lit_code_point_t code_point);
 
 /*
  * Punctuator characters (ECMA-262 v5, 7.7)
@@ -214,13 +210,15 @@ bool lit_char_is_identifier_part_character (ecma_char_t chr);
 bool lit_char_is_octal_digit (ecma_char_t c);
 bool lit_char_is_decimal_digit (ecma_char_t c);
 bool lit_char_is_hex_digit (ecma_char_t c);
+#if ENABLED (JERRY_ES2015)
+bool lit_char_is_binary_digit (ecma_char_t c);
+#endif /* ENABLED (JERRY_ES2015) */
 uint32_t lit_char_hex_to_int (ecma_char_t c);
-size_t lit_char_to_utf8_bytes (uint8_t *dst_p, ecma_char_t chr);
-size_t lit_char_get_utf8_length (ecma_char_t chr);
-
-/* read a hex encoded code point from a zero terminated buffer */
-bool lit_read_code_unit_from_hex (const lit_utf8_byte_t *buf_p, lit_utf8_size_t number_of_characters,
-                                  ecma_char_t *out_code_unit_p);
+size_t lit_code_point_to_cesu8_bytes (uint8_t *dst_p, lit_code_point_t code_point);
+size_t lit_code_point_get_cesu8_length (lit_code_point_t code_point);
+void lit_four_byte_utf8_char_to_cesu8 (uint8_t *dst_p, const uint8_t *source_p);
+uint32_t lit_char_hex_lookup (const lit_utf8_byte_t *buf_p, const lit_utf8_byte_t *const buf_end_p, uint32_t lookup);
+uint32_t lit_parse_decimal (const lit_utf8_byte_t **buffer_p, const lit_utf8_byte_t *const buffer_end_p);
 
 /**
  * Null character
@@ -230,7 +228,7 @@ bool lit_read_code_unit_from_hex (const lit_utf8_byte_t *buf_p, lit_utf8_size_t 
 /*
  * Part of IsWordChar abstract operation (ECMA-262 v5, 15.10.2.6, step 3)
  */
-bool lit_char_is_word_char (ecma_char_t c);
+bool lit_char_is_word_char (lit_code_point_t c);
 
 /*
  * Utility functions for uppercasing / lowercasing
