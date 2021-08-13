@@ -25,11 +25,19 @@
 #define STRING_VALUE(name, magic_string_id, prop_attributes)
 #endif /* !STRING_VALUE */
 
-#if ENABLED (JERRY_ES2015_BUILTIN_SYMBOL)
+#if ENABLED (JERRY_ES2015)
 #ifndef SYMBOL_VALUE
-#define SYMBOL_VALUE(name, desc_string_id)
+#define SYMBOL_VALUE(symbol, desc_magic_string_id)
 #endif /* !SYMBOL_VALUE */
-#endif /* ENABLED (JERRY_ES2015_BUILTIN_SYMBOL) */
+
+#ifndef INTRINSIC_PROPERTY
+#define INTRINSIC_PROPERTY(name, magic_string_id, prop_attributes)
+#endif /* !INTRINSIC_PROPERTY */
+
+#ifndef ACCESSOR_BUILTIN_FUNCTION_OBJECT
+#define ACCESSOR_BUILTIN_FUNCTION_OBJECT(name, getter_builtin_id, setter_builtin_id, prop_attributes)
+#endif /* !ACCESSOR_BUILTIN_FUNCTION_OBJECT */
+#endif /* ENABLED (JERRY_ES2015) */
 
 #ifndef OBJECT_VALUE
 #define OBJECT_VALUE(name, obj_builtin_id, prop_attributes)
@@ -42,6 +50,10 @@
 #ifndef ROUTINE_CONFIGURABLE_ONLY
 #define ROUTINE_CONFIGURABLE_ONLY(name, c_function_name, args_number, length_prop_value)
 #endif /* !ROUTINE_CONFIGURABLE_ONLY */
+
+#ifndef ROUTINE_WITH_FLAGS
+#define ROUTINE_WITH_FLAGS(name, c_function_name, args_number, length_prop_value, flags)
+#endif /* !ROUTINE_WITH_FLAGS */
 
 #ifndef ACCESSOR_READ_WRITE
 #define ACCESSOR_READ_WRITE(name, c_getter_func_name, c_setter_func_name, prop_attributes)

@@ -12,6 +12,7 @@
 #include "ecma-globals.h"
 #include "ecma-helpers.h"
 #include "ecma-property-hashmap.h"
+#include "ecma-array-object.h"
 
 #include <stdio.h>
 
@@ -195,10 +196,8 @@ void DumpPropertyPair(ecma_property_pair_t* pair)
           ecma_object_t* value_obj = ecma_get_object_from_value(value);
           LogAddr(value_obj);
         } else {
-          ecma_value_t value_value = ecma_op_to_string(value);
-          ecma_string_t* value_str = ecma_get_string_from_value(value_value);
+          ecma_string_t* value_str = ecma_op_to_string(value);
           LogStrObj(value_str);
-          ecma_free_value(value_value);
         }
         break;
       }
@@ -311,7 +310,7 @@ void DumpInfoObject(ecma_object_t* object, heapdump_object_flags_t flags)
         Type("Array");
         ecma_extended_object_t* ext_object = (ecma_extended_object_t*)object;
 
-        if (ext_object->u.array.is_fast_mode) {
+        if (ecma_op_object_is_fast_array(object)) {
           Key("subtype");
           LogStr("fast");
           Next();
@@ -336,10 +335,8 @@ void DumpInfoObject(ecma_object_t* object, heapdump_object_flags_t flags)
                 ecma_object_t* value_obj = ecma_get_object_from_value(values[i]);
                 LogAddr(value_obj);
               } else {
-                ecma_value_t value_value = ecma_op_to_string(values[i]);
-                ecma_string_t* value_str = ecma_get_string_from_value(value_value);
+                ecma_string_t* value_str = ecma_op_to_string(values[i]);
                 LogStrObj(value_str);
-                ecma_free_value(value_value);
               }
             }
           }

@@ -15,7 +15,10 @@
 var x = "My cat is awesome";
 assert (x.startsWith ("My"));
 assert (x.startsWith ("cat", 3));
+assert (x.startsWith ("awesome", 10));
 assert (x.startsWith (""));
+assert (x.startsWith ("", 1));
+assert (x.startsWith ("", 17));
 assert (x.startsWith ([]));
 
 assert (x.startsWith ("doggo") === false);
@@ -50,4 +53,21 @@ try {
   assert (false);
 } catch (e) {
   assert (e instanceof TypeError);
+}
+
+y[Symbol.match] = false;
+assert(x.startsWith(y) === false);
+
+try {
+  "foo".startsWith({[Symbol.match] : true});
+  assert(false);
+} catch (e) {
+  assert(e instanceof TypeError);
+}
+
+try {
+  "foo".startsWith({get [Symbol.match] () { throw 5}});
+  assert(false);
+} catch (e) {
+  assert(e === 5);
 }

@@ -61,6 +61,10 @@ ecma_builtin_arraybuffer_prototype_bytelength_getter (ecma_value_t this_arg) /**
 
     if (ecma_object_class_is (object_p, LIT_MAGIC_STRING_ARRAY_BUFFER_UL))
     {
+      if (ecma_arraybuffer_is_detached (object_p))
+      {
+        return ecma_raise_type_error (ECMA_ERR_MSG ("ArrayBuffer has been detached."));
+      }
       ecma_length_t len = ecma_arraybuffer_get_length (object_p);
 
       return ecma_make_uint32_value (len);
@@ -96,30 +100,33 @@ ecma_builtin_arraybuffer_prototype_object_slice (ecma_value_t this_arg, /**< thi
     return ecma_raise_type_error (ECMA_ERR_MSG ("Argument 'this' is not an ArrayBuffer object."));
   }
 
+  if (ecma_arraybuffer_is_detached (object_p))
+  {
+    return ecma_raise_type_error (ECMA_ERR_MSG ("ArrayBuffer has been detached."));
+  }
+
   ecma_length_t len = ecma_arraybuffer_get_length (object_p);
 
   ecma_length_t start = 0, end = len;
 
   ecma_value_t ret_value = ECMA_VALUE_EMPTY;
 
-  ECMA_OP_TO_NUMBER_TRY_CATCH (start_num,
-                               arg1,
-                               ret_value);
-
-  start = ecma_builtin_helper_array_index_normalize (start_num, len, false);
+  if (ECMA_IS_VALUE_ERROR (ecma_builtin_helper_array_index_normalize (arg1,
+                                                                      len,
+                                                                      &start)))
+  {
+    return ECMA_VALUE_ERROR;
+  }
 
   if (!ecma_is_value_undefined (arg2))
   {
-    ECMA_OP_TO_NUMBER_TRY_CATCH (end_num,
-                                 arg2,
-                                 ret_value);
-
-    end = ecma_builtin_helper_array_index_normalize (end_num, len, false);
-
-    ECMA_OP_TO_NUMBER_FINALIZE (end_num);
+    if (ECMA_IS_VALUE_ERROR (ecma_builtin_helper_array_index_normalize (arg2,
+                                                                        len,
+                                                                        &end)))
+    {
+      return ECMA_VALUE_ERROR;
+    }
   }
-
-  ECMA_OP_TO_NUMBER_FINALIZE (start_num);
 
   if (ret_value != ECMA_VALUE_EMPTY)
   {

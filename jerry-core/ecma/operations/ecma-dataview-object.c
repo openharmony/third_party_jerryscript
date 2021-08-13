@@ -66,28 +66,34 @@ ecma_op_dataview_create (const ecma_value_t *arguments_list_p, /**< arguments li
   }
 
   /* 4 - 6. */
-  int32_t offset = 0;
+  uint32_t offset = 0;
 
   if (arguments_list_len > 1)
   {
-    ecma_number_t number_offset;
-    ecma_value_t number_offset_value = ecma_get_number (arguments_list_p[1], &number_offset);
-
-    if (ECMA_IS_VALUE_ERROR (number_offset_value))
+    ecma_number_t number_offset, offset_num;
+    if (ECMA_IS_VALUE_ERROR (ecma_get_number (arguments_list_p[1], &number_offset)))
     {
-      return number_offset_value;
+      return ECMA_VALUE_ERROR;
+    }
+    if (ECMA_IS_VALUE_ERROR (ecma_op_to_integer (arguments_list_p[1], &offset_num)))
+    {
+      return ECMA_VALUE_ERROR;
     }
 
-    offset = ecma_number_to_int32 (number_offset);
-
     /* 7. */
-    if (number_offset != offset || offset < 0)
+    if (number_offset != offset_num || offset_num < 0)
     {
       return ecma_raise_range_error (ECMA_ERR_MSG ("Start offset is outside the bounds of the buffer."));
     }
+
+    offset = (uint32_t) offset_num;
   }
 
-  /* 8. TODO: Throw TypeError, when Detached ArrayBuffer will be supported. */
+  /* 8. */
+  if (ecma_arraybuffer_is_detached (buffer_p))
+  {
+    return ecma_raise_type_error (ECMA_ERR_MSG ("ArrayBuffer has been detached."));
+  }
 
   /* 9. */
   ecma_length_t buffer_byte_length = ecma_arraybuffer_get_length (buffer_p);
@@ -103,37 +109,12 @@ ecma_op_dataview_create (const ecma_value_t *arguments_list_p, /**< arguments li
   if (arguments_list_len > 2)
   {
     /* 12.a */
-    ecma_number_t byte_length;
-    ecma_value_t byte_length_value = ecma_get_number (arguments_list_p[2], &byte_length);
+    ecma_value_t byte_length_value = ecma_op_to_length (arguments_list_p[2], &viewByteLength);
 
     /* 12.b */
     if (ECMA_IS_VALUE_ERROR (byte_length_value))
     {
       return byte_length_value;
-    }
-
-    int32_t byte_length_int32 = ecma_number_to_int32 (byte_length);
-
-    if (ecma_number_is_nan (byte_length))
-    {
-      viewByteLength = 0;
-    }
-    else if (ecma_number_is_infinity (byte_length))
-    {
-      if (ecma_number_is_negative (byte_length))
-      {
-        return ecma_raise_range_error (ECMA_ERR_MSG ("Invalid DataView length"));
-      }
-
-      viewByteLength = UINT32_MAX;
-    }
-    else if (byte_length_int32 <= 0)
-    {
-      viewByteLength = 0;
-    }
-    else
-    {
-      viewByteLength = JERRY_MIN ((ecma_length_t) byte_length_int32, UINT32_MAX);
     }
 
     /* 12.c */
@@ -268,7 +249,7 @@ ecma_op_dataview_get_set_view_value (ecma_value_t view, /**< the operation's 'vi
 
   /* 3 - 5. */
   ecma_number_t number_index;
-  ecma_value_t number_index_value = ecma_get_number (request_index, &number_index);
+  ecma_value_t number_index_value = ecma_op_to_integer (request_index, &number_index);
 
   if (ECMA_IS_VALUE_ERROR (number_index_value))
   {
@@ -291,6 +272,10 @@ ecma_op_dataview_get_set_view_value (ecma_value_t view, /**< the operation's 'vi
   /* 9. */
   ecma_object_t *buffer_p = view_p->buffer_p;
   JERRY_ASSERT (ecma_object_class_is (buffer_p, LIT_MAGIC_STRING_ARRAY_BUFFER_UL));
+  if (ecma_arraybuffer_is_detached (buffer_p))
+  {
+    return ecma_raise_type_error (ECMA_ERR_MSG ("ArrayBuffer has been detached."));
+  }
 
   /* 10. */
   uint32_t view_offset = view_p->byte_offset;
@@ -343,6 +328,26 @@ ecma_op_dataview_get_set_view_value (ecma_value_t view, /**< the operation's 'vi
 
   return ECMA_VALUE_UNDEFINED;
 } /* ecma_op_dataview_get_set_view_value */
+
+/**
+ * Check if the value is dataview
+ *
+ * @return true - if value is a DataView object
+ *         false - otherwise
+ */
+bool
+ecma_is_dataview (ecma_value_t value) /**< the target need to be checked */
+{
+  if (!ecma_is_value_object (value))
+  {
+    return false;
+  }
+
+  ecma_dataview_object_t *dataview_object_p = (ecma_dataview_object_t *) ecma_get_object_from_value (value);
+
+  return (ecma_get_object_type (&dataview_object_p->header.object) == ECMA_OBJECT_TYPE_CLASS
+          && dataview_object_p->header.u.class_prop.class_id == LIT_MAGIC_STRING_DATAVIEW_UL);
+} /* ecma_is_dataview */
 
 /**
  * @}

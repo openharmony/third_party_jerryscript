@@ -33,7 +33,7 @@
 #ifndef JERRY_FOR_IAR_CONFIG
 # define JERRY_MEM_STATS 1
 # define JERRY_LOGGING 1
-#endif
+#endif /* JERRY_FOR_IAR_CONFIG */
 
 #ifndef JERRY_GLOBAL_HEAP_SIZE
 //Maximum size of heap in kilobytes
@@ -44,7 +44,14 @@
 // disable builtin eval() function
 # define JERRY_BUILTIN_EVAL_DISABLED 1
 #endif
-#endif /* JERRY_FOR_IAR_CONFIG */
+
+#if defined (__linux__)
+#ifndef JERRY_SNAPSHOT_SAVE
+# define JERRY_SNAPSHOT_SAVE 1
+#endif
+#endif /* binary tool compiling in linux platform */
+
+#endif /* !defined(_WIN32) && !defined(_WIN64) */
 
 /*
  * Here define the special config for Win simulator build.
@@ -64,9 +71,9 @@
 # define JERRY_MEM_STATS 1
 # define JERRY_SNAPSHOT_EXEC 1
 # define JERRY_SNAPSHOT_SAVE 1
-# ifndef JERRY_LOGGING
-#  define JERRY_LOGGING 1
-# endif
+#ifndef JERRY_LOGGING
+# define JERRY_LOGGING 1
+#endif
 
 // following config controls temp changes in jerry for debugger function with IDE
 # define ACE_DEBUGGER_CUSTOM
@@ -144,17 +151,9 @@
 # define JERRY_ES2015 1
 #endif /* !defined (JERRY_ES2015) */
 
-#ifndef JERRY_ES2015_BUILTIN
-# define JERRY_ES2015_BUILTIN JERRY_ES2015
-#endif /* !defined (JERRY_ES2015_BUILTIN) */
-
 #ifndef JERRY_ES2015_BUILTIN_DATAVIEW
 # define JERRY_ES2015_BUILTIN_DATAVIEW JERRY_ES2015
 #endif /* !defined (JERRY_ES2015_BUILTIN_DATAVIEW) */
-
-#ifndef JERRY_ES2015_BUILTIN_ITERATOR
-# define JERRY_ES2015_BUILTIN_ITERATOR JERRY_ES2015
-#endif /* !defined (JERRY_ES2015_BUILTIN_ITERATOR) */
 
 #ifndef JERRY_ES2015_BUILTIN_MAP
 # define JERRY_ES2015_BUILTIN_MAP JERRY_ES2015
@@ -164,49 +163,33 @@
 # define JERRY_ES2015_BUILTIN_SET JERRY_ES2015
 #endif /* !defined (JERRY_ES2015_BUILTIN_SET) */
 
+#ifndef JERRY_ES2015_BUILTIN_WEAKMAP
+# define JERRY_ES2015_BUILTIN_WEAKMAP JERRY_ES2015
+#endif /* !defined (JERRY_ES2015_BUILTIN_WEAKMAP) */
+
+#ifndef JERRY_ES2015_BUILTIN_WEAKSET
+# define JERRY_ES2015_BUILTIN_WEAKSET JERRY_ES2015
+#endif /* !defined (JERRY_ES2015_BUILTIN_WEAKSET) */
+
 #ifndef JERRY_ES2015_BUILTIN_PROMISE
 # define JERRY_ES2015_BUILTIN_PROMISE JERRY_ES2015
 #endif /* !defined (JERRY_ES2015_BUILTIN_PROMISE) */
 
-#ifndef JERRY_ES2015_BUILTIN_SYMBOL
-# define JERRY_ES2015_BUILTIN_SYMBOL JERRY_ES2015
-#endif /* !defined (JERRY_ES2015_BUILTIN_SYMBOL) */
+#ifndef JERRY_ES2015_BUILTIN_PROXY
+# define JERRY_ES2015_BUILTIN_PROXY JERRY_ES2015
+#endif /* !defined (JERRY_ES2015_BUILTIN_PROXY) */
+
+#ifndef JERRY_ES2015_BUILTIN_REFLECT
+# define JERRY_ES2015_BUILTIN_REFLECT JERRY_ES2015
+#endif /* !defined (JERRY_ES2015_BUILTIN_REFLECT) */
 
 #ifndef JERRY_ES2015_BUILTIN_TYPEDARRAY
 # define JERRY_ES2015_BUILTIN_TYPEDARRAY JERRY_ES2015
 #endif /* !defined (JERRY_ES2015_BUILTIN_TYPEDARRAY) */
 
-#ifndef JERRY_ES2015_ARROW_FUNCTION
-# define JERRY_ES2015_ARROW_FUNCTION JERRY_ES2015
-#endif /* !defined (JERRY_ES2015_ARROW_FUNCTION) */
-
-#ifndef JERRY_ES2015_CLASS
-# define JERRY_ES2015_CLASS JERRY_ES2015
-#endif /* !defined (JERRY_ES2015_CLASS) */
-
-#ifndef JERRY_ES2015_FOR_OF
-# define JERRY_ES2015_FOR_OF JERRY_ES2015
-#endif /* !defined (JERRY_ES2015_FOR_OF) */
-
-#ifndef JERRY_ES2015_FUNCTION_PARAMETER_INITIALIZER
-# define JERRY_ES2015_FUNCTION_PARAMETER_INITIALIZER JERRY_ES2015
-#endif /* !defined (JERRY_ES2015_FUNCTION_PARAMETER_INITIALIZER) */
-
-#ifndef JERRY_ES2015_FUNCTION_REST_PARAMETER
-# define JERRY_ES2015_FUNCTION_REST_PARAMETER JERRY_ES2015
-#endif /* !defined (JERRY_ES2015_FUNCTION_REST_PARAMETER) */
-
-#ifndef JERRY_ES2015_OBJECT_INITIALIZER
-# define JERRY_ES2015_OBJECT_INITIALIZER JERRY_ES2015
-#endif /* !defined (JERRY_ES2015_OBJECT_INITIALIZER) */
-
 #ifndef JERRY_ES2015_MODULE_SYSTEM
 # define JERRY_ES2015_MODULE_SYSTEM JERRY_ES2015
 #endif /* !defined (JERRY_ES2015_MODULE_SYSTEM) */
-
-#ifndef JERRY_ES2015_TEMPLATE_STRINGS
-# define JERRY_ES2015_TEMPLATE_STRINGS JERRY_ES2015
-#endif /* !defined (JERRY_ES2015_TEMPLATE_STRINGS) */
 
 /**
  * Engine internal and misc configurations.
@@ -293,6 +276,15 @@
 #ifndef JERRY_STACK_LIMIT
 # define JERRY_STACK_LIMIT (0)
 #endif /* !defined (JERRY_STACK_LIMIT) */
+
+/**
+ * Maximum depth of recursion during GC mark phase
+ *
+ * Default value: 8
+ */
+#ifndef JERRY_GC_MARK_LIMIT
+# define JERRY_GC_MARK_LIMIT (8)
+#endif /* !defined (JERRY_GC_MARK_LIMIT) */
 
 /**
  * Enable/Disable property lookup cache.
@@ -539,7 +531,6 @@
 # define JERRY_ATTR_GLOBAL_HEAP
 #endif /* !defined (JERRY_ATTR_GLOBAL_HEAP) */
 
-
 /**
  * Sanity check for macros to see if the values are 0 or 1
  *
@@ -600,18 +591,6 @@
 || ((JERRY_ES2015 != 0) && (JERRY_ES2015 != 1))
 # error "Invalid value for JERRY_ES2015 macro."
 #endif
-#if !defined (JERRY_ES2015_ARROW_FUNCTION) \
-|| ((JERRY_ES2015_ARROW_FUNCTION != 0) && (JERRY_ES2015_ARROW_FUNCTION != 1))
-# error "Invalid value for JERRY_ES2015_ARROW_FUNCTION macro."
-#endif
-#if !defined (JERRY_ES2015_BUILTIN) \
-|| ((JERRY_ES2015_BUILTIN != 0) && (JERRY_ES2015_BUILTIN != 1))
-# error "Invalid value for JERRY_ES2015_BUILTIN macro."
-#endif
-#if !defined (JERRY_ES2015_BUILTIN_ITERATOR) \
-|| ((JERRY_ES2015_BUILTIN_ITERATOR != 0) && (JERRY_ES2015_BUILTIN_ITERATOR != 1))
-# error "Invalid value for JERRY_ES2015_BUILTIN_ITERATOR macro."
-#endif
 #if !defined (JERRY_ES2015_BUILTIN_DATAVIEW) \
 || ((JERRY_ES2015_BUILTIN_DATAVIEW != 0) && (JERRY_ES2015_BUILTIN_DATAVIEW != 1))
 # error "Invalid value for JERRY_ES2015_BUILTIN_DATAVIEW macro."
@@ -620,49 +599,37 @@
 || ((JERRY_ES2015_BUILTIN_MAP != 0) && (JERRY_ES2015_BUILTIN_MAP != 1))
 # error "Invalid value for JERRY_ES2015_BUILTIN_MAP macro."
 #endif
+#if !defined (JERRY_ES2015_BUILTIN_REFLECT) \
+|| ((JERRY_ES2015_BUILTIN_REFLECT != 0) && (JERRY_ES2015_BUILTIN_REFLECT != 1))
+# error "Invalid value for JERRY_ES2015_BUILTIN_REFLECT macro."
+#endif
 #if !defined (JERRY_ES2015_BUILTIN_SET) \
 || ((JERRY_ES2015_BUILTIN_SET != 0) && (JERRY_ES2015_BUILTIN_SET != 1))
 # error "Invalid value for JERRY_ES2015_BUILTIN_SET macro."
+#endif
+#if !defined (JERRY_ES2015_BUILTIN_WEAKMAP) \
+|| ((JERRY_ES2015_BUILTIN_WEAKMAP != 0) && (JERRY_ES2015_BUILTIN_WEAKMAP != 1))
+# error "Invalid value for JERRY_ES2015_BUILTIN_WEAKMAP macro."
+#endif
+#if !defined (JERRY_ES2015_BUILTIN_WEAKSET) \
+|| ((JERRY_ES2015_BUILTIN_WEAKSET != 0) && (JERRY_ES2015_BUILTIN_WEAKSET != 1))
+# error "Invalid value for JERRY_ES2015_BUILTIN_WEAKSET macro."
 #endif
 #if !defined (JERRY_ES2015_BUILTIN_PROMISE) \
 || ((JERRY_ES2015_BUILTIN_PROMISE != 0) && (JERRY_ES2015_BUILTIN_PROMISE != 1))
 # error "Invalid value for JERRY_ES2015_BUILTIN_PROMISE macro."
 #endif
-#if !defined (JERRY_ES2015_BUILTIN_SYMBOL) \
-|| ((JERRY_ES2015_BUILTIN_SYMBOL != 0) && (JERRY_ES2015_BUILTIN_SYMBOL != 1))
-# error "Invalid value for JERRY_ES2015_BUILTIN_SYMBOL macro."
+#if !defined (JERRY_ES2015_BUILTIN_PROXY) \
+|| ((JERRY_ES2015_BUILTIN_PROXY != 0) && (JERRY_ES2015_BUILTIN_PROXY != 1))
+# error "Invalid value for JERRY_ES2015_BUILTIN_PROXY macro."
 #endif
 #if !defined (JERRY_ES2015_BUILTIN_TYPEDARRAY) \
 || ((JERRY_ES2015_BUILTIN_TYPEDARRAY != 0) && (JERRY_ES2015_BUILTIN_TYPEDARRAY != 1))
 # error "Invalid value for JERRY_ES2015_BUILTIN_TYPEDARRAY macro."
 #endif
-#if !defined (JERRY_ES2015_CLASS) \
-|| ((JERRY_ES2015_CLASS != 0) && (JERRY_ES2015_CLASS != 1))
-# error "Invalid value for JERRY_ES2015_CLASS macro."
-#endif
-#if !defined (JERRY_ES2015_FOR_OF) \
-|| ((JERRY_ES2015_FOR_OF != 0) && (JERRY_ES2015_FOR_OF != 1))
-# error "Invalid value for JERRY_ES2015_FOR_OF macro."
-#endif
-#if !defined (JERRY_ES2015_FUNCTION_PARAMETER_INITIALIZER) \
-|| ((JERRY_ES2015_FUNCTION_PARAMETER_INITIALIZER != 0) && (JERRY_ES2015_FUNCTION_PARAMETER_INITIALIZER != 1))
-# error "Invalid value for JERRY_ES2015_FUNCTION_PARAMETER_INITIALIZER macro."
-#endif
-#if !defined (JERRY_ES2015_FUNCTION_REST_PARAMETER) \
-|| ((JERRY_ES2015_FUNCTION_REST_PARAMETER != 0) && (JERRY_ES2015_FUNCTION_REST_PARAMETER != 1))
-# error "Invalid value for JERRY_ES2015_FUNCTION_REST_PARAMETER macro."
-#endif
-#if !defined (JERRY_ES2015_OBJECT_INITIALIZER) \
-|| ((JERRY_ES2015_OBJECT_INITIALIZER != 0) && (JERRY_ES2015_OBJECT_INITIALIZER != 1))
-# error "Invalid value for JERRY_ES2015_OBJECT_INITIALIZER macro."
-#endif
 #if !defined (JERRY_ES2015_MODULE_SYSTEM) \
 || ((JERRY_ES2015_MODULE_SYSTEM != 0) && (JERRY_ES2015_MODULE_SYSTEM != 1))
 # error "Invalid value for JERRY_ES2015_MODULE_SYSTEM macro."
-#endif
-#if !defined (JERRY_ES2015_TEMPLATE_STRINGS) \
-|| ((JERRY_ES2015_TEMPLATE_STRINGS != 0) && (JERRY_ES2015_TEMPLATE_STRINGS != 1))
-# error "Invalid value for JERRY_ES2015_TEMPLATE_STRINGS macro."
 #endif
 
 /**
@@ -692,6 +659,9 @@
 #endif
 #if !defined (JERRY_STACK_LIMIT) || (JERRY_STACK_LIMIT < 0)
 # error "Invalid value for 'JERRY_STACK_LIMIT' macro."
+#endif
+#if !defined (JERRY_GC_MARK_LIMIT) || (JERRY_GC_MARK_LIMIT < 0)
+# error "Invalid value for 'JERRY_GC_MARK_LIMIT' macro."
 #endif
 #if !defined (JERRY_LCACHE) \
 || ((JERRY_LCACHE != 0) && (JERRY_LCACHE != 1))
@@ -762,7 +732,6 @@
 # error "Invalid value for 'JERRY_VM_EXEC_STOP' macro."
 #endif
 
-
 #define ENABLED(FEATURE) ((FEATURE) == 1)
 #define DISABLED(FEATURE) ((FEATURE) != 1)
 
@@ -775,6 +744,16 @@
  */
 #if ENABLED (JERRY_BUILTIN_DATE) && !ENABLED (JERRY_NUMBER_TYPE_FLOAT64)
 #  error "Date does not support float32"
+#endif
+
+/**
+ * Wrap container types into a single guard
+ */
+#if ENABLED (JERRY_ES2015_BUILTIN_MAP) || ENABLED (JERRY_ES2015_BUILTIN_SET) \
+|| ENABLED (JERRY_ES2015_BUILTIN_WEAKMAP) || ENABLED (JERRY_ES2015_BUILTIN_WEAKSET)
+# define JERRY_ES2015_BUILTIN_CONTAINER 1
+#else
+# define JERRY_ES2015_BUILTIN_CONTAINER 0
 #endif
 
 #endif /* !JERRYSCRIPT_CONFIG_H */
