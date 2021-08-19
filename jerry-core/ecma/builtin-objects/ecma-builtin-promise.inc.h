@@ -26,7 +26,7 @@
 
 NUMBER_VALUE (LIT_MAGIC_STRING_LENGTH,
               1,
-              ECMA_PROPERTY_FIXED)
+              ECMA_PROPERTY_FLAG_CONFIGURABLE)
 
 /* Object properties:
  *  (property name, object pointer getter) */
@@ -41,6 +41,11 @@ ROUTINE (LIT_MAGIC_STRING_REJECT, ecma_builtin_promise_reject, 1, 1)
 ROUTINE (LIT_MAGIC_STRING_RESOLVE, ecma_builtin_promise_resolve, 1, 1)
 ROUTINE (LIT_MAGIC_STRING_RACE, ecma_builtin_promise_race, 1, 1)
 ROUTINE (LIT_MAGIC_STRING_ALL, ecma_builtin_promise_all, 1, 1)
+
+/* ES2015 25.4.4.6 */
+ACCESSOR_READ_ONLY (LIT_GLOBAL_SYMBOL_SPECIES,
+                    ecma_builtin_promise_species_get,
+                    ECMA_PROPERTY_FLAG_CONFIGURABLE)
 
 #endif /* ENABLED (JERRY_ES2015_BUILTIN_PROMISE) */
 

@@ -34,6 +34,7 @@
 #  define MSG_SIZE_TYPE size_t
 #endif
 
+#if defined (_WIN32) || defined (_WIN64) || !defined (JERRY_NDEBUG) || defined (__APPLE__)
 #if ENABLED (JERRY_MEM_STATS)
 static void
 jerry_dump_memstats_on_error (void)
@@ -64,6 +65,7 @@ jerry_dump_memstats_on_error (void)
   JERRY_ERROR_MSG ("\tpeak allocated memory for properties: %"PRI_SIZET"\n", (MSG_SIZE_TYPE)(jmem_heap_stats.peak_property_bytes));
 }
 #endif
+#endif /* Windows/Mac Or !defined (JERRY_NDEBUG) */
 
 /*
  * Exit with specified status code.
@@ -87,6 +89,11 @@ jerry_fatal (jerry_fatal_code_t code) /**< status code */
       JERRY_ERROR_MSG ("Error: ERR_REF_COUNT_LIMIT\n");
       break;
     }
+    case ERR_UNTERMINATED_GC_LOOPS:
+    {
+      JERRY_ERROR_MSG ("Error: ERR_UNTERMINATED_GC_LOOPS\n");
+      break;
+    }
     case ERR_DISABLED_BYTE_CODE:
     {
       JERRY_ERROR_MSG ("Error: ERR_DISABLED_BYTE_CODE\n");
@@ -107,7 +114,7 @@ jerry_fatal (jerry_fatal_code_t code) /**< status code */
 #if ENABLED (JERRY_MEM_STATS)
   jerry_dump_memstats_on_error ();
 #endif
-#endif
+#endif /* Windows/Mac Or !defined (JERRY_NDEBUG) */
 
   jerry_port_fatal (code);
 

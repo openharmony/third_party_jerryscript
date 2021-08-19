@@ -18,3 +18,5 @@ result = t.exec("abc   abc");
 assert(result[0] === "abc");
 assert(result.index === 0);
 assert(t.lastIndex === 3);
+
+assert(RegExp.prototype.lastIndex === undefined)

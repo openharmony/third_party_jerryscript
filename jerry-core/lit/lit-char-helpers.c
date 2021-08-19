@@ -103,31 +103,32 @@ search_char_in_interval_array (ecma_char_t c,               /**< code unit */
 } /* search_char_in_interval_array */
 
 /**
- * Check if specified character is one of the Whitespace characters including those
- * that fall into "Space, Separator" ("Zs") Unicode character category.
+ * Check if specified character is one of the Whitespace characters including those that fall into
+ * "Space, Separator" ("Zs") Unicode character category or one of the Line Terminator characters.
  *
  * @return true - if the character is one of characters, listed in ECMA-262 v5, Table 2,
  *         false - otherwise
  */
 bool
-lit_char_is_white_space (ecma_char_t c) /**< code unit */
+lit_char_is_white_space (lit_code_point_t c) /**< code point */
 {
   if (c <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
   {
-    return (c == LIT_CHAR_TAB
-            || c == LIT_CHAR_VTAB
-            || c == LIT_CHAR_FF
-            || c == LIT_CHAR_SP);
+    return (c == LIT_CHAR_SP || (c >= LIT_CHAR_TAB && c <= LIT_CHAR_CR));
   }
   else
   {
-    return (c == LIT_CHAR_NBSP
-            || c == LIT_CHAR_BOM
-            || (c >= lit_unicode_separator_char_interval_sps[0]
-                && c <= lit_unicode_separator_char_interval_sps[0] + lit_unicode_separator_char_interval_lengths[0])
-            || search_char_in_char_array (c,
-                                          lit_unicode_separator_chars,
-                                          NUM_OF_ELEMENTS (lit_unicode_separator_chars)));
+    if (c == LIT_CHAR_NBSP || c == LIT_CHAR_BOM || c == LIT_CHAR_LS || c == LIT_CHAR_PS)
+    {
+      return true;
+    }
+
+    return (c <= LIT_UTF16_CODE_UNIT_MAX
+            && ((c >= lit_unicode_separator_char_interval_sps[0]
+                 && c < lit_unicode_separator_char_interval_sps[0] + lit_unicode_separator_char_interval_lengths[0])
+                || search_char_in_char_array ((ecma_char_t) c,
+                                              lit_unicode_separator_chars,
+                                              NUM_OF_ELEMENTS (lit_unicode_separator_chars))));
   }
 } /* lit_char_is_white_space */
 
@@ -201,72 +202,34 @@ lit_char_is_unicode_non_letter_ident_part (ecma_char_t c) /**< code unit */
 } /* lit_char_is_unicode_non_letter_ident_part */
 
 /**
- * Checks whether the next UTF8 character is a valid identifier start.
- *
- * @return true if it is.
- */
-bool
-lit_char_is_identifier_start (const uint8_t *src_p) /**< pointer to a vaild UTF8 character */
-{
-  if (*src_p <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
-  {
-    return lit_char_is_identifier_start_character (*src_p);
-  }
-
-  /* ECMAScript 2015 specification allows some code points in supplementary plane.
-   * However, we don't permit characters in supplementary characters as start of identifier.
-   */
-  if ((*src_p & LIT_UTF8_4_BYTE_MASK) == LIT_UTF8_4_BYTE_MARKER)
-  {
-    return false;
-  }
-
-  return lit_char_is_identifier_start_character (lit_utf8_peek_next (src_p));
-} /* lit_char_is_identifier_start */
-
-/**
  * Checks whether the character is a valid identifier start.
  *
  * @return true if it is.
  */
 bool
-lit_char_is_identifier_start_character (uint16_t chr) /**< EcmaScript character */
+lit_code_point_is_identifier_start (lit_code_point_t code_point) /**< code point */
 {
   /* Fast path for ASCII-defined letters. */
-  if (chr <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
+  if (code_point <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
   {
-    return ((LEXER_TO_ASCII_LOWERCASE (chr) >= LIT_CHAR_LOWERCASE_A
-             && LEXER_TO_ASCII_LOWERCASE (chr) <= LIT_CHAR_LOWERCASE_Z)
-            || chr == LIT_CHAR_DOLLAR_SIGN
-            || chr == LIT_CHAR_UNDERSCORE);
+    return ((LEXER_TO_ASCII_LOWERCASE (code_point) >= LIT_CHAR_LOWERCASE_A
+             && LEXER_TO_ASCII_LOWERCASE (code_point) <= LIT_CHAR_LOWERCASE_Z)
+            || code_point == LIT_CHAR_DOLLAR_SIGN
+            || code_point == LIT_CHAR_UNDERSCORE);
   }
 
-  return lit_char_is_unicode_letter (chr);
-} /* lit_char_is_identifier_start_character */
-
-/**
- * Checks whether the next UTF8 character is a valid identifier part.
- *
- * @return true if it is.
- */
-bool
-lit_char_is_identifier_part (const uint8_t *src_p) /**< pointer to a vaild UTF8 character */
-{
-  if (*src_p <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
+#if ENABLED (JERRY_ES2015)
+  if (code_point >= LIT_UTF8_4_BYTE_CODE_POINT_MIN)
   {
-    return lit_char_is_identifier_part_character (*src_p);
+    /* TODO: detect these ranges correctly. */
+    return (code_point >= 0x10C80 && code_point <= 0x10CF2);
   }
+#else /* !ENABLED (JERRY_ES2015) */
+  JERRY_ASSERT (code_point <= LIT_UTF8_4_BYTE_CODE_POINT_MIN);
+#endif /* ENABLED (JERRY_ES2015) */
 
-  /* ECMAScript 2015 specification allows some code points in supplementary plane.
-   * However, we don't permit characters in supplementary characters as part of identifier.
-   */
-  if ((*src_p & LIT_UTF8_4_BYTE_MASK) == LIT_UTF8_4_BYTE_MARKER)
-  {
-    return false;
-  }
-
-  return lit_char_is_identifier_part_character (lit_utf8_peek_next (src_p));
-} /* lit_char_is_identifier_part */
+  return lit_char_is_unicode_letter ((ecma_char_t) code_point);
+} /* lit_code_point_is_identifier_start */
 
 /**
  * Checks whether the character is a valid identifier part.
@@ -274,21 +237,31 @@ lit_char_is_identifier_part (const uint8_t *src_p) /**< pointer to a vaild UTF8 
  * @return true if it is.
  */
 bool
-lit_char_is_identifier_part_character (uint16_t chr) /**< EcmaScript character */
+lit_code_point_is_identifier_part (lit_code_point_t code_point) /**< code point */
 {
   /* Fast path for ASCII-defined letters. */
-  if (chr <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
+  if (code_point <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
   {
-    return ((LEXER_TO_ASCII_LOWERCASE (chr) >= LIT_CHAR_LOWERCASE_A
-             && LEXER_TO_ASCII_LOWERCASE (chr) <= LIT_CHAR_LOWERCASE_Z)
-            || (chr >= LIT_CHAR_0 && chr <= LIT_CHAR_9)
-            || chr == LIT_CHAR_DOLLAR_SIGN
-            || chr == LIT_CHAR_UNDERSCORE);
+    return ((LEXER_TO_ASCII_LOWERCASE (code_point) >= LIT_CHAR_LOWERCASE_A
+             && LEXER_TO_ASCII_LOWERCASE (code_point) <= LIT_CHAR_LOWERCASE_Z)
+            || (code_point >= LIT_CHAR_0 && code_point <= LIT_CHAR_9)
+            || code_point == LIT_CHAR_DOLLAR_SIGN
+            || code_point == LIT_CHAR_UNDERSCORE);
   }
 
-  return (lit_char_is_unicode_letter (chr)
-          || lit_char_is_unicode_non_letter_ident_part (chr));
-} /* lit_char_is_identifier_part_character */
+#if ENABLED (JERRY_ES2015)
+  if (code_point >= LIT_UTF8_4_BYTE_CODE_POINT_MIN)
+  {
+    /* TODO: detect these ranges correctly. */
+    return (code_point >= 0x10C80 && code_point <= 0x10CF2);
+  }
+#else /* !ENABLED (JERRY_ES2015) */
+  JERRY_ASSERT (code_point <= LIT_UTF8_4_BYTE_CODE_POINT_MIN);
+#endif /* ENABLED (JERRY_ES2015) */
+
+  return (lit_char_is_unicode_letter ((ecma_char_t) code_point)
+          || lit_char_is_unicode_non_letter_ident_part ((ecma_char_t) code_point));
+} /* lit_code_point_is_identifier_part */
 
 /**
  * Check if specified character is one of OctalDigit characters (ECMA-262 v5, B.1.2)
@@ -325,6 +298,19 @@ lit_char_is_hex_digit (ecma_char_t c) /**< code unit */
               && LEXER_TO_ASCII_LOWERCASE (c) <= LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_END));
 } /* lit_char_is_hex_digit */
 
+#if ENABLED (JERRY_ES2015)
+/**
+ * Check if specified character is one of BinaryDigits characters (ECMA-262 v6, 11.8.3)
+ *
+ * @return true / false
+ */
+bool
+lit_char_is_binary_digit (ecma_char_t c) /** code unit */
+{
+  return (c == LIT_CHAR_0 || c == LIT_CHAR_1);
+} /* lit_char_is_binary_digit */
+#endif /* ENABLED (JERRY_ES2015) */
+
 /**
  * Convert a HexDigit character to its numeric value, as defined in ECMA-262 v5, 7.8.3
  *
@@ -356,30 +342,47 @@ lit_char_hex_to_int (ecma_char_t c) /**< code unit, corresponding to
  * @return length of the UTF8 representation.
  */
 size_t
-lit_char_to_utf8_bytes (uint8_t *dst_p, /**< destination buffer */
-                        ecma_char_t chr) /**< EcmaScript character */
+lit_code_point_to_cesu8_bytes (uint8_t *dst_p, /**< destination buffer */
+                               lit_code_point_t code_point) /**< code point */
 {
-  if (!(chr & ~LIT_UTF8_1_BYTE_CODE_POINT_MAX))
+  if (code_point < LIT_UTF8_2_BYTE_CODE_POINT_MIN)
   {
     /* 00000000 0xxxxxxx -> 0xxxxxxx */
-    *dst_p = (uint8_t) chr;
+    dst_p[0] = (uint8_t) code_point;
     return 1;
   }
 
-  if (!(chr & ~LIT_UTF8_2_BYTE_CODE_POINT_MAX))
+  if (code_point < LIT_UTF8_3_BYTE_CODE_POINT_MIN)
   {
     /* 00000yyy yyxxxxxx -> 110yyyyy 10xxxxxx */
-    *(dst_p++) = (uint8_t) (LIT_UTF8_2_BYTE_MARKER | ((chr >> 6) & LIT_UTF8_LAST_5_BITS_MASK));
-    *dst_p = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | (chr & LIT_UTF8_LAST_6_BITS_MASK));
+    dst_p[0] = (uint8_t) (LIT_UTF8_2_BYTE_MARKER | ((code_point >> 6) & LIT_UTF8_LAST_5_BITS_MASK));
+    dst_p[1] = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | (code_point & LIT_UTF8_LAST_6_BITS_MASK));
     return 2;
   }
 
-  /* zzzzyyyy yyxxxxxx -> 1110zzzz 10yyyyyy 10xxxxxx */
-  *(dst_p++) = (uint8_t) (LIT_UTF8_3_BYTE_MARKER | ((chr >> 12) & LIT_UTF8_LAST_4_BITS_MASK));
-  *(dst_p++) = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | ((chr >> 6) & LIT_UTF8_LAST_6_BITS_MASK));
-  *dst_p = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | (chr & LIT_UTF8_LAST_6_BITS_MASK));
-  return 3;
-} /* lit_char_to_utf8_bytes */
+  if (code_point < LIT_UTF8_4_BYTE_CODE_POINT_MIN)
+  {
+    /* zzzzyyyy yyxxxxxx -> 1110zzzz 10yyyyyy 10xxxxxx */
+    dst_p[0] = (uint8_t) (LIT_UTF8_3_BYTE_MARKER | ((code_point >> 12) & LIT_UTF8_LAST_4_BITS_MASK));
+    dst_p[1] = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | ((code_point >> 6) & LIT_UTF8_LAST_6_BITS_MASK));
+    dst_p[2] = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | (code_point & LIT_UTF8_LAST_6_BITS_MASK));
+    return 3;
+  }
+
+  JERRY_ASSERT (code_point <= LIT_UNICODE_CODE_POINT_MAX);
+
+  code_point -= LIT_UTF8_4_BYTE_CODE_POINT_MIN;
+
+  dst_p[0] = (uint8_t) (LIT_UTF8_3_BYTE_MARKER | 0xd);
+  dst_p[1] = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | 0x20 | ((code_point >> 16) & LIT_UTF8_LAST_4_BITS_MASK));
+  dst_p[2] = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | ((code_point >> 10) & LIT_UTF8_LAST_6_BITS_MASK));
+
+  dst_p[3] = (uint8_t) (LIT_UTF8_3_BYTE_MARKER | 0xd);
+  dst_p[4] = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | 0x30 | ((code_point >> 6) & LIT_UTF8_LAST_4_BITS_MASK));
+  dst_p[5] = (uint8_t) (LIT_UTF8_EXTRA_BYTE_MARKER | (code_point & LIT_UTF8_LAST_6_BITS_MASK));
+
+  return 3 * 2;
+} /* lit_code_point_to_cesu8_bytes */
 
 /**
  * Returns the length of the UTF8 representation of a character.
@@ -387,70 +390,112 @@ lit_char_to_utf8_bytes (uint8_t *dst_p, /**< destination buffer */
  * @return length of the UTF8 representation.
  */
 size_t
-lit_char_get_utf8_length (ecma_char_t chr) /**< EcmaScript character */
+lit_code_point_get_cesu8_length (lit_code_point_t code_point) /**< code point */
 {
-  if (!(chr & ~LIT_UTF8_1_BYTE_CODE_POINT_MAX))
+  if (code_point < LIT_UTF8_2_BYTE_CODE_POINT_MIN)
   {
     /* 00000000 0xxxxxxx */
     return 1;
   }
 
-  if (!(chr & ~LIT_UTF8_2_BYTE_CODE_POINT_MAX))
+  if (code_point < LIT_UTF8_3_BYTE_CODE_POINT_MIN)
   {
     /* 00000yyy yyxxxxxx */
     return 2;
   }
 
-  /* zzzzyyyy yyxxxxxx */
-  return 3;
-} /* lit_char_get_utf8_length */
-
-/**
- * Parse the next number_of_characters hexadecimal character,
- * and construct a code unit from them. The buffer must
- * be zero terminated.
- *
- * @return true if decoding was successful, false otherwise
- */
-bool
-lit_read_code_unit_from_hex (const lit_utf8_byte_t *buf_p, /**< buffer with characters */
-                             lit_utf8_size_t number_of_characters, /**< number of characters to be read */
-                             ecma_char_t *out_code_unit_p) /**< [out] decoded result */
-{
-  ecma_char_t code_unit = LIT_CHAR_NULL;
-
-  JERRY_ASSERT (number_of_characters >= 2 && number_of_characters <= 4);
-
-  for (lit_utf8_size_t i = 0; i < number_of_characters; i++)
+  if (code_point < LIT_UTF8_4_BYTE_CODE_POINT_MIN)
   {
-    code_unit = (ecma_char_t) (code_unit << 4u);
-
-    if (*buf_p >= LIT_CHAR_ASCII_DIGITS_BEGIN
-        && *buf_p <= LIT_CHAR_ASCII_DIGITS_END)
-    {
-      code_unit |= (ecma_char_t) (*buf_p - LIT_CHAR_ASCII_DIGITS_BEGIN);
-    }
-    else if (*buf_p >= LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_BEGIN
-             && *buf_p <= LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_END)
-    {
-      code_unit |= (ecma_char_t) (*buf_p - (LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_BEGIN - 10));
-    }
-    else if (*buf_p >= LIT_CHAR_ASCII_UPPERCASE_LETTERS_HEX_BEGIN
-             && *buf_p <= LIT_CHAR_ASCII_UPPERCASE_LETTERS_HEX_END)
-    {
-      code_unit |= (ecma_char_t) (*buf_p - (LIT_CHAR_ASCII_UPPERCASE_LETTERS_HEX_BEGIN - 10));
-    }
-    else
-    {
-      return false;
-    }
-
-    buf_p++;
+    /* zzzzyyyy yyxxxxxx */
+    return 3;
   }
 
-  *out_code_unit_p = code_unit;
-  return true;
-} /* lit_read_code_unit_from_hex */
+  /* high + low surrogate */
+  return 2 * 3;
+} /* lit_code_point_get_cesu8_length */
+
+/**
+ * Convert a four byte long utf8 character to two three byte long cesu8 characters
+ */
+void
+lit_four_byte_utf8_char_to_cesu8 (uint8_t *dst_p, /**< destination buffer */
+                                  const uint8_t *source_p) /**< source buffer */
+{
+  lit_code_point_t code_point = ((((uint32_t) source_p[0]) & LIT_UTF8_LAST_3_BITS_MASK) << 18);
+  code_point |= ((((uint32_t) source_p[1]) & LIT_UTF8_LAST_6_BITS_MASK) << 12);
+  code_point |= ((((uint32_t) source_p[2]) & LIT_UTF8_LAST_6_BITS_MASK) << 6);
+  code_point |= (((uint32_t) source_p[3]) & LIT_UTF8_LAST_6_BITS_MASK);
+
+  lit_code_point_to_cesu8_bytes (dst_p, code_point);
+} /* lit_four_byte_utf8_char_to_cesu8 */
+
+/**
+ * Lookup hex digits in a buffer
+ *
+ * @return UINT32_MAX - if next 'lookup' number of characters do not form a valid hex number
+ *         value of hex number, otherwise
+ */
+uint32_t
+lit_char_hex_lookup (const lit_utf8_byte_t *buf_p, /**< buffer */
+                     const lit_utf8_byte_t *const buf_end_p, /**< buffer end */
+                     uint32_t lookup) /**< size of lookup */
+{
+  JERRY_ASSERT (lookup <= 4);
+
+  if (JERRY_UNLIKELY (buf_p + lookup > buf_end_p))
+  {
+    return UINT32_MAX;
+  }
+
+  uint32_t value = 0;
+
+  while (lookup--)
+  {
+    lit_utf8_byte_t ch = *buf_p++;
+    if (!lit_char_is_hex_digit (ch))
+    {
+      return UINT32_MAX;
+    }
+
+    value <<= 4;
+    value += lit_char_hex_to_int (ch);
+  }
+
+  JERRY_ASSERT (value <= LIT_UTF16_CODE_UNIT_MAX);
+  return value;
+} /* lit_char_hex_lookup */
+
+/**
+ * Parse a decimal number with the value clamped to UINT32_MAX.
+ *
+ * @returns uint32_t number
+ */
+uint32_t
+lit_parse_decimal (const lit_utf8_byte_t **buffer_p, /**< [in/out] character buffer */
+                   const lit_utf8_byte_t *buffer_end_p) /**< buffer end */
+{
+  const lit_utf8_byte_t *current_p = *buffer_p;
+  JERRY_ASSERT (lit_char_is_decimal_digit (*current_p));
+
+  uint32_t value = (uint32_t) (*current_p++ - LIT_CHAR_0);
+
+  while (current_p < buffer_end_p && lit_char_is_decimal_digit (*current_p))
+  {
+    const uint32_t digit = (uint32_t) (*current_p++ - LIT_CHAR_0);
+    uint32_t new_value = value * 10 + digit;
+
+    if (JERRY_UNLIKELY (value > UINT32_MAX / 10) || JERRY_UNLIKELY (new_value < value))
+    {
+      value = UINT32_MAX;
+      continue;
+    }
+
+    value = new_value;
+  }
+
+  *buffer_p = current_p;
+  return value;
+} /* lit_parse_decimal */
 
 /**
  * Check if specified character is a word character (part of IsWordChar abstract operation)
@@ -461,7 +506,7 @@ lit_read_code_unit_from_hex (const lit_utf8_byte_t *buf_p, /**< buffer with char
  *         false - otherwise
  */
 bool
-lit_char_is_word_char (ecma_char_t c) /**< code unit */
+lit_char_is_word_char (lit_code_point_t c) /**< code point */
 {
   return ((c >= LIT_CHAR_ASCII_LOWERCASE_LETTERS_BEGIN && c <= LIT_CHAR_ASCII_LOWERCASE_LETTERS_END)
           || (c >= LIT_CHAR_ASCII_UPPERCASE_LETTERS_BEGIN && c <= LIT_CHAR_ASCII_UPPERCASE_LETTERS_END)

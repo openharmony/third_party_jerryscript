@@ -123,3 +123,37 @@ m = new Map([{0: "foo", 1: 3}, {0 : "bar", 1 : 2}]);
 assert (m.size === 2);
 assert (m.get("foo") === 3);
 assert (m.get("bar") === 2);
+
+function createIterable(arr, methods = {}) {
+  let iterable = function *() {
+    let idx = 0;
+    while (idx < arr.length) {
+      yield arr[idx];
+      idx++;
+    }
+  }();
+  iterable['return'] = methods['return'];
+  iterable['throw'] = methods['throw'];
+
+  return iterable;
+};
+
+var closed = false;
+var iter = createIterable([1, 2, 3], {
+  'return': function(){ closed = true; return {}; }
+});
+try {
+  new Map(iter);
+} catch(e){}
+
+assert(closed === true);
+
+var map = new Map();
+map.set(-0, "foo");
+var k;
+map.forEach(function (value, key) {
+  k = 1 / key;
+});
+
+assert(k === Infinity);
+assert(map.get(+0) === "foo");

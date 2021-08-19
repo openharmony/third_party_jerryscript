@@ -21,6 +21,7 @@
 
 #include "debugger.h"
 #include "ecma-builtins.h"
+#include "ecma-helpers.h"
 #include "ecma-jobqueue.h"
 #include "jerryscript-port.h"
 #include "jmem.h"
@@ -129,7 +130,7 @@ struct jerry_context_t
   /* Update JERRY_CONTEXT_FIRST_MEMBER if the first non-external member changes */
   jmem_cpointer_t ecma_builtin_objects[ECMA_BUILTIN_ID__COUNT]; /**< pointer to instances of built-in objects */
 #if ENABLED (JERRY_BUILTIN_REGEXP)
-  const re_compiled_code_t *re_cache[RE_CACHE_SIZE]; /**< regex cache */
+  re_compiled_code_t *re_cache[RE_CACHE_SIZE]; /**< regex cache */
 #endif /* ENABLED (JERRY_BUILTIN_REGEXP) */
   jmem_cpointer_t ecma_gc_objects_cp; /**< List of currently alive objects. */
   jmem_heap_free_t *jmem_heap_list_skip_p; /**< This is used to speed up deallocation. */
@@ -140,11 +141,14 @@ struct jerry_context_t
   const lit_utf8_byte_t * const *lit_magic_string_ex_array; /**< array of external magic strings */
   const lit_utf8_size_t *lit_magic_string_ex_sizes; /**< external magic string lengths */
   jmem_cpointer_t string_list_first_cp; /**< first item of the literal string list */
-#if ENABLED (JERRY_ES2015_BUILTIN_SYMBOL)
+#if ENABLED (JERRY_ES2015)
   jmem_cpointer_t symbol_list_first_cp; /**< first item of the global symbol list */
-#endif /* ENABLED (JERRY_ES2015_BUILTIN_SYMBOL) */
+#endif /* ENABLED (JERRY_ES2015) */
   jmem_cpointer_t number_list_first_cp; /**< first item of the literal number list */
-  jmem_cpointer_t ecma_global_lex_env_cp; /**< global lexical environment */
+  jmem_cpointer_t ecma_global_env_cp; /**< global lexical environment */
+#if ENABLED (JERRY_ES2015)
+  jmem_cpointer_t ecma_global_scope_cp; /**< global lexical scope */
+#endif /* ENABLED (JERRY_ES2015) */
 
 #if ENABLED (JERRY_ES2015_MODULE_SYSTEM)
   ecma_module_t *ecma_modules_p; /**< list of referenced modules */
@@ -162,6 +166,9 @@ struct jerry_context_t
   uint32_t lit_magic_string_ex_count; /**< external magic strings count */
   uint32_t jerry_init_flags; /**< run-time configuration flags */
   uint32_t status_flags; /**< run-time flags (the top 8 bits are used for passing class parsing options) */
+#if (JERRY_GC_MARK_LIMIT != 0)
+  uint32_t ecma_gc_mark_recursion_limit; /**< GC mark recursion limit */
+#endif /* (JERRY_GC_MARK_LIMIT != 0) */
 
 #if ENABLED (JERRY_PROPRETY_HASHMAP)
   uint8_t ecma_prop_hashmap_alloc_state; /**< property hashmap allocation state: 0-4,
@@ -173,8 +180,8 @@ struct jerry_context_t
 #endif /* ENABLED (JERRY_BUILTIN_REGEXP) */
 
 #if ENABLED (JERRY_ES2015_BUILTIN_PROMISE)
-  ecma_job_queueitem_t *job_queue_head_p; /**< points to the head item of the jobqueue */
-  ecma_job_queueitem_t *job_queue_tail_p; /**< points to the tail item of the jobqueue*/
+  ecma_job_queue_item_t *job_queue_head_p; /**< points to the head item of the job queue */
+  ecma_job_queue_item_t *job_queue_tail_p; /**< points to the tail item of the job queue */
 #endif /* ENABLED (JERRY_ES2015_BUILTIN_PROMISE) */
 
 #if ENABLED (JERRY_VM_EXEC_STOP)
@@ -195,8 +202,8 @@ struct jerry_context_t
   jerry_debugger_transport_header_t *debugger_transport_header_p; /**< head of transport protocol chain */
   uint8_t *debugger_send_buffer_payload_p; /**< start where the outgoing message can be written */
   vm_frame_ctx_t *debugger_stop_context; /**< stop only if the current context is equal to this context */
-  uint8_t *debugger_exception_byte_code_p; /**< Location of the currently executed byte code if an
-                                            *   error occours while the vm_loop is suspended */
+  const uint8_t *debugger_exception_byte_code_p; /**< Location of the currently executed byte code if an
+                                                  *   error occours while the vm_loop is suspended */
   jmem_cpointer_t debugger_byte_code_free_head; /**< head of byte code free linked list */
   jmem_cpointer_t debugger_byte_code_free_tail; /**< tail of byte code free linked list */
   uint32_t debugger_flags; /**< debugger flags */
@@ -220,13 +227,23 @@ struct jerry_context_t
   ecma_lcache_hash_entry_t lcache[ECMA_LCACHE_HASH_ROWS_COUNT][ECMA_LCACHE_HASH_ROW_LENGTH];
 #endif /* ENABLED (JERRY_LCACHE) */
 
+#if ENABLED (JERRY_ES2015)
+  /**
+   * Allowed values and it's meaning:
+   * * NULL (0x0): the current "new.target" is undefined, that is the execution is inside a normal method.
+   * * Any other valid function object pointer: the current "new.target" is valid and it is constructor call.
+   */
+  ecma_object_t *current_new_target;
+  ecma_object_t *current_function_obj_p; /** currently invoked function object
+                                             (Note: currently used only in generator functions) */
+#endif /* ENABLED (JERRY_ES2015) */
+
 #ifdef JERRY_FOR_IAR_CONFIG
 #if ENABLED (JERRY_EXTERNAL_CONTEXT)
   fatal_handler_t jerry_fatal_handler; /* js task fatal handler */
 #endif  /* ENABLED (JERRY_EXTERNAL_CONTEXT) */
 #endif // not defined JERRY_FOR_IAR_CONFIG
 };
-
 
 #if ENABLED (JERRY_EXTERNAL_CONTEXT)
 
@@ -235,6 +252,7 @@ struct jerry_context_t
  */
 extern jerry_context_t *jerry_dynamic_global_context_p;
 
+#define JERRY_CONTEXT_STRUCT (*jerry_dynamic_global_context_p)
 #define JERRY_CONTEXT(field) (jerry_dynamic_global_context_p->field)
 
 #if !ENABLED (JERRY_SYSTEM_ALLOCATOR)
@@ -263,6 +281,11 @@ struct jmem_heap_t
  * Global context.
  */
 extern jerry_context_t jerry_global_context;
+
+/**
+ * Config-independent name for context.
+ */
+#define JERRY_CONTEXT_STRUCT (jerry_global_context)
 
 /**
  * Provides a reference to a field in the current context.
@@ -300,6 +323,27 @@ extern jmem_heap_t jerry_global_heap;
 #endif /* !ENABLED (JERRY_SYSTEM_ALLOCATOR) */
 
 #endif /* ENABLED (JERRY_EXTERNAL_CONTEXT) */
+
+void
+jcontext_set_exception_flag (bool is_exception);
+
+void
+jcontext_set_abort_flag (bool is_abort);
+
+bool
+jcontext_has_pending_exception (void);
+
+bool
+jcontext_has_pending_abort (void);
+
+void
+jcontext_raise_exception (ecma_value_t error);
+
+void
+jcontext_release_exception (void);
+
+ecma_value_t
+jcontext_take_exception (void);
 
 /**
  * @}

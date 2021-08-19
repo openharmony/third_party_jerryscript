@@ -43,20 +43,19 @@ void PrintObjectProperties(ecma_object_t* object)
                                                                    prop_pair_p->names_cp[i]);
         ecma_property_value_t prop_value_p = prop_pair_p->values[i];
 
-        ecma_value_t value_value;
+        ecma_string_t *string_value;
         if (ecma_is_value_object(prop_value_p.value)) {
           // Expand it more?
-          value_value = ecma_op_to_string (prop_value_p.value);
+          string_value = ecma_op_to_string (prop_value_p.value);
         } else {
-          value_value = ecma_op_to_string (prop_value_p.value);
+          string_value = ecma_op_to_string (prop_value_p.value);
         }
         // handle value_value is error value?
-        ecma_string_t *str_p = ecma_get_string_from_value(value_value);
-        JERRY_ASSERT (str_p != NULL);
+        JERRY_ASSERT (string_value != NULL);
 
         ecma_string_t* separator_str = ecma_new_ecma_string_from_utf8((const lit_utf8_byte_t *)" :> ", 4);
         prop_name = ecma_concat_ecma_strings(prop_name, separator_str);
-        prop_name = ecma_concat_ecma_strings(prop_name, str_p);
+        prop_name = ecma_concat_ecma_strings(prop_name, string_value);
 
         ECMA_STRING_TO_UTF8_STRING(prop_name, buf, buf_size);
         printf("PROPERTY PAIR : ");
@@ -66,7 +65,7 @@ void PrintObjectProperties(ecma_object_t* object)
 	printf("\n");
 
         ecma_deref_ecma_string(prop_name);
-        ecma_deref_ecma_string(str_p);
+        ecma_deref_ecma_string(string_value);
         ecma_deref_ecma_string(separator_str);
       }
     }

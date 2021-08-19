@@ -38,6 +38,7 @@ OPTIONS_PROFILE_MIN = ['--profile=minimal']
 OPTIONS_PROFILE_ES51 = [] # NOTE: same as ['--profile=es5.1']
 OPTIONS_PROFILE_ES2015 = ['--profile=es2015-subset']
 OPTIONS_STACK_LIMIT = ['--stack-limit=96']
+OPTIONS_GC_MARK_LIMIT = ['--gc-mark-limit=16']
 OPTIONS_DEBUG = ['--debug']
 OPTIONS_SNAPSHOT = ['--snapshot-save=on', '--snapshot-exec=on', '--jerry-cmdline-snapshot=on']
 OPTIONS_UNITTESTS = ['--unittests=on', '--jerry-cmdline=off', '--error-messages=on',
@@ -75,22 +76,23 @@ JERRY_UNITTESTS_OPTIONS = [
 # Test options for jerry-tests
 JERRY_TESTS_OPTIONS = [
     Options('jerry_tests-es2015_subset-debug',
-            OPTIONS_COMMON + OPTIONS_PROFILE_ES2015 + OPTIONS_DEBUG + OPTIONS_STACK_LIMIT),
+            OPTIONS_COMMON + OPTIONS_PROFILE_ES2015 + OPTIONS_DEBUG + OPTIONS_STACK_LIMIT + OPTIONS_GC_MARK_LIMIT),
     Options('jerry_tests-es5.1',
-            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_STACK_LIMIT),
+            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_STACK_LIMIT + OPTIONS_GC_MARK_LIMIT),
     Options('jerry_tests-es5.1-snapshot',
-            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_SNAPSHOT + OPTIONS_STACK_LIMIT,
+            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_SNAPSHOT + OPTIONS_STACK_LIMIT + OPTIONS_GC_MARK_LIMIT,
             ['--snapshot']),
     Options('jerry_tests-es5.1-debug',
-            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_DEBUG + OPTIONS_STACK_LIMIT),
+            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_DEBUG + OPTIONS_STACK_LIMIT + OPTIONS_GC_MARK_LIMIT),
     Options('jerry_tests-es5.1-debug-snapshot',
-            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_SNAPSHOT + OPTIONS_DEBUG + OPTIONS_STACK_LIMIT,
-            ['--snapshot']),
+            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_SNAPSHOT + OPTIONS_DEBUG + OPTIONS_STACK_LIMIT
+            + OPTIONS_GC_MARK_LIMIT, ['--snapshot']),
     Options('jerry_tests-es5.1-debug-cpointer_32bit',
-            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_DEBUG + OPTIONS_STACK_LIMIT
+            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_DEBUG + OPTIONS_STACK_LIMIT + OPTIONS_GC_MARK_LIMIT
             + ['--cpointer-32bit=on', '--mem-heap=1024']),
     Options('jerry_tests-es5.1-debug-external_context',
-            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_DEBUG + OPTIONS_STACK_LIMIT + ['--external-context=on']),
+            OPTIONS_COMMON + OPTIONS_PROFILE_ES51 + OPTIONS_DEBUG + OPTIONS_STACK_LIMIT + OPTIONS_GC_MARK_LIMIT
+            + ['--external-context=on']),
 ]
 
 # Test options for jerry-test-suite
@@ -120,6 +122,11 @@ JERRY_TEST_SUITE_OPTIONS.extend([
 TEST262_TEST_SUITE_OPTIONS = [
     Options('test262_tests'),
     Options('test262_tests-debug', OPTIONS_DEBUG)
+]
+
+# Test options for test262-es2015
+TEST262_ES2015_TEST_SUITE_OPTIONS = [
+    Options('test262_tests_es2015', OPTIONS_PROFILE_ES2015 + ['--line-info=on', '--error-messages=on']),
 ]
 
 # Test options for jerry-debugger
@@ -169,8 +176,12 @@ JERRY_BUILDOPTIONS = [
             ['--jerry-cmdline-snapshot=on']),
     Options('buildoption_test-recursion_limit',
             OPTIONS_STACK_LIMIT),
+    Options('buildoption_test-gc-mark_limit',
+            OPTIONS_GC_MARK_LIMIT),
     Options('buildoption_test-single-source',
             ['--cmake-param=-DENABLE_ALL_IN_ONE_SOURCE=ON']),
+    Options('buildoption_test-jerry-debugger',
+            ['--jerry-debugger=on']),
 ]
 
 def get_arguments():
@@ -207,7 +218,9 @@ def get_arguments():
     parser.add_argument('--jerry-test-suite', action='store_true',
                         help='Run jerry-test-suite')
     parser.add_argument('--test262', action='store_true',
-                        help='Run test262')
+                        help='Run test262 - ES5.1')
+    parser.add_argument('--test262-es2015', action='store_true',
+                        help='Run test262 - ES2015')
     parser.add_argument('--unittests', action='store_true',
                         help='Run unittests (including doctests)')
     parser.add_argument('--buildoption-test', action='store_true',
@@ -280,6 +293,7 @@ def create_binary(job, options):
         subprocess.check_output(build_cmd)
         ret = 0
     except subprocess.CalledProcessError as err:
+        print(err.output)
         ret = err.returncode
 
     BINARY_CACHE[binary_key] = (ret, build_dir_path)
@@ -294,7 +308,7 @@ def hash_binary(bin_path):
     hasher = hashlib.sha1()
     with open(bin_path, 'rb') as bin_file:
         buf = bin_file.read(blocksize)
-        while len(buf) > 0:
+        while buf:
             hasher.update(buf)
             buf = bin_file.read(blocksize)
     return hasher.hexdigest()
@@ -323,7 +337,8 @@ def iterate_test_runner_jobs(jobs, options):
         else:
             tested_hashes[bin_hash] = build_dir_path
 
-        test_cmd = [settings.TEST_RUNNER_SCRIPT, bin_path]
+        test_cmd = get_platform_cmd_prefix()
+        test_cmd.extend([settings.TEST_RUNNER_SCRIPT, '--engine', bin_path])
 
         yield job, ret_build, test_cmd
 
@@ -373,6 +388,7 @@ def run_jerry_tests(options):
         if ret_build:
             break
 
+        test_cmd.append('--test-dir')
         test_cmd.append(settings.JERRY_TESTS_DIR)
 
         if options.quiet:
@@ -381,9 +397,9 @@ def run_jerry_tests(options):
         skip_list = []
 
         if '--profile=es2015-subset' in job.build_args:
-            skip_list.append(r"es5.1\/")
+            skip_list.append(os.path.join('es5.1', ''))
         else:
-            skip_list.append(r"es2015\/")
+            skip_list.append(os.path.join('es2015', ''))
 
         if options.skip_list:
             skip_list.append(options.skip_list)
@@ -404,18 +420,27 @@ def run_jerry_test_suite(options):
         if ret_build:
             break
 
+        skip_list = []
+
         if '--profile=minimal' in job.build_args:
+            test_cmd.append('--test-list')
             test_cmd.append(settings.JERRY_TEST_SUITE_MINIMAL_LIST)
-        elif '--profile=es2015-subset' in job.build_args:
-            test_cmd.append(settings.JERRY_TEST_SUITE_DIR)
         else:
-            test_cmd.append(settings.JERRY_TEST_SUITE_ES51_LIST)
+            test_cmd.append('--test-dir')
+            test_cmd.append(settings.JERRY_TEST_SUITE_DIR)
+            if '--profile=es2015-subset' in job.build_args:
+                skip_list.append(os.path.join('es5.1', ''))
+            else:
+                skip_list.append(os.path.join('es2015', ''))
 
         if options.quiet:
             test_cmd.append("-q")
 
         if options.skip_list:
-            test_cmd.append("--skip-list=" + options.skip_list)
+            skip_list.append(options.skip_list)
+
+        if skip_list:
+            test_cmd.append("--skip-list=" + ",".join(skip_list))
 
         if job.test_args:
             test_cmd.extend(job.test_args)
@@ -426,7 +451,14 @@ def run_jerry_test_suite(options):
 
 def run_test262_test_suite(options):
     ret_build = ret_test = 0
-    for job in TEST262_TEST_SUITE_OPTIONS:
+
+    jobs = []
+    if options.test262:
+        jobs.extend(TEST262_TEST_SUITE_OPTIONS)
+    if options.test262_es2015:
+        jobs.extend(TEST262_ES2015_TEST_SUITE_OPTIONS)
+
+    for job in jobs:
         ret_build, build_dir_path = create_binary(job, options)
         if ret_build:
             print("\n%sBuild failed%s\n" % (TERM_RED, TERM_NORMAL))
@@ -434,9 +466,14 @@ def run_test262_test_suite(options):
 
         test_cmd = get_platform_cmd_prefix() + [
             settings.TEST262_RUNNER_SCRIPT,
-            get_binary_path(build_dir_path),
-            settings.TEST262_TEST_SUITE_DIR
+            '--engine', get_binary_path(build_dir_path),
+            '--test-dir', settings.TEST262_TEST_SUITE_DIR
         ]
+
+        if '--profile=es2015-subset' in job.build_args:
+            test_cmd.append('--es2015')
+        else:
+            test_cmd.append('--es51')
 
         if job.test_args:
             test_cmd.extend(job.test_args)
@@ -502,7 +539,7 @@ def main(options):
         Check(options.jerry_debugger, run_jerry_debugger_tests, options),
         Check(options.jerry_tests, run_jerry_tests, options),
         Check(options.jerry_test_suite, run_jerry_test_suite, options),
-        Check(options.test262, run_test262_test_suite, options),
+        Check(options.test262 or options.test262_es2015, run_test262_test_suite, options),
         Check(options.unittests, run_unittests, options),
         Check(options.buildoption_test, run_buildoption_test, options),
     ]
