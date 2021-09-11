@@ -27,7 +27,11 @@ uint8_t* js_context_and_heap;
 void JerryPsRamMemInit()
 {
   // memory for js task
+#ifdef INDEPENDENT_HEAP
+  js_context_and_heap = OhosMalloc(MEM_TYPE_JERRY_HEAP, JS_TASK_CONTEXT_AND_HEAP_SIZE_BYTE);
+#else
   js_context_and_heap = OhosMalloc(MEM_TYPE_JERRY_LSRAM, JS_TASK_CONTEXT_AND_HEAP_SIZE_BYTE);
+#endif // INDEPENDENT_HEAP
 }
 
 void JerryBmsPsRamMemInit()
