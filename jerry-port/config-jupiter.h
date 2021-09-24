@@ -12,8 +12,14 @@
 #include "ohos_types.h"
 
 // Maximum size for js and snapshot file
+#ifndef INPUTJS_BUFFER_SIZE
 #define INPUTJS_BUFFER_SIZE (32 * 1024)
+#endif /* INPUTJS_BUFFER_SIZE */
+
+#ifndef SNAPSHOT_BUFFER_SIZE
 #define SNAPSHOT_BUFFER_SIZE (24 * 1024)
+#endif /* SNAPSHOT_BUFFER_SIZE */
+
 #define CONVERTION_RATIO (1024)
 #define CONTEXT_SIZE_FOR_TASK (3)
 
