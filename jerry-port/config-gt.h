@@ -11,8 +11,13 @@
 #include "mc_type.h"
 #include "mc_hal_rtc.h"
 
+#ifndef INPUTJS_BUFFER_SIZE
 #define INPUTJS_BUFFER_SIZE (32 * 1024)
+#endif /* INPUTJS_BUFFER_SIZE */
+
+#ifndef SNAPSHOT_BUFFER_SIZE
 #define SNAPSHOT_BUFFER_SIZE (24 * 1024)
+#endif /* SNAPSHOT_BUFFER_SIZE */
 
 // Maximum size for js and snapshot file
 __no_init static uint8_t input_buffer[INPUTJS_BUFFER_SIZE] @ ACE_CACHE_ADDRESS;
