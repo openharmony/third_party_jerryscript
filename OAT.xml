@@ -56,7 +56,7 @@ Note:If the text contains special characters, please escape them according to th
 -->
 <configuration>
     <oatconfig>
-        <licensefile>COPYRIGHT_JERRYSCRIPT</licensefile>
+        <licensefile></licensefile>
         <policylist>
             <policy name="projectPolicy" desc="">
             </policy>
