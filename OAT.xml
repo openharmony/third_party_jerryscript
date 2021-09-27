@@ -65,6 +65,7 @@ Note:If the text contains special characters, please escape them according to th
             <filefilter name="defaultPolicyFilter" desc="Filters for compatibility，license header policies">
                 <filteritem type="filename" name=".travis.yml" desc="No License specified while permission to use, copy, modify, and distribute are granted"/>
                 <filteritem type="filename" name="Doxyfile" desc="No License specified while permission to use, copy, modify, and distribute are granted"/>
+                <filerittem type="filename" name=".+(.png|.jpg|.lib)" desc="图片文件及二进制不涉及License"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>
