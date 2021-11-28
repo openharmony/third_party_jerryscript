@@ -15,37 +15,54 @@ import("//build/lite/config/component/lite_component.gni")
 import("//third_party/jerryscript/engine.gni")
 
 lite_component("jerry-ext") {
-  features = [ ":jerry-ext_shared" ]
+  if (ohos_kernel_type == "liteos_m") {
+    features = [ ":jerry-ext_static" ]
+  } else {
+    features = [ ":jerry-ext_shared" ]
+  }
 }
 
-lite_library("jerry-ext_shared") {
-  target_type = "shared_library"
+jerry_ext_sources = [
+  "arg/arg-js-iterator-helper.c",
+  "arg/arg-transform-functions.c",
+  "arg/arg.c",
+  "debugger/debugger-common.c",
+  "debugger/debugger-rp.c",
+  "debugger/debugger-serial.c",
+  "debugger/debugger-sha1.c",
+  "debugger/debugger-tcp.c",
+  "debugger/debugger-ws.c",
+  "handle-scope/handle-scope-allocator.c",
+  "handle-scope/handle-scope.c",
+  "handler/handler-assert.c",
+  "handler/handler-gc.c",
+  "handler/handler-print.c",
+  "handler/handler-register.c",
+  "handler/handler-resource-name.c",
+  "module/module.c",
+]
 
-  sources = [
-    "arg/arg-js-iterator-helper.c",
-    "arg/arg-transform-functions.c",
-    "arg/arg.c",
-    "debugger/debugger-common.c",
-    "debugger/debugger-rp.c",
-    "debugger/debugger-serial.c",
-    "debugger/debugger-sha1.c",
-    "debugger/debugger-tcp.c",
-    "debugger/debugger-ws.c",
-    "handle-scope/handle-scope-allocator.c",
-    "handle-scope/handle-scope.c",
-    "handler/handler-assert.c",
-    "handler/handler-gc.c",
-    "handler/handler-print.c",
-    "handler/handler-register.c",
-    "handler/handler-resource-name.c",
-    "module/module.c",
-  ]
-  include_dirs = [
-    "include",
-    "debugger",
-    "common",
-    "arg",
-    "handle-scope",
-    "${core_path}/include",
-  ]
+jerry_ext_include_dirs = [
+  "include",
+  "debugger",
+  "common",
+  "arg",
+  "handle-scope",
+  "${core_path}/include",
+]
+
+if (ohos_kernel_type == "liteos_m") {
+  lite_library("jerry-ext_static") {
+    target_type = "static_library"
+
+    sources = jerry_ext_sources
+    include_dirs = jerry_ext_include_dirs
+  }
+} else {
+  lite_library("jerry-ext_shared") {
+    target_type = "shared_library"
+
+    sources = jerry_ext_sources
+    include_dirs = jerry_ext_include_dirs
+  }
 }
