@@ -15,41 +15,57 @@ import("//build/lite/config/component/lite_component.gni")
 import("//third_party/jerryscript/engine.gni")
 
 lite_component("jerry-libm") {
-  features = [ ":jerry-libm_shared" ]
+  if (ohos_kernel_type == "liteos_m") {
+    features = [ ":jerry-libm_static" ]
+  } else {
+    features = [ ":jerry-libm_shared" ]
+  }
 }
 
-lite_library("jerry-libm_shared") {
-  target_type = "shared_library"
-  sources = [
-    "acos.c",
-    "acosh.c",
-    "asin.c",
-    "asinh.c",
-    "atan.c",
-    "atan2.c",
-    "atanh.c",
-    "cbrt.c",
-    "ceil.c",
-    "copysign.c",
-    "cosh.c",
-    "exp.c",
-    "expm1.c",
-    "fabs.c",
-    "finite.c",
-    "floor.c",
-    "fmod.c",
-    "isnan.c",
-    "log.c",
-    "log10.c",
-    "log1p.c",
-    "log2.c",
-    "nextafter.c",
-    "pow.c",
-    "scalbn.c",
-    "sinh.c",
-    "sqrt.c",
-    "tanh.c",
-    "trig.c",
-  ]
-  include_dirs = [ "include" ]
+jerry_libm_sources = [
+  "acos.c",
+  "acosh.c",
+  "asin.c",
+  "asinh.c",
+  "atan.c",
+  "atan2.c",
+  "atanh.c",
+  "cbrt.c",
+  "ceil.c",
+  "copysign.c",
+  "cosh.c",
+  "exp.c",
+  "expm1.c",
+  "fabs.c",
+  "finite.c",
+  "floor.c",
+  "fmod.c",
+  "isnan.c",
+  "log.c",
+  "log10.c",
+  "log1p.c",
+  "log2.c",
+  "nextafter.c",
+  "pow.c",
+  "scalbn.c",
+  "sinh.c",
+  "sqrt.c",
+  "tanh.c",
+  "trig.c",
+]
+
+jerry_libm_include_dirs = [ "include" ]
+
+if (ohos_kernel_type == "liteos_m") {
+  lite_library("jerry-libm_static") {
+    target_type = "static_library"
+    sources = jerry_libm_sources
+    include_dirs = jerry_libm_include_dirs
+  }
+} else {
+  lite_library("jerry-libm_shared") {
+    target_type = "shared_library"
+    sources = jerry_libm_sources
+    include_dirs = jerry_libm_include_dirs
+  }
 }
