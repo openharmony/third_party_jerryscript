@@ -14,6 +14,7 @@ extern "C"
 
 void JerryPsRamMemInit();
 void JerryBmsPsRamMemInit();
+void JerryInitContextRecords();
 
 #ifdef __cplusplus
 }
