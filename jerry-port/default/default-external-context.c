@@ -24,13 +24,11 @@ extern jerry_context_t *jerry_dynamic_global_context_p;
 
 #include "generate-bytecode.h"
 #include "los_task.h"
-#include "target_config.h"
 
 /**
- * use array to record the correspondence between task id and jerry-heap/context
+ * use dynamic size array to record the correspondence between task id and jerry-heap/context
  */
-#define MAX_CONTEXT_NUM (LOSCFG_BASE_CORE_TSK_LIMIT+1)
-ContextRecord g_contextRecords[MAX_CONTEXT_NUM] = {0};
+extern ContextRecord* g_contextRecords;
 
 void jerry_switch_context();
 
