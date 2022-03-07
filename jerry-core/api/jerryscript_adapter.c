@@ -18,11 +18,16 @@
 #include "jerryscript.h"
 #include "jmem.h"
 #include "config-jupiter.h"
+#include "generate-bytecode.h"
+#include "los_task.h"
+
+#define MAX_CONTEXT_NUM (g_taskMaxNum+1)
 
 uint8_t* input_buffer;
 uint8_t* snapshot_buffer;
 uint8_t* bms_context_and_heap;
 uint8_t* js_context_and_heap;
+ContextRecord* g_contextRecords;
 
 void JerryPsRamMemInit()
 {
@@ -40,6 +45,14 @@ void JerryBmsPsRamMemInit()
   input_buffer = OhosMalloc(MEM_TYPE_JERRY_LSRAM, INPUTJS_BUFFER_SIZE);
   snapshot_buffer = OhosMalloc(MEM_TYPE_JERRY_LSRAM, SNAPSHOT_BUFFER_SIZE);
   bms_context_and_heap = OhosMalloc(MEM_TYPE_JERRY_LSRAM, BMS_TASK_CONTEXT_AND_HEAP_SIZE * CONVERTION_RATIO);
+}
+
+void JerryInitContextRecords()
+{
+  g_contextRecords = (ContextRecord*)OhosMalloc(MEM_TYPE_JERRY, (MAX_CONTEXT_NUM) * sizeof(ContextRecord));
+  if (g_contextRecords == NULL) {
+    jerry_port_log (JERRY_LOG_LEVEL_ERROR, "[JERRYSCRIPT]Init g_contextRecords Error.\n");
+  }
 }
 
 #endif // JERRY_IAR_JUPITER
