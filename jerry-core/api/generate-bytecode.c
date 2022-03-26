@@ -311,9 +311,6 @@ EXECRES walk_directory(char* filefolder) {
   end->dir_name = start_folder;
   end->next = NULL;
 
-  jerry_init_flag_t flags = JERRY_INIT_EMPTY;
-  jerry_init (flags);
-
   while (head->next != NULL) {
     curr = head->next;
     current_path = curr->dir_name;
@@ -321,7 +318,6 @@ EXECRES walk_directory(char* filefolder) {
       free_link(head);
       curr = NULL;
       end = NULL;
-      jerry_cleanup();
       return EXCE_ACE_JERRY_OPEN_DIR_FAILED;
     }
     while ((direntp = (struct dirent*)readdir(dir)) != NULL) {
@@ -334,7 +330,6 @@ EXECRES walk_directory(char* filefolder) {
         free_link(head);
         curr = NULL;
         end = NULL;
-        jerry_cleanup();
         return EXCE_ACE_JERRY_SPLICE_PATH_ERROR;
       }
       if (stat(input_file_path, &file_stat) < 0) {
@@ -344,7 +339,6 @@ EXECRES walk_directory(char* filefolder) {
         free_link(head);
         curr = NULL;
         end = NULL;
-        jerry_cleanup();
         return EXCE_ACE_JERRY_GET_FILE_STAT_ERROR;
       }
       if (file_stat.st_mode & S_IFDIR) {
@@ -356,7 +350,6 @@ EXECRES walk_directory(char* filefolder) {
           free_link(head);
           curr = NULL;
           end = NULL;
-          jerry_cleanup();
           return EXCE_ACE_JERRY_LINKLIST_ERROR;
         }
         // input_file_path for dir will be freed when that node is freed
@@ -374,10 +367,12 @@ EXECRES walk_directory(char* filefolder) {
           free_link(head);
           curr = NULL;
           end = NULL;
-          jerry_cleanup();
           return EXCE_ACE_JERRY_SPLICE_OUTPUT_PATH_ERROR;
         }
+        jerry_init_flag_t flags = JERRY_INIT_EMPTY;
+        jerry_init (flags);
         generate_val = generate_snapshot_file(input_file_path, output_file_path);
+        jerry_cleanup();
         OhosFree(output_file_path);
         output_file_path = NULL;
         OhosFree(input_file_path);
@@ -387,7 +382,6 @@ EXECRES walk_directory(char* filefolder) {
           free_link(head);
           curr = NULL;
           end = NULL;
-          jerry_cleanup();
           return generate_val; // return error_code
         }
       } else {
@@ -405,7 +399,6 @@ EXECRES walk_directory(char* filefolder) {
   OhosFree(head);
   head = NULL;
   end = NULL;
-  jerry_cleanup();
   return EXCE_ACE_JERRY_EXEC_OK;
 } /* walk_directory */
 
