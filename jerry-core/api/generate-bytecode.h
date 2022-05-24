@@ -7,6 +7,11 @@
 #ifndef GENERATE_BYTECODE_H
 #define GENERATE_BYTECODE_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
 #ifdef JERRY_FOR_IAR_CONFIG
 
 #include "jerryscript.h"
@@ -48,4 +53,7 @@ void jerry_external_context_init(uint32_t heap_size, jerry_context_alloc_t alloc
 
 #endif  // JERRY_FOR_IAR_CONFIG
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif  // GENERATE_BYTECODE_H
