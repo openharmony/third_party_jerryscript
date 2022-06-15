@@ -15,6 +15,7 @@ extern "C"
 #ifdef JERRY_FOR_IAR_CONFIG
 
 #include "jerryscript.h"
+#include "jerry-snapshot.h"
 
 typedef enum {
   EXCE_ACE_JERRY_EXEC_OK = 0, // program function OK
@@ -26,14 +27,15 @@ typedef enum {
   EXCE_ACE_JERRY_GENERATE_SNAPSHOT_FAILED, // jerry_generate_snapshot failed
   EXCE_ACE_JERRY_OPEN_FILE_FAILED, // open file failed
   EXCE_ACE_JERRY_WRITE_SNAPSHOT_FILE_FAILED, // write into snapshot file failed
-  EXCE_ACE_JERRY_READ_JSFILE_FAILED, // read .js file process failed
-  EXCE_ACE_JERRY_JSFILE_TOO_LARGE, // bytes of js file out of psRAM
+  EXCE_ACE_JERRY_READ_FILE_FAILED, // read .js file or snapshot file process failed
+  EXCE_ACE_JERRY_FILE_TOO_LARGE, // bytes of js or snapshot file out of psRAM buffer size for them
   EXCE_ACE_JERRY_SPLICE_PATH_ERROR, // error when splice path
   EXCE_ACE_JERRY_SPLICE_OUTPUT_PATH_ERROR, // error when splice output file abs name
   EXCE_ACE_JERRY_SPRINTFS_VERSION_ERROR, // error when sprintf_s for jerry_version
   EXCE_ACE_JERRY_GET_FILE_STAT_ERROR, // error when getting file stat
   EXCE_ACE_JERRY_LINKLIST_ERROR, // error when malloc for list node
   EXCE_ACE_JERRY_UNLINKFILE_ERROR, // error when unlink bytecode file
+  EXCE_ACE_JERRY_SNAPSHOT_VERSION_ERROR, // snapshot file version wrong
 } EXECRES;
 
 typedef struct

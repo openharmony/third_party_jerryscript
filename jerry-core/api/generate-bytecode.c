@@ -113,9 +113,9 @@ char* get_output_file_path(char* input_file_path) {
 } /* get_output_file_path */
 
 /**
- * read js bundle file by Fragement
+ * read js bundle file or snapshot file by Fragement
  */
-EXECRES read_js_file(char* filename, uint8_t* target_Js, int* file_bytesize) {
+EXECRES read_js_or_snapshot_file(char* filename, uint8_t* target_file, int* file_bytesize, int buffer_capacity) {
   int fd = 0;
   struct stat file_stat = { 0 };
   int remain_to_read = 0;
@@ -132,19 +132,19 @@ EXECRES read_js_file(char* filename, uint8_t* target_Js, int* file_bytesize) {
     return EXCE_ACE_JERRY_GET_FILE_STAT_ERROR;
   }
   *file_bytesize = file_stat.st_size;
-  if (*file_bytesize > INPUTJS_BUFFER_SIZE) {
+  if (*file_bytesize > buffer_capacity) {
     close(fd);
-    return EXCE_ACE_JERRY_JSFILE_TOO_LARGE;
+    return EXCE_ACE_JERRY_FILE_TOO_LARGE;
   }
   remain_to_read = *file_bytesize;
   while (remain_to_read > 0) {
     here_to_read = (remain_to_read > ONETIME_MAX_OPTBYTES) ?
                     ONETIME_MAX_OPTBYTES : remain_to_read;
-    tmp_read = read(fd, target_Js + read_offset, here_to_read);
+    tmp_read = read(fd, target_file + read_offset, here_to_read);
     if (tmp_read < 0 || tmp_read != here_to_read) {
       close(fd);
       // Error: failed to read file
-      return EXCE_ACE_JERRY_READ_JSFILE_FAILED;
+      return EXCE_ACE_JERRY_READ_FILE_FAILED;
     }
     read_offset = read_offset + here_to_read;
     remain_to_read = remain_to_read - here_to_read;
@@ -152,11 +152,11 @@ EXECRES read_js_file(char* filename, uint8_t* target_Js, int* file_bytesize) {
   if (read_offset != *file_bytesize) {
     close(fd);
     // Error: failed to successfully read file
-    return EXCE_ACE_JERRY_READ_JSFILE_FAILED;
+    return EXCE_ACE_JERRY_READ_FILE_FAILED;
   }
   close(fd);
   return EXCE_ACE_JERRY_EXEC_OK;
-} /* read_js_file */
+} /* read_js_or_snapshot_file */
 
 /**
  * write snapshot file by Fragment
@@ -235,7 +235,7 @@ EXECRES generate_snapshot_file(char* input_file, char* output_file) {
   if (input_file == NULL || output_file == NULL) {
     return EXCE_ACE_JERRY_NULL_PATH;
   }
-  read_res = read_js_file(input_file, target_Js, &file_bytesize);
+  read_res = read_js_or_snapshot_file(input_file, target_Js, &file_bytesize, INPUTJS_BUFFER_SIZE);
   if (read_res != EXCE_ACE_JERRY_EXEC_OK) {
     return read_res;
   }
@@ -268,21 +268,11 @@ EXECRES generate_snapshot_file(char* input_file, char* output_file) {
 }/* generate_snapshot_file */
 
 /**
- * traverse directory and do js to bytecode conversion ON IAR
+ * init the linked list for files in filefolder.
  */
-EXECRES walk_directory(char* filefolder) {
-  EXECRES generate_val = EXCE_ACE_JERRY_EXEC_OK;
-  DIR* dir;
-  struct dirent* direntp;
+EXECRES init_directory_list(char* filefolder, char* start_folder, dir_node **head, dir_node **end) {
   struct stat file_stat = { 0 };
-  char* filename = NULL;
-  char* current_path = NULL;
-  char* input_file_path = NULL;
-  char* output_file_path = NULL;
-  char* start_folder = NULL;
-  dir_node *head, *curr, *end, *new_node;
   int filefolder_len = strlen(filefolder) + 1;
-
   if ((filefolder == NULL) || (stat(filefolder, &file_stat) < 0)) {
     return EXCE_ACE_JERRY_INPUT_PATH_ERROR;
   }
@@ -294,112 +284,230 @@ EXECRES walk_directory(char* filefolder) {
     start_folder = NULL;
     return EXCE_ACE_JERRY_INPUT_PATH_ERROR;
   }
-  if ((head = (dir_node*)OhosMalloc(MEM_TYPE_JERRY, sizeof(dir_node))) == NULL) {
+  if ((*head = (dir_node*)OhosMalloc(MEM_TYPE_JERRY, sizeof(dir_node))) == NULL) {
     OhosFree(start_folder);
     start_folder = NULL;
     return EXCE_ACE_JERRY_LINKLIST_ERROR;
   }
-  if ((end = (dir_node*)OhosMalloc(MEM_TYPE_JERRY, sizeof(dir_node))) == NULL) {
+  if ((*end = (dir_node*)OhosMalloc(MEM_TYPE_JERRY, sizeof(dir_node))) == NULL) {
     OhosFree(start_folder);
     start_folder = NULL;
-    OhosFree(head);
-    head = NULL;
+    OhosFree(*head);
+    *head = NULL;
     return EXCE_ACE_JERRY_LINKLIST_ERROR;
   }
-  head->dir_name = NULL;
-  head->next = end;
-  end->dir_name = start_folder;
-  end->next = NULL;
+  (*head)->dir_name = NULL;
+  (*head)->next = *end;
+  (*end)->dir_name = start_folder;
+  (*end)->next = NULL;
+  return EXCE_ACE_JERRY_EXEC_OK;
+} /* init_directory_list */
 
-  while (head->next != NULL) {
-    curr = head->next;
+/**
+ * when visited node is a directory, add it to the node list's end.
+ */
+EXECRES add_directory_to_pending_list(dir_node **end, char* input_file_path) {
+  dir_node *new_node = NULL;
+  if ((new_node = (dir_node*)OhosMalloc(MEM_TYPE_JERRY, sizeof(dir_node))) == NULL) {
+    OhosFree(input_file_path);
+    input_file_path = NULL;
+    return EXCE_ACE_JERRY_LINKLIST_ERROR;
+  }
+  // input_file_path for dir will be freed when that node is freed
+  new_node->dir_name = input_file_path;
+  new_node->next = NULL;
+  (*end)->next = new_node;
+  *end = new_node;
+  new_node = NULL;
+  return EXCE_ACE_JERRY_EXEC_OK;
+} /* add_directory_to_pending_list */
+
+/**
+ * transform this js file into snapshot.
+ */
+EXECRES gen_snapshot(char* input_file_path, char* output_file_path) {
+  jerry_init_flag_t flags = JERRY_INIT_EMPTY;
+  jerry_init (flags);
+  EXECRES generate_val = EXCE_ACE_JERRY_EXEC_OK;
+  generate_val = generate_snapshot_file(input_file_path, output_file_path);
+  jerry_cleanup();
+  OhosFree(output_file_path);
+  output_file_path = NULL;
+  OhosFree(input_file_path);
+  input_file_path = NULL;
+  if (generate_val != EXCE_ACE_JERRY_EXEC_OK) {
+    return generate_val; // return error_code
+  }
+  return EXCE_ACE_JERRY_EXEC_OK;
+} /* gen_snapshot */
+
+/**
+ * validate snapshot's version.
+ */
+EXECRES validate_snapshot(char* input_file_path, char* output_file_path) {
+  uint8_t* snapshot_data_p = snapshot_buffer;
+  int file_bytesize = 0;
+  OhosFree(input_file_path);
+  input_file_path = NULL;
+
+  EXECRES read_res = read_js_or_snapshot_file(output_file_path, snapshot_data_p, &file_bytesize, SNAPSHOT_BUFFER_SIZE);
+  if ((read_res != EXCE_ACE_JERRY_EXEC_OK) || (snapshot_data_p == NULL) || (file_bytesize == 0)) {
+    OhosFree(output_file_path);
+    output_file_path = NULL;
+    return EXCE_ACE_JERRY_READ_FILE_FAILED;
+  }
+  const jerry_snapshot_header_t* header_p = (const jerry_snapshot_header_t*) snapshot_data_p;
+  if (header_p->version != JERRY_SNAPSHOT_VERSION) {
+    OhosFree(output_file_path);
+    output_file_path = NULL;
+    return EXCE_ACE_JERRY_SNAPSHOT_VERSION_ERROR;
+  }
+  OhosFree(output_file_path);
+  output_file_path = NULL;
+  return EXCE_ACE_JERRY_EXEC_OK;
+} /* validate_snapshot */
+
+/**
+ * when visited file is a js file, transform it into snapshot or check its snapshot's version.
+ */
+EXECRES visit_js_file(char* input_file_path, EXECRES (*call_back)(char*, char*)) {
+  char* output_file_path = NULL;
+  if ((output_file_path = get_output_file_path(input_file_path)) == NULL) {
+    OhosFree(input_file_path);
+    input_file_path = NULL;
+    return EXCE_ACE_JERRY_SPLICE_OUTPUT_PATH_ERROR;
+  }
+  EXECRES res = call_back(input_file_path, output_file_path);
+  return res;
+} /* visit_js_file */
+
+/**
+ * visit one single list node.
+ */
+EXECRES visit_directory(dir_node **end, char* current_path, EXECRES (*call_back)(char*, char*)) {
+  struct dirent* direntp = NULL;
+  struct stat file_stat = { 0 };
+  char* filename = NULL;
+  char* input_file_path = NULL;
+  DIR* dir = NULL;
+  if ((dir = (DIR*)opendir(current_path)) == NULL) {
+    return EXCE_ACE_JERRY_OPEN_DIR_FAILED;
+  }
+  while ((direntp = (struct dirent*)readdir(dir)) != NULL) {
+    filename = direntp->d_name;
+    if (strncmp(filename, ".", 1) == 0) {
+      continue;
+    }
+    if ((input_file_path = splice_path(current_path, filename)) == NULL) {
+      closedir(dir);
+      return EXCE_ACE_JERRY_SPLICE_PATH_ERROR;
+    }
+    if (stat(input_file_path, &file_stat) < 0) {
+      OhosFree(input_file_path);
+      input_file_path = NULL;
+      closedir(dir);
+      return EXCE_ACE_JERRY_GET_FILE_STAT_ERROR;
+    }
+    if (file_stat.st_mode & S_IFDIR) {
+      EXECRES add_directory_res = add_directory_to_pending_list(end, input_file_path);
+      if (add_directory_res != EXCE_ACE_JERRY_EXEC_OK) {
+        closedir(dir);
+        return add_directory_res;
+      }
+    } else if (is_template_file(filename, ".js")) {
+      EXECRES visit_js_res = visit_js_file(input_file_path, call_back);
+      if (visit_js_res != EXCE_ACE_JERRY_EXEC_OK) {
+        closedir(dir);
+        return visit_js_res;
+      }
+    } else {
+      OhosFree(input_file_path);
+      input_file_path = NULL;
+    }
+  }
+  closedir(dir);
+  return EXCE_ACE_JERRY_EXEC_OK;
+} /* visit_directory */
+
+/**
+ * visit directory from head list node.
+ */
+EXECRES visit_pending_directories(dir_node **head, dir_node **end, EXECRES (*call_back)(char*, char*)) {
+  dir_node* curr = NULL;
+  char* current_path = NULL;
+  while ((*head)->next != NULL) {
+    curr = (*head)->next;
     current_path = curr->dir_name;
-    if ((dir = (DIR*)opendir(current_path)) == NULL) {
-      free_link(head);
+    EXECRES visit_res = visit_directory(end, current_path, call_back);
+    if (visit_res != EXCE_ACE_JERRY_EXEC_OK) {
+      free_link(*head);
       curr = NULL;
-      end = NULL;
-      return EXCE_ACE_JERRY_OPEN_DIR_FAILED;
+      *end = NULL;
+      return visit_res;
     }
-    while ((direntp = (struct dirent*)readdir(dir)) != NULL) {
-      filename = direntp->d_name;
-      if (strncmp(filename, ".", 1) == 0) {
-        continue;
-      }
-      if ((input_file_path = splice_path(current_path, filename)) == NULL) {
-        closedir(dir);
-        free_link(head);
-        curr = NULL;
-        end = NULL;
-        return EXCE_ACE_JERRY_SPLICE_PATH_ERROR;
-      }
-      if (stat(input_file_path, &file_stat) < 0) {
-        closedir(dir);
-        OhosFree(input_file_path);
-        input_file_path = NULL;
-        free_link(head);
-        curr = NULL;
-        end = NULL;
-        return EXCE_ACE_JERRY_GET_FILE_STAT_ERROR;
-      }
-      if (file_stat.st_mode & S_IFDIR) {
-        // file now is file folder
-        if ((new_node = (dir_node*)OhosMalloc(MEM_TYPE_JERRY, sizeof(dir_node))) == NULL) {
-          closedir(dir);
-          OhosFree(input_file_path);
-          input_file_path = NULL;
-          free_link(head);
-          curr = NULL;
-          end = NULL;
-          return EXCE_ACE_JERRY_LINKLIST_ERROR;
-        }
-        // input_file_path for dir will be freed when that node is freed
-        new_node->dir_name = input_file_path;
-        new_node->next = NULL;
-        end->next = new_node;
-        end = new_node;
-        new_node = NULL;
-      } else if (is_template_file(filename, ".js")) {
-        //filename now is .js file
-        if ((output_file_path = get_output_file_path(input_file_path)) == NULL) {
-          closedir(dir);
-          OhosFree(input_file_path);
-          input_file_path = NULL;
-          free_link(head);
-          curr = NULL;
-          end = NULL;
-          return EXCE_ACE_JERRY_SPLICE_OUTPUT_PATH_ERROR;
-        }
-        jerry_init_flag_t flags = JERRY_INIT_EMPTY;
-        jerry_init (flags);
-        generate_val = generate_snapshot_file(input_file_path, output_file_path);
-        jerry_cleanup();
-        OhosFree(output_file_path);
-        output_file_path = NULL;
-        OhosFree(input_file_path);
-        input_file_path = NULL;
-        if (generate_val != EXCE_ACE_JERRY_EXEC_OK) {
-          closedir(dir);
-          free_link(head);
-          curr = NULL;
-          end = NULL;
-          return generate_val; // return error_code
-        }
-      } else {
-        OhosFree(input_file_path);
-        input_file_path = NULL;
-      }
-    }
-    closedir(dir);
-    head->next = curr->next;
+    (*head)->next = curr->next;
     OhosFree(curr->dir_name);
     curr->dir_name = NULL;
     OhosFree(curr);
     curr = NULL;
   }
-  OhosFree(head);
+  OhosFree(*head);
   head = NULL;
   end = NULL;
   return EXCE_ACE_JERRY_EXEC_OK;
+} /* visit_pending_directories */
+
+/**
+ * visit directory and do js to snapshot conversion
+ */
+EXECRES generate_snapshots(char* filefolder) {
+  char* start_folder = NULL;
+  dir_node* head = NULL;
+  dir_node* end = NULL;
+
+  EXECRES init_res = init_directory_list(filefolder, start_folder, &head, &end);
+  if (init_res != EXCE_ACE_JERRY_EXEC_OK) {
+    return init_res;
+  }
+  EXECRES visit_res = visit_pending_directories(&head, &end, gen_snapshot);
+  if (visit_res != EXCE_ACE_JERRY_EXEC_OK) {
+    return visit_res;
+  }
+  return EXCE_ACE_JERRY_EXEC_OK;
+} /* generate_snapshots */
+
+/**
+ * visit directory and check snapshot file's version
+ */
+EXECRES validate_snapshots(char* filefolder) {
+  char* start_folder = NULL;
+  dir_node* head = NULL;
+  dir_node* end = NULL;
+
+  EXECRES init_res = init_directory_list(filefolder, start_folder, &head, &end);
+  if (init_res != EXCE_ACE_JERRY_EXEC_OK) {
+    return init_res;
+  }
+  EXECRES visit_res = visit_pending_directories(&head, &end, validate_snapshot);
+  if (visit_res != EXCE_ACE_JERRY_EXEC_OK) {
+    return visit_res;
+  }
+  return EXCE_ACE_JERRY_EXEC_OK;
+} /* validate_snapshots */
+
+/**
+ * visit directory and do js to bytecode conversion ON IAR
+ */
+EXECRES walk_directory(char* filefolder) {
+  EXECRES generate_res = generate_snapshots(filefolder);
+  if (generate_res != EXCE_ACE_JERRY_EXEC_OK) {
+    return generate_res;
+  }
+#if defined (JERRY_ENABLE_SNAPSHOT_VERSION_CHECK) && (JERRY_ENABLE_SNAPSHOT_VERSION_CHECK == 1)
+  return validate_snapshots(filefolder);
+#else
+  return EXCE_ACE_JERRY_EXEC_OK;
+#endif
 } /* walk_directory */
 
 /**
