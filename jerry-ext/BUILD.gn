@@ -51,17 +51,26 @@ jerry_ext_include_dirs = [
   "${core_path}/include",
 ]
 
+config("jerry_ext_config") {
+  if (board_toolchain_type == "iccarm") {
+    cflags = [
+      "--diag_suppress",
+      "Pe940",
+    ]
+  }
+}
+
 if (ohos_kernel_type == "liteos_m") {
   lite_library("jerry-ext_static") {
     target_type = "static_library"
-
+    public_configs = [ ":jerry_ext_config" ]
     sources = jerry_ext_sources
     include_dirs = jerry_ext_include_dirs
   }
 } else {
   lite_library("jerry-ext_shared") {
     target_type = "shared_library"
-
+    public_configs = [ ":jerry_ext_config" ]
     sources = jerry_ext_sources
     include_dirs = jerry_ext_include_dirs
   }
