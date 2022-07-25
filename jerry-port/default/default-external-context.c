@@ -92,4 +92,28 @@ jerry_port_get_current_context (void)
 
 #endif // defined (JERRY_FOR_IAR_CONFIG)
 
-#endif // (JERRY_EXTERNAL_CONTEXT == 1)
+#else // (JERRY_EXTERNAL_CONTEXT == 0)
+
+static jerry_context_t *current_context_p = NULL;
+
+/**
+ * Set the current_context_p as the passed pointer.
+ */
+void
+jerry_port_default_set_current_context (jerry_context_t *context_p) /**< points to the created context */
+{
+  current_context_p = context_p;
+} /* jerry_port_default_set_current_context */
+
+/**
+ * Get the current context.
+ *
+ * @return the pointer to the current context
+ */
+jerry_context_t *
+jerry_port_get_current_context (void)
+{
+  return current_context_p;
+} /* jerry_port_get_current_context */
+
+#endif  // (JERRY_EXTERNAL_CONTEXT == 0)
