@@ -17,10 +17,12 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
   lite_component("jerry_engine") {
     features = [
       "jerry-core",
-      "jerry-libm",
       "jerry-ext",
       "jerry-port/default:jerry-port-default",
     ]
+    if (ohos_kernel_type != "liteos_m") {
+      features += [ "jerry_libm" ]
+    }
   }
 } else {
   import("//build/ohos.gni")
