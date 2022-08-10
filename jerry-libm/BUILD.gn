@@ -56,15 +56,26 @@ jerry_libm_sources = [
 
 jerry_libm_include_dirs = [ "include" ]
 
+config("jerry_libm_config") {
+  if (board_toolchain_type == "iccarm") {
+    cflags = [
+      "--diag_suppress",
+      "Pe039,Pa089,Pe222",
+    ]
+  }
+}
+
 if (ohos_kernel_type == "liteos_m") {
   lite_library("jerry-libm_static") {
     target_type = "static_library"
+    public_configs = [ ":jerry_libm_config" ]
     sources = jerry_libm_sources
     include_dirs = jerry_libm_include_dirs
   }
 } else {
   lite_library("jerry-libm_shared") {
     target_type = "shared_library"
+    public_configs = [ ":jerry_libm_config" ]
     sources = jerry_libm_sources
     include_dirs = jerry_libm_include_dirs
   }
