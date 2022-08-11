@@ -51,17 +51,59 @@ jerry_ext_include_dirs = [
   "${core_path}/include",
 ]
 
+if (board_toolchain_type == "iccarm") {
+  config("jerry_ext_config") {
+    cflags = [
+      "--diag_suppress",
+      "Pe940",
+    ]
+    defines = [
+      "JERRY_FOR_IAR_CONFIG",
+      "JERRY_GC_LIMIT=(0)",
+      "JERRY_CPOINTER_32_BIT=0",
+      "JERRY_ERROR_MESSAGES=1",
+      "JERRY_EXTERNAL_CONTEXT=1",
+      "JERRY_PARSER=1",
+      "JERRY_LINE_INFO=1",
+      "JERRY_LOGGING=0",
+      "JERRY_DEBUGGER=0",
+      "JERRY_MEM_GC_BEFORE_EACH_ALLOC=0",
+      "JERRY_PARSER_DUMP_BYTE_CODE=0",
+      "JERRY_ES2015=0",
+      "JERRY_REGEXP_STRICT_MODE=0",
+      "JERRY_REGEXP_DUMP_BYTE_CODE=0",
+      "JERRY_SNAPSHOT_EXEC=1",
+      "JERRY_SNAPSHOT_SAVE=1",
+      "JERRY_SYSTEM_ALLOCATOR=0",
+      "JERRY_VALGRIND=0",
+      "JERRY_VM_EXEC_STOP=0",
+      "JERRY_STACK_LIMIT=(8)",
+      "JERRY_IAR_JUPITER",
+      "INPUTJS_BUFFER_SIZE=64*1024",
+      "SNAPSHOT_BUFFER_SIZE=48*1024",
+    ]
+    include_dirs = jerry_ext_include_dirs
+    include_dirs += [
+      "${core_path}",
+      "${core_path}/jrt",
+      "//utils/native/lite/memory/include",
+    ]
+  }
+}
+
 if (ohos_kernel_type == "liteos_m") {
   lite_library("jerry-ext_static") {
     target_type = "static_library"
-
     sources = jerry_ext_sources
-    include_dirs = jerry_ext_include_dirs
+    if (board_toolchain_type == "iccarm") {
+      public_configs = [ ":jerry_ext_config" ]
+    } else {
+      include_dirs = jerry_ext_include_dirs
+    }
   }
 } else {
   lite_library("jerry-ext_shared") {
     target_type = "shared_library"
-
     sources = jerry_ext_sources
     include_dirs = jerry_ext_include_dirs
   }
