@@ -1454,7 +1454,10 @@ parser_parse_for_statement_start (parser_context_t *context_p) /**< context */
           parser_parse_expression_statement (context_p, PARSE_EXPR);
           break;
         }
-
+        /* FALLTHRU */
+      }
+      case LEXER_KEYW_LET:
+      {
         if (context_p->next_scanner_info_p->source_p == context_p->source_p
             && context_p->next_scanner_info_p->type != SCANNER_TYPE_BLOCK)
         {
@@ -1468,9 +1471,9 @@ parser_parse_for_statement_start (parser_context_t *context_p) /**< context */
         }
 
         context_p->token.type = LEXER_KEYW_LET;
+
         /* FALLTHRU */
       }
-      case LEXER_KEYW_LET:
       case LEXER_KEYW_CONST:
       {
         if (context_p->next_scanner_info_p->source_p == source_p)
