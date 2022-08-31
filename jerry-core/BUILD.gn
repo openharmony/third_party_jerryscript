@@ -232,7 +232,7 @@ if (board_toolchain_type != "iccarm") {
   config("jerry_core_config") {
     cflags = [
       "--diag_suppress",
-      "Pa089,Pe111,Pe188,Pe191,Pe546,Pe940",
+      "Pa089,Pe111,Pe188,Pe191,Pe546,Pe940,Pe128",
     ]
     defines = [
       "JERRY_FOR_IAR_CONFIG",
