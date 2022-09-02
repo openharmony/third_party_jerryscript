@@ -87,7 +87,7 @@ if (board_toolchain_type == "iccarm") {
       "${core_path}/parser/regexp",
       "${core_path}/vm",
       "${port_path}",
-      "//utils/native/lite/memory/include",
+      "//commonlibrary/utils_lite/memory/include",
     ]
   }
 }
