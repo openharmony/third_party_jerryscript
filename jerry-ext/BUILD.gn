@@ -86,7 +86,7 @@ if (board_toolchain_type == "iccarm") {
     include_dirs += [
       "${core_path}",
       "${core_path}/jrt",
-      "//utils/native/lite/memory/include",
+      "//commonlibrary/utils_lite/memory/include",
     ]
   }
 }
