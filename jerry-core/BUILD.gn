@@ -264,7 +264,7 @@ if (board_toolchain_type != "iccarm") {
     include_dirs += [
       "$port_path",
       "$port_path/default/include",
-      "//utils/native/lite/memory/include",
+      "//commonlibrary/utils_lite/memory/include",
     ]
   }
 }
