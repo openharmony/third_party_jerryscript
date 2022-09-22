@@ -2871,6 +2871,14 @@ jerry_call_function (const jerry_value_t func_obj_val, /**< function object to c
   jerry_assert_api_available ();
 
 #if ENABLED (JERRY_DEBUGGER)
+  /**
+   * Clear flag JERRY_DEBUGGER_VM_STOP and set debugger_stop_context Null everytime jerry's debugger call a function.
+   * This could solve the problem that jerry's debugger stops at an unexpected line when re-entering a function after a
+   * step-operation.
+   */
+  JERRY_DEBUGGER_CLEAR_FLAGS (JERRY_DEBUGGER_VM_STOP);
+  JERRY_CONTEXT (debugger_stop_context) = NULL;
+
   if (JERRY_CONTEXT (debugger_flags) & JERRY_DEBUGGER_CONNECTED) {
     if (jerry_debugger_receive (NULL)) {
       JERRY_DEBUG_MSG ("resume");
