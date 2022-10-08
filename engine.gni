@@ -11,6 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+declare_args() {
+    thirdparty_jerryscript_enable_external_context = true
+}
+
 engine_path = "//third_party/jerryscript"
 
 core_path = "${engine_path}/jerry-core"
