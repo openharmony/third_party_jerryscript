@@ -12,7 +12,7 @@
 # limitations under the License.
 
 declare_args() {
-    thirdparty_jerryscript_enable_external_context = true
+  thirdparty_jerryscript_enable_external_context = true
 }
 
 engine_path = "//third_party/jerryscript"
