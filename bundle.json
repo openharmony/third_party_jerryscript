@@ -13,7 +13,7 @@
         "name": "thirdparty_jerryscript",
         "subsystem": "",
         "syscap": [],
-        "features": [],
+        "features": ["thirdparty_jerryscript_enable_external_context"],
         "adapted_system_type": [],
         "rom": "",
         "ram": "",
