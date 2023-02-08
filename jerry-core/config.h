@@ -20,19 +20,42 @@
  * Here define the special config for IAR and gn build.
  */
 #if (!defined(_WIN32) && !defined(_WIN64))
-
+#ifndef JERRY_BUILTIN_REGEXP
 # define JERRY_BUILTIN_REGEXP 0
+#endif
+
+#ifndef JERRY_ES2015
 # define JERRY_ES2015 0
+#endif
+
 #ifndef JERRY_NDEBUG
 # define JERRY_NDEBUG
 #endif
+
+#ifndef JERRY_DISABLE_HEAVY_DEBUG
 # define JERRY_DISABLE_HEAVY_DEBUG
+#endif
+
+#ifndef JERRY_SNAPSHOT_EXEC
 # define JERRY_SNAPSHOT_EXEC 1
+#endif
+
+#ifndef JERRY_PARSER
 # define JERRY_PARSER 1
+#endif
+
+#ifndef JERRY_ES2015_BUILTIN_TYPEDARRAY
 # define JERRY_ES2015_BUILTIN_TYPEDARRAY 1
+#endif
+
 #ifndef JERRY_FOR_IAR_CONFIG
+#ifndef JERRY_MEM_STATS
 # define JERRY_MEM_STATS 1
+#endif
+
+#ifndef JERRY_LOGGING
 # define JERRY_LOGGING 1
+#endif
 #endif /* JERRY_FOR_IAR_CONFIG */
 
 #ifndef JERRY_GLOBAL_HEAP_SIZE
