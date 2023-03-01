@@ -223,6 +223,7 @@ if (board_toolchain_type != "iccarm") {
     "JERRY_FUNCTION_BACKTRACE",
     "JERRY_STACK_LIMIT=0",
   ]
+  jerry_core_defines += es6_support_defines
 } else {
   jerry_core_sources += [
     "api/external-context-helpers.c",
@@ -245,7 +246,6 @@ if (board_toolchain_type != "iccarm") {
       "JERRY_DEBUGGER=0",
       "JERRY_MEM_GC_BEFORE_EACH_ALLOC=0",
       "JERRY_PARSER_DUMP_BYTE_CODE=0",
-      "JERRY_ES2015=0",
       "JERRY_REGEXP_STRICT_MODE=0",
       "JERRY_REGEXP_DUMP_BYTE_CODE=0",
       "JERRY_SNAPSHOT_EXEC=1",
@@ -259,6 +259,7 @@ if (board_toolchain_type != "iccarm") {
       "SNAPSHOT_BUFFER_SIZE=48*1024",
       "_BSD_SOURCE",
     ]
+    defines += es6_support_defines
     if (thirdparty_jerryscript_enable_external_context == true) {
       defines += [ "JERRY_EXTERNAL_CONTEXT=1" ]
     }

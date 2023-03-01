@@ -83,23 +83,55 @@
 #ifdef JERRY_FOR_IAR_CONFIG
 # error "Should not define this macro on WIN simulator!"
 #endif
+#ifndef JERRY_BUILTIN_REGEXP
 # define JERRY_BUILTIN_REGEXP 0
+#endif
+
+#ifndef JERRY_ES2015
 # define JERRY_ES2015 0
+#endif
+
+#ifndef JERRY_ES2015_BUILTIN_TYPEDARRAY
 # define JERRY_ES2015_BUILTIN_TYPEDARRAY 1
+#endif
+
 //Maximum size of heap in kilobytes
+#ifndef JERRY_GLOBAL_HEAP_SIZE
 # define JERRY_GLOBAL_HEAP_SIZE (64)
+#endif
+
+#ifndef JERRY_DISABLE_HEAVY_DEBUG
 # define JERRY_DISABLE_HEAVY_DEBUG
+#endif
+
+#ifndef JERRY_ERROR_MESSAGES
 # define JERRY_ERROR_MESSAGES 1
+#endif
+
+#ifndef JERRY_LINE_INFO
 # define JERRY_LINE_INFO 1
+#endif
+
+#ifndef JERRY_MEM_STATS
 # define JERRY_MEM_STATS 1
+#endif
+
+#ifndef JERRY_SNAPSHOT_EXEC
 # define JERRY_SNAPSHOT_EXEC 1
+#endif
+
+#ifndef JERRY_SNAPSHOT_SAVE
 # define JERRY_SNAPSHOT_SAVE 1
+#endif
+
 #ifndef JERRY_LOGGING
 # define JERRY_LOGGING 1
 #endif
 
 // following config controls temp changes in jerry for debugger function with IDE
+#ifndef ACE_DEBUGGER_CUSTOM
 # define ACE_DEBUGGER_CUSTOM
+#endif
 
 #ifndef JERRY_BUILTIN_EVAL_DISABLED
 // disable builtin eval() function

@@ -26,3 +26,18 @@ ext_path = "${engine_path}/jerry-ext"
 libm_path = "${engine_path}/jerry-libm"
 
 port_path = "${engine_path}/jerry-port"
+
+# support es6 with limitation
+es6_support_defines = [
+  "JERRY_ES2015=1",
+  "JERRY_ES2015_BUILTIN_TYPEDARRAY=1",
+  "JERRY_ES2015_BUILTIN_SET=1",
+  "JERRY_ES2015_BUILTIN_PROMISE=1",
+  "JERRY_ES2015_BUILTIN_PROXY=1",
+  "JERRY_ES2015_MODULE_SYSTEM=1",
+  "JERRY_ES2015_BUILTIN_MAP=1",
+  "JERRY_ES2015_BUILTIN_WEAKMAP=0",
+  "JERRY_ES2015_BUILTIN_WEAKSET=0",
+  "JERRY_ES2015_BUILTIN_DATAVIEW=0",
+  "JERRY_ES2015_BUILTIN_REFLECT=0",
+]
