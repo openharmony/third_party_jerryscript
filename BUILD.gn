@@ -69,6 +69,16 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
     if (thirdparty_jerryscript_enable_external_context == true) {
       defines += [ "JERRY_EXTERNAL_CONTEXT=1" ]
     }
+    defines +=
+        [ "INPUTJS_BUFFER_SIZE=${thirdparty_jerryscript_inputjs_buffer_size}" ]
+    defines += [
+      "SNAPSHOT_BUFFER_SIZE=${thirdparty_jerryscript_snapshot_buffer_size}",
+    ]
+    defines +=
+        [ "BMS_TASK_HEAP_SIZE=${thirdparty_jerryscript_bms_task_heap_size}" ]
+    defines +=
+        [ "JS_TASK_HEAP_SIZE=${thirdparty_jerryscript_js_task_heap_size}" ]
+
     cflags = [
       "-Wno-unused-function",
       "-Wno-sign-compare",
