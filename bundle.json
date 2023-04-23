@@ -13,7 +13,13 @@
         "name": "thirdparty_jerryscript",
         "subsystem": "",
         "syscap": [],
-        "features": ["thirdparty_jerryscript_enable_external_context"],
+        "features": [
+            "thirdparty_jerryscript_enable_external_context",
+            "thirdparty_jerryscript_inputjs_buffer_size",
+            "thirdparty_jerryscript_snapshot_buffer_size",
+            "thirdparty_jerryscript_bms_task_heap_size",
+            "thirdparty_jerryscript_js_task_heap_size"
+        ],
         "adapted_system_type": [],
         "rom": "",
         "ram": "",
