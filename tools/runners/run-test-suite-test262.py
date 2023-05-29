@@ -59,7 +59,7 @@ def prepare_test262_test_suite(args):
         return 0
 
     return_code = subprocess.call(['git', 'clone', '--no-checkout',
-                                   'https://github.com/tc39/test262.git', args.test_dir])
+                                   'https://gitee.com/Han00000000/test262.git', args.test_dir])
     if return_code:
         print('Cloning test262 repository failed.')
         return return_code

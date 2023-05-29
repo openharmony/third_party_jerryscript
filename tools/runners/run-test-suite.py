@@ -35,6 +35,8 @@ def get_arguments():
                         help='File contains test paths to run')
     parser.add_argument('--skip-list', metavar='LIST',
                         help='Add a comma separated list of patterns of the excluded JS-tests')
+    parser.add_argument('--skip-file', metavar='LIST',
+                        help='Add a comma separated list of patterns of the excluded JS-tests')                   
     parser.add_argument('--test-dir', metavar='DIR',
                         help='Directory contains tests to run')
     parser.add_argument('--snapshot', action='store_true',
@@ -45,11 +47,15 @@ def get_arguments():
         script_args.skip_list = script_args.skip_list.split(',')
     else:
         script_args.skip_list = []
+    if script_args.skip_file:
+        script_args.skip_file = script_args.skip_file.split(',')
+    else:
+        script_args.skip_file = []
 
     return script_args
 
 
-def get_tests(test_dir, test_list, skip_list):
+def get_tests(test_dir, test_list, skip_list, skip_file):
     tests = []
     if test_dir:
         tests = []
@@ -69,8 +75,14 @@ def get_tests(test_dir, test_list, skip_list):
             if skipped in test:
                 return False
         return True
+    def filter_file_tests(test):
+        for skipped in skip_file:
+            if skipped in test:
+                return False
+        return True
 
-    return [test for test in tests if filter_tests(test)]
+    return [test for test in tests if filter_tests(test) and filter_file_tests(test)]
+
 
 
 def get_platform_cmd_prefix():
@@ -90,7 +102,7 @@ def execute_test_command(test_cmd):
 
 
 def main(args):
-    tests = get_tests(args.test_dir, args.test_list, args.skip_list)
+    tests = get_tests(args.test_dir, args.test_list, args.skip_list, args.skip_file)
     total = len(tests)
     if total == 0:
         print("No test to execute.")
