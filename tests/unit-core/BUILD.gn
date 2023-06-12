@@ -1,0 +1,157 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/lite/config/component/lite_component.gni")
+import("//third_party/jerryscript/engine.gni")
+import("//third_party/jerryscript/tests/test_helper.gni")
+
+host_unittest_action("TddTest") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "//commonlibrary/c_utils/base/include",
+    "${core_path}/include",
+    "${core_path}/api",
+    "${core_path}/debugger",
+    "${core_path}/ecma/builtin-objects/typedarray",
+    "${core_path}/ext",
+    "${core_path}/parser",
+    "${core_path}/parser/js",
+    "${core_path}/parser/regexp",
+    "${core_path}/vm",
+    "${core_path}",
+    "test-common.h",
+    "${ext_path}",
+    "${ext_path}/common",
+    "${ext_path}/debugger",
+    "${ext_path}/handle-scope",
+    "${ext_path}/include/jerryscript-ext",
+    "${ext_path}/include",
+    "${libm_path}",
+    "${debugger_path}",
+    "${port_path}",
+    "${engine_path}/jerry-main",
+    "${port_path}/default/include",
+    "${core_path}/ecma/base",
+    "${core_path}/ecma/operations",
+    "${core_path}/vm",
+    "${core_path}/jcontext",
+    "${core_path}/jmem",
+    "${core_path}/parser/js",
+    "${core_path}/parser/regexp",
+    "${core_path}/jrt",
+    "${core_path}/lit",
+    "${core_path}/ecma/builtin-objects",
+    "//commonlibrary/utils_lite/memory/include",
+    "//commonlibrary/utils_lite/include",
+    "//third_party/googletest/googletest/include/gtest",
+    "//third_party/googletest/include",
+    "//commonlibrary/c_utils/base/include",
+    "//third_party/node/src",
+  ]
+  configs = [ "//third_party/bounds_checking_function:libsec_public_config" ]
+  deps = [
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/googletest:gtest",
+    "//third_party/googletest:gtest_main",
+    "//third_party/jerryscript:jerry",
+    "//third_party/jerryscript:jerry-snapshot",
+    "//third_party/jerryscript:libjerryscript",
+  ]
+
+  cflags = [
+    "-Wno-unused-function",
+    "-Wno-sign-compare",
+    "-Wno-implicit-fallthrough",
+  ]
+  defines = [
+    "JERRY_FOR_IAR_CONFIG",
+    "JERRY_GC_LIMIT=(0)",
+    "JERRY_CPOINTER_32_BIT=0",
+    "JERRY_ERROR_MESSAGES=1",
+    "JERRY_PARSER=1",
+    "JERRY_LINE_INFO=1",
+    "JERRY_LOGGING=0",
+    "JERRY_DEBUGGER=0",
+    "JERRY_MEM_GC_BEFORE_EACH_ALLOC=0",
+    "JERRY_PARSER_DUMP_BYTE_CODE=0",
+    "JERRY_ES2015=0",
+    "JERRY_REGEXP_STRICT_MODE=0",
+    "JERRY_REGEXP_DUMP_BYTE_CODE=0",
+    "JERRY_SNAPSHOT_EXEC=1",
+    "JERRY_SNAPSHOT_SAVE=1",
+    "JERRY_SYSTEM_ALLOCATOR=0",
+    "JERRY_VALGRIND=0",
+    "JERRY_VM_EXEC_STOP=0",
+    "JERRY_STACK_LIMIT=(8)",
+    "JERRY_IAR_JUPITER",
+    "INPUTJS_BUFFER_SIZE=64*1024",
+    "SNAPSHOT_BUFFER_SIZE=48*1024",
+    "JERRY_COMMIT_HASH=\"ignored\"",
+    "JERRY_NDEBUG",
+    "JERRY_HEAPDUMP",
+    "JERRY_REF_TRACKER",
+    "JERRY_ES2015_BUILTIN_TYPEDARRAY=1",
+  ]
+  if (thirdparty_jerryscript_enable_external_context == true) {
+    defines += [ "JERRY_EXTERNAL_CONTEXT=1" ]
+  }
+  sources = [
+    "test-abort.cpp",
+    "test-api-binary-operations-arithmetics.cpp",
+    "test-api-binary-operations-comparisons.cpp",
+    "test-api-binary-operations-instanceof.cpp",
+    "test-api-errortype.cpp",
+    "test-api-promise.cpp",
+    "test-api-property.cpp",
+    "test-api-set-and-clear-error-flag.cpp",
+    "test-api-strings.cpp",
+    "test-api-value-type.cpp",
+    "test-api.cpp",
+    "test-arraybuffer.cpp",
+    "test-container.cpp",
+    "test-context-data.cpp",
+    "test-dataview.cpp",
+    "test-date-helpers.cpp",
+    "test-exec-stop.cpp",
+    "test-has-property.cpp",
+    "test-internal-properties.cpp",
+    "test-jmem.cpp",
+    "test-lit-char-helpers.cpp",
+    "test-native-callback-nested.cpp",
+    "test-native-instanceof.cpp",
+    "test-newtarget.cpp",
+    "test-number-to-int32.cpp",
+    "test-number-to-string.cpp",
+    "test-objects-foreach.cpp",
+    "test-poolman.cpp",
+    "test-promise.cpp",
+    "test-proxy.cpp",
+    "test-regression-3588.cpp",
+    "test-resource-name.cpp",
+    "test-string-to-number.cpp",
+    "test-symbol.cpp",
+    "test-to-integer.cpp",
+    "test-to-length.cpp",
+    "test-typedarray.cpp",
+    "test-unicode.cpp",
+  ]
+}
+
+group("jerry_tdd_test") {
+  testonly = true
+  deps = [ ":TddTest" ]
+}
+group("jerry_tdd_host_test") {
+  testonly = true
+  deps = [ ":TddTestAction" ]
+}
