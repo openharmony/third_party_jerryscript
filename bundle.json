@@ -11,7 +11,7 @@
     "scripts": {},
     "component": {
         "name": "thirdparty_jerryscript",
-        "subsystem": "",
+        "subsystem": "thirdparty",
         "syscap": [],
         "features": [
             "thirdparty_jerryscript_enable_external_context",
