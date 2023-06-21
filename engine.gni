@@ -12,11 +12,42 @@
 # limitations under the License.
 
 declare_args() {
-  thirdparty_jerryscript_enable_external_context = true
-  thirdparty_jerryscript_inputjs_buffer_size = 32768
-  thirdparty_jerryscript_snapshot_buffer_size = 24576
-  thirdparty_jerryscript_bms_task_heap_size = 64
-  thirdparty_jerryscript_js_task_heap_size = 64
+  jerryscript_enable_external_context = true
+  jerryscript_inputjs_buffer_size = 32768
+  jerryscript_snapshot_buffer_size = 24576
+  jerryscript_bms_task_heap_size = 64
+  jerryscript_js_task_heap_size = 64
+  jerryscript_jerry_cpointer_32_bit = 0
+  jerryscript_jerry_debugger = 1
+  jerryscript_jerry_gc_limit = 0
+  jerryscript_jerry_line_info = 1
+  jerryscript_jerry_mem_gc_before_each_alloc = 0
+  jerryscript_jerry_parser = 1
+  jerryscript_jerry_parser_dump_byte_code = 0
+  jerryscript_jerry_regexp_dump_byte_code = 0
+  jerryscript_jerry_regexp_strict_mode = 0
+  jerryscript_jerry_stack_limit = 0
+  jerryscript_jerry_system_allocator = 0
+  jerryscript_jerry_valgrind = 0
+  jerryscript_jerry_vm_exec_stop = 0
+
+  # support es6 with limitation
+  jerryscript_jerry_es2015 = 1
+  jerryscript_jerry_es2015_builtin_typedarray = 1
+  jerryscript_jerry_es2015_builtin_set = 1
+  jerryscript_jerry_es2015_builtin_promise = 1
+  jerryscript_jerry_es2015_builtin_proxy = 1
+  jerryscript_jerry_es2015_module_system = 1
+  jerryscript_jerry_es2015_builtin_map = 1
+  jerryscript_jerry_es2015_builtin_weakmap = 0
+  jerryscript_jerry_es2015_builtin_weakset = 0
+  jerryscript_jerry_es2015_builtin_dataview = 0
+  jerryscript_jerry_es2015_builtin_reflect = 0
+
+  jerryscript_jerry_error_messages = 1
+  jerryscript_jerry_logging = 0
+  jerryscript_jerry_snapshot_exec = 1
+  jerryscript_jerry_snapshot_save = 1
 }
 
 engine_path = "//third_party/jerryscript"
@@ -30,18 +61,3 @@ ext_path = "${engine_path}/jerry-ext"
 libm_path = "${engine_path}/jerry-libm"
 
 port_path = "${engine_path}/jerry-port"
-
-# support es6 with limitation
-es6_support_defines = [
-  "JERRY_ES2015=1",
-  "JERRY_ES2015_BUILTIN_TYPEDARRAY=1",
-  "JERRY_ES2015_BUILTIN_SET=1",
-  "JERRY_ES2015_BUILTIN_PROMISE=1",
-  "JERRY_ES2015_BUILTIN_PROXY=1",
-  "JERRY_ES2015_MODULE_SYSTEM=1",
-  "JERRY_ES2015_BUILTIN_MAP=1",
-  "JERRY_ES2015_BUILTIN_WEAKMAP=0",
-  "JERRY_ES2015_BUILTIN_WEAKSET=0",
-  "JERRY_ES2015_BUILTIN_DATAVIEW=0",
-  "JERRY_ES2015_BUILTIN_REFLECT=0",
-]
