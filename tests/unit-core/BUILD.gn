@@ -102,7 +102,7 @@ host_unittest_action("TddTest") {
     "JERRY_REF_TRACKER",
     "JERRY_ES2015_BUILTIN_TYPEDARRAY=1",
   ]
-  if (thirdparty_jerryscript_enable_external_context == true) {
+  if (jerryscript_enable_external_context == true) {
     defines += [ "JERRY_EXTERNAL_CONTEXT=1" ]
   }
   sources = [

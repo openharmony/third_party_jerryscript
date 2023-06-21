@@ -217,13 +217,25 @@ jerry_core_includes = [
 if (board_toolchain_type != "iccarm") {
   jerry_core_defines = [
     "JERRY_GLOBAL_HEAP_SIZE=(128)",
-    "JERRY_ERROR_MESSAGES=1",
-    "JERRY_LINE_INFO=1",
     "JERRY_FUNCTION_NAME",
     "JERRY_FUNCTION_BACKTRACE",
     "JERRY_STACK_LIMIT=0",
   ]
-  jerry_core_defines += es6_support_defines
+  jerry_core_defines += [
+    "JERRY_ERROR_MESSAGES=${jerryscript_jerry_error_messages}",
+    "JERRY_LINE_INFO=${jerryscript_jerry_line_info}",
+    "JERRY_ES2015=${jerryscript_jerry_es2015}",
+    "JERRY_ES2015_BUILTIN_TYPEDARRAY=${jerryscript_jerry_es2015_builtin_typedarray}",
+    "JERRY_ES2015_BUILTIN_SET=${jerryscript_jerry_es2015_builtin_set}",
+    "JERRY_ES2015_BUILTIN_PROMISE=${jerryscript_jerry_es2015_builtin_promise}",
+    "JERRY_ES2015_BUILTIN_PROXY=${jerryscript_jerry_es2015_builtin_proxy}",
+    "JERRY_ES2015_MODULE_SYSTEM=${jerryscript_jerry_es2015_module_system}",
+    "JERRY_ES2015_BUILTIN_MAP=${jerryscript_jerry_es2015_builtin_map}",
+    "JERRY_ES2015_BUILTIN_WEAKMAP=${jerryscript_jerry_es2015_builtin_weakmap}",
+    "JERRY_ES2015_BUILTIN_WEAKSET=${jerryscript_jerry_es2015_builtin_weakset}",
+    "JERRY_ES2015_BUILTIN_DATAVIEW=${jerryscript_jerry_es2015_builtin_dataview}",
+    "JERRY_ES2015_BUILTIN_REFLECT=${jerryscript_jerry_es2015_builtin_reflect}",
+  ]
 } else {
   jerry_core_sources += [
     "api/external-context-helpers.c",
@@ -237,41 +249,48 @@ if (board_toolchain_type != "iccarm") {
     ]
     defines = [
       "JERRY_FOR_IAR_CONFIG",
-      "JERRY_GC_LIMIT=(0)",
-      "JERRY_CPOINTER_32_BIT=0",
-      "JERRY_ERROR_MESSAGES=1",
-      "JERRY_PARSER=1",
-      "JERRY_LINE_INFO=1",
-      "JERRY_LOGGING=0",
       "JERRY_DEBUGGER=0",
-      "JERRY_MEM_GC_BEFORE_EACH_ALLOC=0",
-      "JERRY_PARSER_DUMP_BYTE_CODE=0",
-      "JERRY_REGEXP_STRICT_MODE=0",
-      "JERRY_REGEXP_DUMP_BYTE_CODE=0",
-      "JERRY_SNAPSHOT_EXEC=1",
-      "JERRY_SNAPSHOT_SAVE=1",
-      "JERRY_SYSTEM_ALLOCATOR=0",
-      "JERRY_VALGRIND=0",
-      "JERRY_VM_EXEC_STOP=0",
       "JERRY_STACK_LIMIT=(8)",
       "JERRY_IAR_JUPITER",
       "INPUTJS_BUFFER_SIZE=64*1024",
       "SNAPSHOT_BUFFER_SIZE=48*1024",
       "_BSD_SOURCE",
     ]
-    defines += es6_support_defines
-    if (thirdparty_jerryscript_enable_external_context == true) {
+    defines += [
+      "JERRY_GC_LIMIT=${jerryscript_jerry_gc_limit}",
+      "JERRY_CPOINTER_32_BIT=${jerryscript_jerry_cpointer_32_bit}",
+      "JERRY_ERROR_MESSAGES=${jerryscript_jerry_error_messages}",
+      "JERRY_PARSER=${jerryscript_jerry_parser}",
+      "JERRY_LINE_INFO=${jerryscript_jerry_line_info}",
+      "JERRY_LOGGING=${jerryscript_jerry_logging}",
+      "JERRY_MEM_GC_BEFORE_EACH_ALLOC=${jerryscript_jerry_mem_gc_before_each_alloc}",
+      "JERRY_PARSER_DUMP_BYTE_CODE=${jerryscript_jerry_parser_dump_byte_code}",
+      "JERRY_REGEXP_STRICT_MODE=${jerryscript_jerry_regexp_strict_mode}",
+      "JERRY_REGEXP_DUMP_BYTE_CODE=${jerryscript_jerry_regexp_dump_byte_code}",
+      "JERRY_SNAPSHOT_EXEC=${jerryscript_jerry_snapshot_exec}",
+      "JERRY_SNAPSHOT_SAVE=${jerryscript_jerry_snapshot_save}",
+      "JERRY_SYSTEM_ALLOCATOR=${jerryscript_jerry_system_allocator}",
+      "JERRY_VALGRIND=${jerryscript_jerry_valgrind}",
+      "JERRY_VM_EXEC_STOP=${jerryscript_jerry_vm_exec_stop}",
+      "JERRY_ES2015=${jerryscript_jerry_es2015}",
+      "JERRY_ES2015_BUILTIN_TYPEDARRAY=${jerryscript_jerry_es2015_builtin_typedarray}",
+      "JERRY_ES2015_BUILTIN_SET=${jerryscript_jerry_es2015_builtin_set}",
+      "JERRY_ES2015_BUILTIN_PROMISE=${jerryscript_jerry_es2015_builtin_promise}",
+      "JERRY_ES2015_BUILTIN_PROXY=${jerryscript_jerry_es2015_builtin_proxy}",
+      "JERRY_ES2015_MODULE_SYSTEM=${jerryscript_jerry_es2015_module_system}",
+      "JERRY_ES2015_BUILTIN_MAP=${jerryscript_jerry_es2015_builtin_map}",
+      "JERRY_ES2015_BUILTIN_WEAKMAP=${jerryscript_jerry_es2015_builtin_weakmap}",
+      "JERRY_ES2015_BUILTIN_WEAKSET=${jerryscript_jerry_es2015_builtin_weakset}",
+      "JERRY_ES2015_BUILTIN_DATAVIEW=${jerryscript_jerry_es2015_builtin_dataview}",
+      "JERRY_ES2015_BUILTIN_REFLECT=${jerryscript_jerry_es2015_builtin_reflect}",
+    ]
+    if (jerryscript_enable_external_context == true) {
       defines += [ "JERRY_EXTERNAL_CONTEXT=1" ]
     }
-    defines +=
-        [ "INPUTJS_BUFFER_SIZE=${thirdparty_jerryscript_inputjs_buffer_size}" ]
-    defines += [
-      "SNAPSHOT_BUFFER_SIZE=${thirdparty_jerryscript_snapshot_buffer_size}",
-    ]
-    defines +=
-        [ "BMS_TASK_HEAP_SIZE=${thirdparty_jerryscript_bms_task_heap_size}" ]
-    defines +=
-        [ "JS_TASK_HEAP_SIZE=${thirdparty_jerryscript_js_task_heap_size}" ]
+    defines += [ "INPUTJS_BUFFER_SIZE=${jerryscript_inputjs_buffer_size}" ]
+    defines += [ "SNAPSHOT_BUFFER_SIZE=${jerryscript_snapshot_buffer_size}" ]
+    defines += [ "BMS_TASK_HEAP_SIZE=${jerryscript_bms_task_heap_size}" ]
+    defines += [ "JS_TASK_HEAP_SIZE=${jerryscript_js_task_heap_size}" ]
 
     include_dirs = jerry_core_includes
     include_dirs += [
