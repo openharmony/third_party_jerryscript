@@ -326,6 +326,7 @@ EXECRES add_directory_to_pending_list(dir_node **end, char* input_file_path) {
  * transform this js file into snapshot.
  */
 EXECRES gen_snapshot(char* input_file_path, char* output_file_path) {
+  RefreshAllServiceTimeStamp();
   jerry_init_flag_t flags = JERRY_INIT_EMPTY;
   jerry_init (flags);
   EXECRES generate_val = EXCE_ACE_JERRY_EXEC_OK;
