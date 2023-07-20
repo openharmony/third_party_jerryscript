@@ -53,6 +53,7 @@ void jerry_port_default_remove_current_context_record ();
 
 void jerry_external_context_init(uint32_t heap_size, jerry_context_alloc_t alloc, void *cb_data_p);
 
+void RefreshAllServiceTimeStamp(void);
 #endif  // JERRY_FOR_IAR_CONFIG
 
 #ifdef __cplusplus
