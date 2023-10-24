@@ -16,10 +16,6 @@
 #ifndef JMEM_H
 #define JMEM_H
 
-#ifndef __weak
-#define __weak			__attribute__((weak))
-#endif
-
 #include "jrt.h"
 
 /** \addtogroup mem Memory allocation
