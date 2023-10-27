@@ -23,17 +23,6 @@
 #include "jrt-bit-fields.h"
 #include "jrt-libc-includes.h"
 
-void *JerryHeapMalloc(uint32_t size)
-{
-   return NULL;
-}
-bool JerryHeapFree(void *addr)
-{
-   return false;
-}
-
-void JerryHeapInit() {}
-
 #define JMEM_ALLOCATOR_INTERNAL
 #include "jmem-allocator-internal.h"
 
@@ -146,18 +135,6 @@ jmem_heap_finalize (void)
 static void * JERRY_ATTR_HOT
 jmem_heap_alloc (const size_t size) /**< size of requested block */
 {
-  if (size > 8 && size <= 24) {
-   void *data_space_p = JerryHeapMalloc (size);
-   if (data_space_p != NULL)
-   {
-     JERRY_CONTEXT (jmem_heap_allocated_size) += size;
-     while(JERRY_CONTEXT(jmem_heap_allocated_size) >= JERRY_CONTEXT (jmem_heap_limit))
-     {
-       JERRY_CONTEXT (jmem_heap_limit) += CONFIG_GC_LIMIT;
-     }
-     return data_space_p;
-   }
-  }
 #if !ENABLED (JERRY_SYSTEM_ALLOCATOR)
   /* Align size. */
   const size_t required_size = ((size + JMEM_ALIGNMENT - 1) / JMEM_ALIGNMENT) * JMEM_ALIGNMENT;
@@ -493,18 +470,6 @@ jmem_heap_free_block_internal (void *ptr, /**< pointer to beginning of data spac
   JERRY_ASSERT (JERRY_CONTEXT (jmem_heap_limit) >= JERRY_CONTEXT (jmem_heap_allocated_size));
   JERRY_ASSERT (JERRY_CONTEXT (jmem_heap_allocated_size) > 0);
 
-  if (JerryHeapFree(ptr)) {
-      JERRY_CONTEXT (jmem_heap_allocated_size) -= size;
-
-      while (JERRY_CONTEXT (jmem_heap_allocated_size) + CONFIG_GC_LIMIT <= JERRY_CONTEXT(jmem_heap_limit))
-      {
-        JERRY_CONTEXT(jmem_heap_limit) -= CONFIG_GC_LIMIT;
-      }
-
-      JERRY_ASSERT (JERRY_CONTEXT(jmem_heap_limit) >= JERRY_CONTEXT(jmem_heap_allocated_size));
-      return;
-  }
-
 #if !ENABLED (JERRY_SYSTEM_ALLOCATOR)
   /* checking that ptr points to the heap */
   JERRY_ASSERT (jmem_is_heap_pointer (ptr));
@@ -541,22 +506,186 @@ jmem_heap_realloc_block (void *ptr, /**< memory region to reallocate */
                          const size_t old_size, /**< current size of the region */
                          const size_t new_size) /**< desired new size */
 {
-  const size_t required_size = new_size - old_size;
+#if !ENABLED (JERRY_SYSTEM_ALLOCATOR)
+  JERRY_ASSERT (jmem_is_heap_pointer (ptr));
+  JERRY_ASSERT ((uintptr_t) ptr % JMEM_ALIGNMENT == 0);
+  JERRY_ASSERT (old_size != 0);
+  JERRY_ASSERT (new_size != 0);
+
+  jmem_heap_free_t * const block_p = (jmem_heap_free_t *) ptr;
+  const size_t aligned_new_size = (new_size + JMEM_ALIGNMENT - 1) / JMEM_ALIGNMENT * JMEM_ALIGNMENT;
+  const size_t aligned_old_size = (old_size + JMEM_ALIGNMENT - 1) / JMEM_ALIGNMENT * JMEM_ALIGNMENT;
+
+  if (aligned_old_size == aligned_new_size)
+  {
+    JMEM_VALGRIND_RESIZE_SPACE (block_p, old_size, new_size);
+    JMEM_HEAP_STAT_FREE (old_size);
+    JMEM_HEAP_STAT_ALLOC (new_size);
+    return block_p;
+  }
+
+  if (aligned_new_size < aligned_old_size)
+  {
+    JMEM_VALGRIND_RESIZE_SPACE (block_p, old_size, new_size);
+    JMEM_HEAP_STAT_FREE (old_size);
+    JMEM_HEAP_STAT_ALLOC (new_size);
+    jmem_heap_insert_block ((jmem_heap_free_t *) ((uint8_t *) block_p + aligned_new_size),
+                            jmem_heap_find_prev (block_p),
+                            aligned_old_size - aligned_new_size);
+
+    JERRY_CONTEXT (jmem_heap_allocated_size) -= (aligned_old_size - aligned_new_size);
+    while (JERRY_CONTEXT (jmem_heap_allocated_size) + CONFIG_GC_LIMIT <= JERRY_CONTEXT (jmem_heap_limit))
+    {
+      JERRY_CONTEXT (jmem_heap_limit) -= CONFIG_GC_LIMIT;
+    }
+
+    return block_p;
+  }
+
+  void *ret_block_p = NULL;
+  const size_t required_size = aligned_new_size - aligned_old_size;
+
+#if !ENABLED (JERRY_MEM_GC_BEFORE_EACH_ALLOC)
   if (JERRY_CONTEXT (jmem_heap_allocated_size) + required_size >= JERRY_CONTEXT (jmem_heap_limit))
+#endif /* !ENABLED (JERRY_MEM_GC_BEFORE_EACH_ALLOC) */
   {
     ecma_free_unused_memory (JMEM_PRESSURE_LOW);
   }
 
-  void *newBuffer = jmem_heap_alloc_block(new_size);
-  size_t copySize = (old_size > new_size) ? new_size : old_size;
-  if (newBuffer) {
-    memcpy(newBuffer, ptr, copySize);
-    jmem_heap_free_block(ptr, old_size);
-    return newBuffer;
-  }else {
-    jmem_heap_free_block(ptr, old_size);
-    return NULL;
+  jmem_heap_free_t *prev_p = jmem_heap_find_prev (block_p);
+  JMEM_VALGRIND_DEFINED_SPACE (prev_p, sizeof (jmem_heap_free_t));
+  jmem_heap_free_t * const next_p = JMEM_HEAP_GET_ADDR_FROM_OFFSET (prev_p->next_offset);
+
+  /* Check if block can be extended at the end */
+  if (((jmem_heap_free_t *) ((uint8_t *) block_p + aligned_old_size)) == next_p)
+  {
+    JMEM_VALGRIND_DEFINED_SPACE (next_p, sizeof (jmem_heap_free_t));
+
+    if (required_size <= next_p->size)
+    {
+      /* Block can be extended, update the list. */
+      if (required_size == next_p->size)
+      {
+        prev_p->next_offset = next_p->next_offset;
+      }
+      else
+      {
+        jmem_heap_free_t *const new_next_p = (jmem_heap_free_t *) ((uint8_t *) next_p + required_size);
+        JMEM_VALGRIND_DEFINED_SPACE (new_next_p, sizeof (jmem_heap_free_t));
+        new_next_p->next_offset = next_p->next_offset;
+        new_next_p->size = (uint32_t) (next_p->size - required_size);
+        JMEM_VALGRIND_NOACCESS_SPACE (new_next_p, sizeof (jmem_heap_free_t));
+        prev_p->next_offset = JMEM_HEAP_GET_OFFSET_FROM_ADDR (new_next_p);
+      }
+
+      /* next_p will be marked as undefined space. */
+      JMEM_VALGRIND_RESIZE_SPACE (block_p, old_size, new_size);
+      ret_block_p = block_p;
+    }
+    else
+    {
+      JMEM_VALGRIND_NOACCESS_SPACE (next_p, sizeof (jmem_heap_free_t));
+    }
+
+    JMEM_VALGRIND_NOACCESS_SPACE (prev_p, sizeof (jmem_heap_free_t));
   }
+  /*
+   * Check if block can be extended at the front.
+   * This is less optimal because we need to copy the data, but still better than allocting a new block.
+   */
+  else if (jmem_heap_get_region_end (prev_p) == block_p)
+  {
+    if (required_size <= prev_p->size)
+    {
+      if (required_size == prev_p->size)
+      {
+        JMEM_VALGRIND_NOACCESS_SPACE (prev_p, sizeof (jmem_heap_free_t));
+        prev_p = jmem_heap_find_prev (prev_p);
+        JMEM_VALGRIND_DEFINED_SPACE (prev_p, sizeof (jmem_heap_free_t));
+        prev_p->next_offset = JMEM_HEAP_GET_OFFSET_FROM_ADDR (next_p);
+      }
+      else
+      {
+        prev_p->size = (uint32_t) (prev_p->size - required_size);
+      }
+
+      JMEM_VALGRIND_NOACCESS_SPACE (prev_p, sizeof (jmem_heap_free_t));
+
+      ret_block_p = (uint8_t *) block_p - required_size;
+
+      /* Mark the the new block as undefined so that we are able to write to it. */
+      JMEM_VALGRIND_UNDEFINED_SPACE (ret_block_p, old_size);
+      /* The blocks are likely to overlap, so mark the old block as defined memory again. */
+      JMEM_VALGRIND_DEFINED_SPACE (block_p, old_size);
+      memmove (ret_block_p, block_p, old_size);
+
+      JMEM_VALGRIND_FREELIKE_SPACE (block_p);
+      JMEM_VALGRIND_MALLOCLIKE_SPACE (ret_block_p, new_size);
+      JMEM_VALGRIND_DEFINED_SPACE (ret_block_p, old_size);
+    }
+    else
+    {
+      JMEM_VALGRIND_NOACCESS_SPACE (prev_p, sizeof (jmem_heap_free_t));
+    }
+  }
+
+  if (ret_block_p != NULL)
+  {
+    /* Managed to extend the block. Update memory usage and the skip pointer. */
+    JERRY_CONTEXT (jmem_heap_list_skip_p) = prev_p;
+    JERRY_CONTEXT (jmem_heap_allocated_size) += required_size;
+
+    while (JERRY_CONTEXT (jmem_heap_allocated_size) >= JERRY_CONTEXT (jmem_heap_limit))
+    {
+      JERRY_CONTEXT (jmem_heap_limit) += CONFIG_GC_LIMIT;
+    }
+  }
+  else
+  {
+    /* Could not extend block. Allocate new region and copy the data. */
+    /* jmem_heap_alloc_block_internal will adjust the allocated_size, but insert_block will not,
+       so we reduce it here first, so that the limit calculation remains consistent. */
+    JERRY_CONTEXT (jmem_heap_allocated_size) -= aligned_old_size;
+    ret_block_p = jmem_heap_alloc_block_internal (new_size);
+
+    /* jmem_heap_alloc_block_internal may trigger garbage collection, which can create new free blocks
+     * in the heap structure, so we need to look up the previous block again. */
+    prev_p = jmem_heap_find_prev (block_p);
+
+    memcpy (ret_block_p, block_p, old_size);
+    jmem_heap_insert_block (block_p, prev_p, aligned_old_size);
+    /* jmem_heap_alloc_block_internal will call JMEM_VALGRIND_MALLOCLIKE_SPACE */
+    JMEM_VALGRIND_FREELIKE_SPACE (block_p);
+  }
+
+  JMEM_HEAP_STAT_FREE (old_size);
+  JMEM_HEAP_STAT_ALLOC (new_size);
+  return ret_block_p;
+#else /* ENABLED (JERRY_SYSTEM_ALLOCATOR) */
+  const size_t required_size = new_size - old_size;
+#if !ENABLED (JERRY_MEM_GC_BEFORE_EACH_ALLOC)
+  if (JERRY_CONTEXT (jmem_heap_allocated_size) + required_size >= JERRY_CONTEXT (jmem_heap_limit))
+#endif /* !ENABLED (JERRY_MEM_GC_BEFORE_EACH_ALLOC) */
+  {
+    ecma_free_unused_memory (JMEM_PRESSURE_LOW);
+  }
+
+  JERRY_CONTEXT (jmem_heap_allocated_size) += required_size;
+
+  while (JERRY_CONTEXT (jmem_heap_allocated_size) >= JERRY_CONTEXT (jmem_heap_limit))
+  {
+    JERRY_CONTEXT (jmem_heap_limit) += CONFIG_GC_LIMIT;
+  }
+
+  while (JERRY_CONTEXT (jmem_heap_allocated_size) + CONFIG_GC_LIMIT <= JERRY_CONTEXT (jmem_heap_limit))
+  {
+    JERRY_CONTEXT (jmem_heap_limit) -= CONFIG_GC_LIMIT;
+  }
+
+  JMEM_HEAP_STAT_FREE (old_size);
+  JMEM_HEAP_STAT_ALLOC (new_size);
+  return realloc (ptr, new_size);
+#endif /* !ENABLED (JERRY_SYSTEM_ALLOCATOR) */
 } /* jmem_heap_realloc_block */
 
 /**
