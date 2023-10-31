@@ -293,7 +293,7 @@ ecma_new_ecma_string_from_utf8_buffer (lit_utf8_size_t length, /**< length of th
  * @return pointer to ecma string with the special representation
  *         NULL, if there is no special representation for the string
  */
-static ecma_string_t *
+ecma_string_t *
 ecma_find_special_string (const lit_utf8_byte_t *string_p, /**< utf8 string */
                           lit_utf8_size_t string_size) /**< string size */
 {
@@ -359,6 +359,46 @@ ecma_new_ecma_string_from_utf8 (const lit_utf8_byte_t *string_p, /**< utf-8 stri
 
   return string_desc_p;
 } /* ecma_new_ecma_string_from_utf8 */
+
+static ecma_long_utf8_string_t g_literalStringCache;
+
+ecma_string_t * ecma_new_nonref_ecma_string_from_utf8 (const lit_utf8_byte_t *string_p, lit_utf8_size_t size)
+{
+  ecma_length_t length = lit_utf8_string_length (string_p, size);
+
+  if  (JERRY_LIKELY (size <= UINT16_MAX))
+  {
+      if  (JERRY_LIKELY (length != size))
+       {
+           JERRY_ASSERT (length < size);
+           ecma_utf8_string_t *string_desc_p;
+           string_desc_p = (ecma_utf8_string_t *)&g_literalStringCache;
+           string_desc_p->header.refs_and_container = ECMA_STRING_CONTAINER_HEAP_UTF8_STRING | ECMA_STRING_REF_ONE;
+           string_desc_p->header.u.hash = lit_utf8_string_calc_hash (string_p, size);
+           string_desc_p->size = (uint16_t) size;
+           string_desc_p->length = (uint16_t) length;
+
+           return (ecma_string_t *) string_desc_p;
+       }
+
+       ecma_ascii_string_t *string_desc_p;
+       string_desc_p = (ecma_ascii_string_t *)&g_literalStringCache;
+       string_desc_p->header.refs_and_container = ECMA_STRING_CONTAINER_HEAP_ASCII_STRING | ECMA_STRING_REF_ONE;
+       string_desc_p->header.u.hash = lit_utf8_string_calc_hash (string_p, size);
+       string_desc_p->size = (uint16_t) size;
+
+       return (ecma_string_t *) string_desc_p;
+  }
+
+  ecma_long_utf8_string_t *string_desc_p;
+  string_desc_p = (ecma_long_utf8_string_t *)&g_literalStringCache;
+  string_desc_p->header.refs_and_container = ECMA_STRING_CONTAINER_HEAP_LONG_UTF8_STRING | ECMA_STRING_REF_ONE;
+  string_desc_p->header.u.hash = lit_utf8_string_calc_hash (string_p, size);
+  string_desc_p->size = size;
+  string_desc_p->length = length;
+
+  return  (ecma_string_t *) string_desc_p;
+}
 
 /**
  * Allocate a new ecma-string and initialize it from the utf8 string argument.
@@ -1662,19 +1702,20 @@ ecma_compare_ecma_strings_longpath (const ecma_string_t *string1_p, /**< ecma-st
   const lit_utf8_byte_t *utf8_string1_p, *utf8_string2_p;
   lit_utf8_size_t utf8_string1_size, utf8_string2_size;
 
-  if (JERRY_LIKELY (ECMA_STRING_GET_CONTAINER (string1_p) == ECMA_STRING_CONTAINER_HEAP_ASCII_STRING))
-  {
-    utf8_string1_p = ECMA_ASCII_STRING_GET_BUFFER (string1_p);
-    utf8_string1_size = ((ecma_ascii_string_t *) string1_p)->size;
-    utf8_string2_p = ECMA_ASCII_STRING_GET_BUFFER (string2_p);
-    utf8_string2_size = ((ecma_ascii_string_t *) string2_p)->size;
-  }
-  else if (ECMA_STRING_GET_CONTAINER (string1_p) == ECMA_STRING_CONTAINER_HEAP_UTF8_STRING)
+  if (JERRY_LIKELY (ECMA_STRING_GET_CONTAINER (string1_p) == ECMA_STRING_CONTAINER_HEAP_UTF8_STRING))
   {
     utf8_string1_p = ECMA_UTF8_STRING_GET_BUFFER (string1_p);
     utf8_string1_size = ((ecma_utf8_string_t *) string1_p)->size;
     utf8_string2_p = ECMA_UTF8_STRING_GET_BUFFER (string2_p);
     utf8_string2_size = ((ecma_utf8_string_t *) string2_p)->size;
+
+  }
+  else if (ECMA_STRING_GET_CONTAINER(string1_p) == ECMA_STRING_CONTAINER_HEAP_ASCII_STRING)
+  {
+    utf8_string1_p = ECMA_ASCII_STRING_GET_BUFFER (string1_p);
+    utf8_string1_size = ((ecma_ascii_string_t *) string1_p)->size;
+    utf8_string2_p = ECMA_ASCII_STRING_GET_BUFFER (string2_p);
+    utf8_string2_size = ((ecma_ascii_string_t *) string2_p)->size;
   }
   else
   {
@@ -1744,6 +1785,92 @@ ecma_compare_ecma_strings (const ecma_string_t *string1_p, /**< ecma-string */
 
   return ecma_compare_ecma_strings_longpath (string1_p, string2_p);
 } /* ecma_compare_ecma_strings */
+
+static bool JERRY_ATTR_NOINLINE
+ecma_compare_ecma_strings_longpath_with_literal (const ecma_string_t *string1_p, /**< ecma_string */
+                                       const ecma_string_t *string2_p,
+                                       const lit_utf8_byte_t *chars_p) /**< ecma_string */
+{
+  JERRY_ASSERT (ECMA_STRING_GET_CONTAINER (string1_p) == ECMA_STRING_GET_CONTAINER (string2_p));
+
+  const lit_utf8_byte_t *utf8_string2_p;
+  lit_utf8_size_t utf8_string1_size,utf8_string2_size;
+
+  if(JERRY_LIKELY (ECMA_STRING_GET_CONTAINER (string1_p) == ECMA_STRING_CONTAINER_HEAP_UTF8_STRING))
+  {
+     utf8_string1_size = ((ecma_utf8_string_t *) string1_p)->size;
+     utf8_string2_p = ECMA_UTF8_STRING_GET_BUFFER (string2_p);
+     utf8_string2_size = ((ecma_utf8_string_t *) string2_p)->size;
+
+  }
+  else if (ECMA_STRING_GET_CONTAINER (string1_p) == ECMA_STRING_CONTAINER_HEAP_ASCII_STRING)
+  {
+    utf8_string1_size = ((ecma_ascii_string_t *) string1_p)->size;
+    utf8_string2_p = ECMA_ASCII_STRING_GET_BUFFER (string2_p);
+    utf8_string2_size = ((ecma_ascii_string_t *) string2_p)->size;
+  }
+  else
+  {
+      JERRY_ASSERT (ECMA_STRING_GET_CONTAINER (string1_p) == ECMA_STRING_CONTAINER_HEAP_ASCII_STRING);
+
+    utf8_string1_size = ((ecma_long_utf8_string_t *) string1_p)->size;
+    utf8_string2_p = ECMA_LONG_UTF8_STRING_GET_BUFFER (string2_p);
+    utf8_string2_size = ((ecma_long_utf8_string_t *) string2_p)->size;
+  }
+
+  if (utf8_string1_size != utf8_string2_size)
+  {
+      return false;
+  }
+
+  return !memcmp ((char *) chars_p, (char *) utf8_string2_p, utf8_string1_size);
+}  /* ecma_compare_ecma_strings_longpath */
+
+extern inline bool JERRY_ATTR_ALWAYS_INLINE
+ecma_compare_ecma_strings_with_literal (const ecma_string_t *string1_p, /**< ecma-string */
+                          const ecma_string_t *string2_p,\
+                          const lit_utf8_byte_t *chars_p) /**< ecma-string */
+{
+   JERRY_ASSERT (string1_p != NULL && string2_p != NULL);
+
+   /* Fast paths first. */
+   if  (string1_p == string2_p)
+   {
+       return true;
+   }
+
+   /* Either string is direct, return with false. */
+   if (ECMA_IS_DIRECT_STRING (((uintptr_t) string1_p) | ((uintptr_t) string2_p)))
+   {
+      return false;
+   }
+
+   if (string1_p->u.hash != string2_p->u.hash)
+   {
+      return false;
+   }
+
+   ecma_string_container_t string1_container = ECMA_STRING_GET_CONTAINER (string1_p);
+
+   if (string1_container != ECMA_STRING_GET_CONTAINER (string2_p))
+   {
+      return false;
+   }
+
+   if (string1_container == ECMA_STRING_CONTAINER_UINT32_IN_DESC)
+   {
+      return true;
+   }
+
+#if ENABLED (JERRY_ES2015)
+  if (string1_container == ECMA_STRING_CONTAINER_SYMBOL)
+  {
+     return false;
+  }
+#endif /* ENABLED (JERRY_ES2015)  */
+
+  return ecma_compare_ecma_strings_longpath_with_literal (string1_p, string2_p, chars_p);
+}  /* ecma_compare_ecma_strings */
 
 /**
  * Compare two non-direct ecma-strings

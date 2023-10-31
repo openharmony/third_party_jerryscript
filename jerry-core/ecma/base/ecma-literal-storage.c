@@ -17,6 +17,20 @@
 #include "ecma-literal-storage.h"
 #include "ecma-helpers.h"
 #include "jcontext.h"
+#include "jerry_literal_cache.h"
+
+void InitJerryLiteralCache(void) {}
+
+void ClearJerryLiteralCache(void) {}
+
+void AddJerryLiteralCache(int32_t hash, void *p) {}
+
+void DelJerryLiteralCache(int32_t hash) {}
+
+void *GetJerryLiteralCache(int32_t hash)
+{
+  return (void*)UINT32_MAX;
+}
 
 /** \addtogroup ecma ECMA
  * @{
@@ -73,6 +87,7 @@ ecma_free_string_list (jmem_cpointer_t string_list_cp) /**< string list */
                                                                 string_list_p->values[i]);
 
         JERRY_ASSERT (ECMA_STRING_IS_REF_EQUALS_TO_ONE (string_p));
+        DelJerryLiteralCache(string_p->u.hash);
         ecma_destroy_ecma_string (string_p);
       }
     }
@@ -131,12 +146,21 @@ ecma_value_t
 ecma_find_or_create_literal_string (const lit_utf8_byte_t *chars_p, /**< string to be searched */
                                     lit_utf8_size_t size) /**< size of the string */
 {
-  ecma_string_t *string_p = ecma_new_ecma_string_from_utf8 (chars_p, size);
-
-  if (ECMA_IS_DIRECT_STRING (string_p))
+  ecma_string_t *string_desc_p = ecma_find_special_string (chars_p,size);
+  if ((string_desc_p != NULL) && ECMA_IS_DIRECT_STRING (string_desc_p))
   {
-    return ecma_make_string_value (string_p);
+    return ecma_make_string_value (string_desc_p);
   }
+
+  ecma_string_t *nonref_string_p = ecma_new_nonref_ecma_string_from_utf8(chars_p, size);
+  ecma_string_t *cached_literal = (ecma_string_t *)GetJerryLiteralCache(nonref_string_p->u.hash);
+  if ((cached_literal != NULL) && (cached_literal != (void*)UINT32_MAX)) {
+    if (ecma_compare_ecma_strings_with_literal (nonref_string_p, cached_literal,chars_p)) {
+       return ecma_make_string_value (cached_literal);
+    }
+  }
+
+  ecma_string_t *string_p = ecma_new_ecma_string_from_utf8 (chars_p, size);
 
   jmem_cpointer_t string_list_cp = JERRY_CONTEXT (string_list_first_cp);
   jmem_cpointer_t *empty_cpointer_p = NULL;
@@ -153,8 +177,12 @@ ecma_find_or_create_literal_string (const lit_utf8_byte_t *chars_p, /**< string 
         {
           empty_cpointer_p = string_list_p->values + i;
         }
+
+        if ((cached_literal == NULL) && empty_cpointer_p != NULL) {
+          break;
+        }
       }
-      else
+      else if (cached_literal != NULL)
       {
         ecma_string_t *value_p = JMEM_CP_GET_NON_NULL_POINTER (ecma_string_t,
                                                                string_list_p->values[i]);
@@ -168,6 +196,9 @@ ecma_find_or_create_literal_string (const lit_utf8_byte_t *chars_p, /**< string 
       }
     }
 
+    if ((cached_literal == NULL) && (empty_cpointer_p != NULL)) {
+      break;
+    }
     string_list_cp = string_list_p->next_cp;
   }
 
@@ -178,6 +209,7 @@ ecma_find_or_create_literal_string (const lit_utf8_byte_t *chars_p, /**< string 
   if (empty_cpointer_p != NULL)
   {
     *empty_cpointer_p = result;
+    AddJerryLiteralCache(string_p->u.hash, string_p);
     return ecma_make_string_value (string_p);
   }
 
@@ -193,6 +225,7 @@ ecma_find_or_create_literal_string (const lit_utf8_byte_t *chars_p, /**< string 
   new_item_p->next_cp = JERRY_CONTEXT (string_list_first_cp);
   JMEM_CP_SET_NON_NULL_POINTER (JERRY_CONTEXT (string_list_first_cp), new_item_p);
 
+  AddJerryLiteralCache(string_p->u.hash, string_p);
   return ecma_make_string_value (string_p);
 } /* ecma_find_or_create_literal_string */
 

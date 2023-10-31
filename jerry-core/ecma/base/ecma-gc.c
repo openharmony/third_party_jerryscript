@@ -1342,6 +1342,18 @@ ecma_gc_free_object (ecma_object_t *object_p) /**< object to free */
   ecma_dealloc_extended_object (object_p, ext_object_size);
 } /* ecma_gc_free_object */
 
+bool g_isGCEnabled = true;
+void EnableGC()
+{
+  g_isGCEnabled = true;
+  ecma_gc_run();
+}
+
+void DisableGC()
+{
+  g_isGCEnabled = false;
+}
+
 /**
  * Run garbage collection, freeing objects that are no longer referenced.
  */
@@ -1353,6 +1365,10 @@ ecma_gc_run (void)
 #endif /* (JERRY_GC_MARK_LIMIT != 0) */
 
   JERRY_CONTEXT (ecma_gc_new_objects) = 0;
+
+  if (!g_isGCEnabled) {
+    return;
+  }
 
   ecma_object_t black_list_head;
   black_list_head.gc_next_cp = JMEM_CP_NULL;

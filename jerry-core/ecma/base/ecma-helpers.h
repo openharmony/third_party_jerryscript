@@ -292,6 +292,9 @@ ecma_string_t *ecma_new_map_key_string (ecma_value_t value);
 bool ecma_prop_name_is_map_key (ecma_string_t *string_p);
 #endif /* ENABLED (JERRY_ES2015_BUILTIN_MAP) || ENABLED (JERRY_ES2015_BUILTIN_SET) */
 ecma_string_t *ecma_new_ecma_string_from_utf8 (const lit_utf8_byte_t *string_p, lit_utf8_size_t string_size);
+ecma_string_t *ecma_new_nonref_ecma_string_from_utf8 (const lit_utf8_byte_t *string_p, lit_utf8_size_t string_size);
+ecma_string_t *ecma_find_special_string (const lit_utf8_byte_t *string_p, lit_utf8_size_t string_size);
+bool ecma_compare_ecma_strings_with_literal  (const ecma_string_t *string1_p, const ecma_string_t *string2_p, const lit_utf8_byte_t *chars_p);
 ecma_string_t *ecma_new_ecma_string_from_utf8_converted_to_cesu8 (const lit_utf8_byte_t *string_p,
                                                                   lit_utf8_size_t string_size);
 ecma_string_t *ecma_new_ecma_string_from_code_unit (ecma_char_t code_unit);
