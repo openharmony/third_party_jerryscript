@@ -71,8 +71,18 @@
   <test id="built-ins/GeneratorFunction/instance-restricted-properties.js"><reason></reason></test>
   <test id="built-ins/GeneratorPrototype/next/context-constructor-invocation.js"><reason></reason></test>
   <test id="built-ins/GeneratorPrototype/throw/from-state-completed.js"><reason></reason></test>
+  <test id="built-ins/IteratorPrototype/Symbol.iterator/name.js"><reason></reason></test>
   <test id="built-ins/Map/prototype/Symbol.iterator.js"><reason></reason></test>
   <test id="built-ins/Map/prototype/values/name.js"><reason></reason></test>
+  <test id="built-ins/Map/prototype/clear/name.js"><reason></reason></test>
+  <test id="built-ins/Map/prototype/delete/name.js"><reason></reason></test>
+  <test id="built-ins/Map/prototype/entries/name.js"><reason></reason></test>
+  <test id="built-ins/Map/prototype/forEach/name.js"><reason></reason></test>
+  <test id="built-ins/Map/prototype/get/name.js"><reason></reason></test>
+  <test id="built-ins/Map/prototype/has/name.js"><reason></reason></test>
+  <test id="built-ins/Map/prototype/keys/name.js"><reason></reason></test>
+  <test id="built-ins/Map/prototype/set/name.js"><reason></reason></test>
+  <test id="built-ins/Map/prototype/size/name.js"><reason></reason></test>
   <test id="built-ins/Map/symbol-species-name.js"><reason></reason></test>
   <test id="built-ins/Number/15.7.4-1.js"><reason></reason></test>
   <test id="built-ins/Number/prototype/S15.7.3.1_A2_T1.js"><reason></reason></test>
@@ -119,6 +129,11 @@
   <test id="built-ins/Number/prototype/toString/S15.7.4.2_A2_T34.js"><reason></reason></test>
   <test id="built-ins/Number/prototype/valueOf/S15.7.4.4_A1_T01.js"><reason></reason></test>
   <test id="built-ins/Number/prototype/valueOf/S15.7.4.4_A1_T02.js"><reason></reason></test>
+  <test id="built-ins/Object/create/15.2.3.5-4-28.js"><reason></reason></test>
+  <test id="built-ins/Object/create/15.2.3.5-4-5.js"><reason></reason></test>
+  <test id="built-ins/Object/defineProperties/15.2.3.7-2-9.js"><reason></reason></test>
+  <test id="built-ins/Object/defineProperties/15.2.3.7-5-a-7.js"><reason></reason></test>
+  <test id="built-ins/Object/defineProperties/15.2.3.7-5-b-239.js"><reason></reason></test>
   <test id="built-ins/Object/assign/name.js"><reason></reason></test>
   <test id="built-ins/Object/is/name.js"><reason></reason></test>
   <test id="built-ins/Object/is/object-is.js"><reason></reason></test>
@@ -217,6 +232,7 @@
   <test id="built-ins/Set/prototype/forEach/name.js"><reason></reason></test>
   <test id="built-ins/Set/prototype/has/name.js"><reason></reason></test>
   <test id="built-ins/Set/prototype/keys/keys.js"><reason></reason></test>
+  <test id="built-ins/Set/prototype/size/name.js"><reason></reason></test>
   <test id="built-ins/Set/prototype/Symbol.iterator.js"><reason></reason></test>
   <test id="built-ins/Set/prototype/values/name.js"><reason></reason></test>
   <test id="built-ins/Set/symbol-species-name.js"><reason></reason></test>
@@ -477,16 +493,9 @@
   <test id="language/expressions/equals/coerce-symbol-to-prim-return-prim.js"><reason></reason></test>
   <test id="language/expressions/function/name.js"><reason></reason></test>
   <test id="language/expressions/generators/has-instance.js"><reason></reason></test>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
   <test id="language/expressions/generators/implicit-name.js"><reason></reason></test>
   <test id="language/expressions/generators/name.js"><reason></reason></test>
   <test id="language/expressions/generators/no-name.js"><reason></reason></test>
->>>>>>> parent of 104001df (Implement function name support for script functions and classes (#3745))
-=======
-  <test id="language/expressions/generators/no-name.js"><reason></reason></test>
->>>>>>> parent of 3b4c2592 (Add support for builtin/builtin routine 'name' property (#3810))
   <test id="language/expressions/generators/prototype-value.js"><reason></reason></test>
   <test id="language/expressions/object/fn-name-accessor-get.js"><reason></reason></test>
   <test id="language/expressions/object/fn-name-accessor-set.js"><reason></reason></test>
@@ -566,6 +575,9 @@
   <test id="language/statements/class/syntax/early-errors/class-body-static-method-get-propname-prototype.js"><reason></reason></test>
   <test id="language/statements/const/fn-name-arrow.js"><reason></reason></test>
   <test id="language/statements/const/fn-name-class.js"><reason></reason></test>
+  <test id="language/expressions/assignment/fn-name-lhs-cover.js"><reason></reason></test>
+  <test id="language/expressions/assignment/fn-name-lhs-member.js"><reason></reason></test>
+  <test id="language/expressions/grouping/S11.1.6_A3_T5.js"><reason></reason></test>
   <test id="language/statements/const/fn-name-cover.js"><reason></reason></test>
   <test id="language/statements/const/fn-name-fn.js"><reason></reason></test>
   <test id="language/statements/const/fn-name-gen.js"><reason></reason></test>
