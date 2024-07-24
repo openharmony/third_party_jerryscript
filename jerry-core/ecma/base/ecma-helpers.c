@@ -273,11 +273,6 @@ ecma_get_lex_env_type (const ecma_object_t *object_p) /**< lexical environment *
   JERRY_ASSERT (object_p != NULL);
   JERRY_ASSERT (ecma_is_lexical_environment (object_p));
 
-  if (object_p == NULL)
-  {
-    jerry_fatal(ERR_FAILED_INTERNAL_ASSERTION);
-  }
-
   return (ecma_lexical_environment_type_t) (object_p->type_flags_refs & ECMA_OBJECT_TYPE_MASK);
 } /* ecma_get_lex_env_type */
 
