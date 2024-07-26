@@ -178,7 +178,7 @@ ecma_find_or_create_literal_string (const lit_utf8_byte_t *chars_p, /**< string 
           empty_cpointer_p = string_list_p->values + i;
         }
 
-        if ((cached_literal == NULL) && empty_cpointer_p != NULL) {
+        if ((cached_literal == NULL) && (empty_cpointer_p != NULL)) {
           break;
         }
       }
