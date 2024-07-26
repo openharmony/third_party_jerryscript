@@ -1811,7 +1811,7 @@ ecma_compare_ecma_strings_longpath_with_literal (const ecma_string_t *string1_p,
   }
   else
   {
-      JERRY_ASSERT (ECMA_STRING_GET_CONTAINER (string1_p) == ECMA_STRING_CONTAINER_HEAP_ASCII_STRING);
+      JERRY_ASSERT (ECMA_STRING_GET_CONTAINER (string1_p) == ECMA_STRING_CONTAINER_HEAP_LONG_UTF8_STRING);
 
     utf8_string1_size = ((ecma_long_utf8_string_t *) string1_p)->size;
     utf8_string2_p = ECMA_LONG_UTF8_STRING_GET_BUFFER (string2_p);
@@ -1828,7 +1828,7 @@ ecma_compare_ecma_strings_longpath_with_literal (const ecma_string_t *string1_p,
 
 extern inline bool JERRY_ATTR_ALWAYS_INLINE
 ecma_compare_ecma_strings_with_literal (const ecma_string_t *string1_p, /**< ecma-string */
-                          const ecma_string_t *string2_p,\
+                          const ecma_string_t *string2_p,
                           const lit_utf8_byte_t *chars_p) /**< ecma-string */
 {
    JERRY_ASSERT (string1_p != NULL && string2_p != NULL);
