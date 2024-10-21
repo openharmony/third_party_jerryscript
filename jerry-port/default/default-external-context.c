@@ -30,6 +30,11 @@ extern jerry_context_t *jerry_dynamic_global_context_p;
  */
 extern ContextRecord* g_contextRecords;
 
+/**
+ * obtain the task ID with the highest priority in the task readiness queue
+ */
+extern UINT32 LOS_NextTaskIDGet(VOID);
+
 void jerry_switch_context();
 
 /**
