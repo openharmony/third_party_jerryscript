@@ -52,7 +52,7 @@
         "rom": "",
         "ram": "",
         "deps": {
-            "components": ["bounds_checking_function"],
+            "components": [],
             "third_party": []
         },
         "build": {
