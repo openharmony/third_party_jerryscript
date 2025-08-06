@@ -475,4 +475,66 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
     include_dirs += jerry_libm_include_dirs
     include_dirs += jerry_port_default_include_dirs
   }
+
+  config("jerryscript_not_lite_config") {
+      defines = [
+          "JERRY_FUNCTION_BACKTRACE",
+          "JERRY_FUNCTION_NAME",
+          "JERRY_HEAPDUMP",
+          "JERRY_NDEBUG",
+          "JERRY_REF_TRACKER",
+      ]
+      defines += [
+          "JERRY_CPOINTER_32_BIT=${jerryscript_jerry_cpointer_32_bit}",
+          "JERRY_DEBUGGER=${jerryscript_jerry_debugger}",
+          "JERRY_GC_LIMIT=${jerryscript_jerry_gc_limit}",
+          "JERRY_LINE_INFO=${jerryscript_jerry_line_info}",
+          "JERRY_MEM_GC_BEFORE_EACH_ALLOC=${jerryscript_jerry_mem_gc_before_each_alloc}",
+          "JERRY_PARSER=${jerryscript_jerry_parser}",
+          "JERRY_PARSER_DUMP_BYTE_CODE=${jerryscript_jerry_parser_dump_byte_code}",
+          "JERRY_REGEXP_DUMP_BYTE_CODE=${jerryscript_jerry_regexp_dump_byte_code}",
+          "JERRY_REGEXP_STRICT_MODE=${jerryscript_jerry_regexp_strict_mode}",
+          "JERRY_STACK_LIMIT=${jerryscript_jerry_stack_limit}",
+          "JERRY_SYSTEM_ALLOCATOR=${jerryscript_jerry_system_allocator}",
+          "JERRY_VALGRIND=${jerryscript_jerry_valgrind}",
+          "JERRY_VM_EXEC_STOP=${jerryscript_jerry_vm_exec_stop}",
+          "JERRY_ES2015=${jerryscript_jerry_es2015}",
+          "JERRY_ES2015_BUILTIN_TYPEDARRAY=${jerryscript_jerry_es2015_builtin_typedarray}",
+          "JERRY_ES2015_BUILTIN_SET=${jerryscript_jerry_es2015_builtin_set}",
+          "JERRY_ES2015_BUILTIN_PROMISE=${jerryscript_jerry_es2015_builtin_promise}",
+          "JERRY_ES2015_BUILTIN_PROXY=${jerryscript_jerry_es2015_builtin_proxy}",
+          "JERRY_ES2015_MODULE_SYSTEM=${jerryscript_jerry_es2015_module_system}",
+          "JERRY_ES2015_BUILTIN_MAP=${jerryscript_jerry_es2015_builtin_map}",
+          "JERRY_ES2015_BUILTIN_WEAKMAP=${jerryscript_jerry_es2015_builtin_weakmap}",
+          "JERRY_ES2015_BUILTIN_WEAKSET=${jerryscript_jerry_es2015_builtin_weakset}",
+          "JERRY_ES2015_BUILTIN_DATAVIEW=${jerryscript_jerry_es2015_builtin_dataview}",
+          "JERRY_ES2015_BUILTIN_REFLECT=${jerryscript_jerry_es2015_builtin_reflect}",
+      ]
+      defines += [ "JERRY_BUILTIN_REGEXP=1" ]
+      defines += [ "INPUTJS_BUFFER_SIZE=${jerryscript_inputjs_buffer_size}" ]
+      defines += [ "SNAPSHOT_BUFFER_SIZE=${jerryscript_snapshot_buffer_size}" ]
+      defines += [ "BMS_TASK_HEAP_SIZE=${jerryscript_bms_task_heap_size}" ]
+      defines += [ "JS_TASK_HEAP_SIZE=${jerryscript_js_task_heap_size}" ]
+
+      cflags = [
+          "-Wno-unused-function",
+          "-Wno-sign-compare",
+          "-Wno-error",  # jerry add
+          "-Wno-implicit-fallthrough",
+      ]
+      include_dirs = [ "//third_party/jerryscript/jerry-core/include" ]
+  }
+
+  ohos_static_library("jerryscript_static_not_lite") {
+      public_configs = [ ":jerryscript_not_lite_config" ]
+      sources = jerry_core_sources
+      sources += jerry_ext_sources
+      sources += jerry_libm_sources
+      sources += jerry_port_default_sources
+
+      include_dirs = jerry_core_include_dirs
+      include_dirs += jerry_ext_include_dirs
+      include_dirs += jerry_libm_include_dirs
+      include_dirs += jerry_port_default_include_dirs
+  }
 }

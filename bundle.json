@@ -57,7 +57,11 @@
         },
         "build": {
             "sub_component": [],
-            "inner_kits": [],
+            "inner_kits": [
+              {
+                "name": "//third_party/jerryscript:jerryscript_static_not_lite"
+              }
+            ],
             "test": []
         }
     }
