@@ -537,4 +537,19 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
       include_dirs += jerry_libm_include_dirs
       include_dirs += jerry_port_default_include_dirs
   }
+
+  ohos_shared_library("jerryscript_shared_not_lite") {
+    public_configs = [ ":jerryscript_not_lite_config" ]
+    sources = jerry_core_sources
+    sources += jerry_ext_sources
+    sources += jerry_libm_sources
+    sources += jerry_port_default_sources
+
+    include_dirs = jerry_core_include_dirs
+    include_dirs += jerry_ext_include_dirs
+    include_dirs += jerry_libm_include_dirs
+    include_dirs += jerry_port_default_include_dirs
+    part_name = "jerryscript"
+    subsystem_name = "thirdparty"
+  }
 }
