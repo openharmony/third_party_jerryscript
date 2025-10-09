@@ -63,6 +63,9 @@
               },
               {
                 "name": "//third_party/jerryscript:jerryscript_shared_not_lite"
+              },
+              {
+                "name": "//third_party/jerryscript:libjerryscript"
               }
             ],
             "test": []
