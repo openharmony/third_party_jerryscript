@@ -21,7 +21,9 @@
 #include "generate-bytecode.h"
 #include "los_task.h"
 
-#define MAX_CONTEXT_NUM (g_taskMaxNum+1)
+#ifndef MAX_CONTEXT_NUM
+#define MAX_CONTEXT_NUM (g_taskMaxNum + 1)
+#endif
 
 uint8_t* input_buffer;
 uint8_t* snapshot_buffer;
