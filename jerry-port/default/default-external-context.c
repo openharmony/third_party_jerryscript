@@ -37,20 +37,29 @@ extern UINT32 LOS_NextTaskIDGet(VOID);
 
 void jerry_switch_context();
 
+#ifdef CONFIG_WATCH_SELITEOS
+#include "box_adapt.h"
+#define TASKID_TO_INDEX(taskId)      TASKID_2_INDEX(taskId)
+#else
+#define TASKID_TO_INDEX(taskId)      taskId
+#endif
 /**
  * set context function: store task id and context
  */
 void
 jerry_port_default_set_current_context (jerry_context_t *context_p) /**< store created context */
 {
-  uint32_t curTaskId = LOS_CurTaskIDGet();
+  uint32_t curTaskId = TASKID_TO_INDEX(LOS_CurTaskIDGet());
   g_contextRecords[curTaskId].context_p = context_p;
   jerry_dynamic_global_context_p = context_p;
 }
 
 void jerry_switch_context()
 {
-  jerry_dynamic_global_context_p = g_contextRecords[LOS_NextTaskIDGet()].context_p;
+  if (g_contextRecords) {
+    jerry_dynamic_global_context_p = g_contextRecords[TASKID_TO_INDEX(LOS_NextTaskIDGet())].context_p;
+  }
+  
 }
 
 /**
@@ -59,7 +68,7 @@ void jerry_switch_context()
 void
 jerry_port_default_remove_current_context_record () /**< remove current task's context record in Array */
 {
-  uint32_t curTaskId = LOS_CurTaskIDGet();
+  uint32_t curTaskId = TASKID_TO_INDEX(LOS_CurTaskIDGet());
   g_contextRecords[curTaskId].context_p = NULL;
   jerry_dynamic_global_context_p = NULL;
 }
