@@ -59,7 +59,6 @@ void jerry_switch_context()
   if (g_contextRecords) {
     jerry_dynamic_global_context_p = g_contextRecords[TASKID_TO_INDEX(LOS_NextTaskIDGet())].context_p;
   }
-  
 }
 
 /**
