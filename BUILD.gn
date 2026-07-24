@@ -540,6 +540,14 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
 
   ohos_shared_library("jerryscript_shared_not_lite") {
     public_configs = [ ":jerryscript_not_lite_config" ]
+
+    branch_protector_ret = "pac_ret"
+    cflags = [
+      "-Oz",
+      "-fdata-sections",
+      "-ffunction-sections",
+    ]
+
     sources = jerry_core_sources
     sources += jerry_ext_sources
     sources += jerry_libm_sources
