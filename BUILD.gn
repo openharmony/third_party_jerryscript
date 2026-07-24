@@ -548,6 +548,11 @@ if (defined(ohos_lite)) {  # is on lite Os for ipcamera
       "-ffunction-sections",
     ]
 
+    ldflags = [
+      "-Wl,--exclude-libs=ALL",
+      "-Wl,--gc-sections",
+    ]
+
     sources = jerry_core_sources
     sources += jerry_ext_sources
     sources += jerry_libm_sources
