@@ -1,0 +1,7 @@
+{
+  global:
+    jerry_*;
+    jerryx_*;
+  local:
+    *;
+};
